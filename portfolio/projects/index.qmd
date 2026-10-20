@@ -1,0 +1,57 @@
+---
+title: "Projects"
+toc: false
+---
+
+Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1 and 3 use the same series and the same test set, so their results can be compared directly. Select a project to open its executive summary and detailed analysis.
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+[Section 1]{.card-tag}
+
+### [Project 1: Forecasting accommodation demand with ARIMA and SARIMA](project-01/project-01-sarima-tourism_v4.qmd){.stretched-link}
+
+Benchmarks, ARMA, ARIMA and SARIMA models for Stats SA monthly nights sold, and how the treatment of the COVID-19 break changes the results.
+
+*Implementation and model comparison, real-world data*
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+[Section 1]{.card-tag}
+
+### [Project 2: Volatility of the rand with ARCH and GARCH](project-02/project-02-garch-zar_v4.qmd){.stretched-link}
+
+Stylised facts of USD/ZAR returns, ARCH and GARCH models, my own GARCH(1,1) likelihood code, and a rolling Value-at-Risk backtest.
+
+*Own implementation, simulation check and model comparison, real-world data*
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+[Section 2]{.card-tag}
+
+### [Project 3: Modelling the COVID-19 shock](project-03/project-03-covid-intervention-tourism_v2.qmd){.stretched-link}
+
+ETS, regression with ARIMA errors and intervention terms, and a basic structural model fitted with the Kalman filter, compared with Project 1 on the same test set.
+
+*Model comparison, real-world data*
+:::
+:::
+
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+[Section 2]{.card-tag}
+
+### [Project 4: Building a Kalman filter](project-04/project-04-placeholder.qmd){.stretched-link}
+
+My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series. In progress.
+
+*Implementation and simulation study*
+:::
+:::
+
+:::

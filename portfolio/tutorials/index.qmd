@@ -1,0 +1,75 @@
+---
+title: "Tutorials and Exercises"
+toc: false
+---
+
+Worked tutorials, labs and exercises with my implementations and reflections, organised by the two sections of the course.
+
+## Section 1: Time series foundations, ARIMA and volatility models {.section-heading}
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [TS Intro](section-1/01-ts-intro.qmd){.stretched-link}
+
+Introduction to time series: the nature of time series data, the forecasting problem, and exploring a series.
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Time Series Analysis Part 1: Exercise 1](section-1/02-tsa-part1-exercise-1.qmd){.stretched-link}
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Time Series Analysis Part 1: Exercise 2](section-1/03-tsa-part1-exercise-2.qmd){.stretched-link}
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [ARCH and GARCH Lab](section-1/04-arch-garch-lab.qmd){.stretched-link}
+
+Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Spectral Analysis Lab](section-1/05-spectral-analysis-lab.qmd){.stretched-link}
+
+Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models.
+:::
+:::
+:::
+
+## Section 2: Exponential smoothing, state-space and hidden Markov models {.section-heading}
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Exponential Smoothing Exercise](section-2/06-exponential-smoothing-exercise.qmd){.stretched-link}
+
+Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and their prediction intervals.
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [State Space Model Exercise](section-2/07-state-space-model-exercise.qmd){.stretched-link}
+
+Local level, linear growth and basic structural models written in state-space form.
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Kalman Filter Exercise](section-2/08-kalman-filter-exercise.qmd){.stretched-link}
+
+The Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations.
+:::
+:::
+::: {.g-col-12 .g-col-md-6}
+::: {.portfolio-card}
+### [Hidden Markov Model Exercise](section-2/09-hidden-markov-model-exercise.qmd){.stretched-link}
+
+Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm.
+:::
+:::
+:::

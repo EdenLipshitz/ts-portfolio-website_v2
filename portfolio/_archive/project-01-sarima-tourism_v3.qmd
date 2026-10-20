@@ -1,0 +1,835 @@
+---
+title: "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models"
+subtitle: "Section 1: ARIMA and seasonal ARIMA models"
+author: "Eden"
+format:
+  pdf:
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    colorlinks: true
+    geometry:
+      - margin=2.2cm
+    fontsize: 11pt
+    fig-pos: "H"
+    highlight-style: github
+    include-in-header:
+      text: |
+        \usepackage{fvextra}
+        \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+        \fvset{breaklines=true}
+execute:
+  warning: false
+  message: false
+  echo: true
+fig-width: 7
+fig-height: 4
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+# Packages --------------------------------------------------------------
+# fpp3 attaches tsibble, fable, feasts, fabletools, dplyr, tidyr,
+# ggplot2, lubridate and tibble.
+library(fpp3)
+library(readxl)
+library(knitr)
+
+set.seed(2026)
+theme_set(theme_minimal(base_size = 11))
+
+# Markdown (pipe) tables let Pandoc wrap wide tables to the PDF page width
+options(knitr.table.format = "pipe")
+
+# Path to the Stats SA P6410 spreadsheet. Keep the file in the same
+# folder as this .qmd (or change the path). Watch out for trailing
+# spaces in the file name, which caused a read_excel() error before.
+data_file <- "tourist_data.xlsx"
+
+# Key dates used throughout the analysis --------------------------------
+# The COVID window runs from the national state of disaster (declared
+# 15 March 2020) to its end (4 April 2022).
+covid_start <- yearmonth("2020 Mar")
+covid_end   <- yearmonth("2022 Mar")
+test_start  <- yearmonth("2024 Jul")   # last 24 months are held out
+
+# Small helpers for inline text -----------------------------------------
+fmt  <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ",")
+pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%")
+```
+
+# Project summary {.unnumbered}
+
+::: {.callout-note appearance="simple"}
+## Executive summary
+
+**Title:** Forecasting South African accommodation demand with ARIMA and SARIMA models
+
+**Section and topic:** Section 1. Benchmarks, stationarity and differencing, ARMA, ARIMA and SARIMA models, the Box and Jenkins workflow, forecast evaluation.
+
+**Type of project:** Implementation and model comparison on real-world data.
+
+**Question:** How much forecast accuracy is gained by moving from simple benchmark methods to ARMA, ARIMA and seasonal ARIMA models for monthly stay unit nights sold in South Africa, and how sensitive is that gain to the way the COVID-19 structural break is handled?
+
+**Data:** Real-world, publicly available data from Statistics South Africa (Stats SA), *Tourist Accommodation* statistical release P6410, series B64100 (stay unit nights sold, total industry, thousands), monthly. Analysis window January 2015 to June 2026. Full source details are in @sec-data-source.
+
+**Methods:** Four benchmarks (mean, naive, seasonal naive, drift); ARMA, ARIMA and SARIMA models on the log scale, including an automatically selected SARIMA and a SARIMA identified by hand from the ACF and PACF. Every model is fitted under two designs: (A) the COVID months are kept as observed, and (B) the COVID months (March 2020 to March 2022) are treated as missing values and handled by the Kalman filter inside the ARIMA likelihood. Models are compared on a 24 month hold-out test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding window rolling-origin cross-validation.
+
+**Key findings:** See @sec-findings. In short: with the COVID months left in the data, the seasonal ARIMA models are no better than the seasonal naive benchmark, because the collapse in April 2020 dominates the estimated variance and distorts the parameters. Treating the COVID window as missing gives a stable SARIMA(0,1,1)(0,1,1)~12~ "airline" model with well behaved residuals, and that model gives the most accurate forecasts on both the test set and in cross-validation.
+
+**What I would do differently:** Model the shock explicitly with intervention variables (planned for Project 3), and compare the expanding window with a sliding window that forgets the pre-COVID years.
+
+**Detailed analysis:** the sections below.
+:::
+
+# Introduction and research question
+
+Tourist accommodation is one of the clearest seasonal series published by Statistics South Africa. Demand peaks over the December holidays and dips in the winter months, and in April 2020 it collapsed almost to zero when the hard lockdown closed the industry. This makes it a good series for the Box and Jenkins material: the seasonality calls for seasonal differencing and a SARIMA model, while the COVID shock is a real example of a structural break that violates the assumptions those models are built on.
+
+**Research question.** *How much forecast accuracy is gained by moving from benchmark methods to ARMA, ARIMA and SARIMA models for monthly stay unit nights sold, and how sensitive is this gain to the treatment of the COVID-19 break?*
+
+The project follows the five stages of a forecasting project from the notes: define the problem, gather the data, explore it, choose and fit models, and evaluate the forecasts on data the models have not seen.
+
+# Data
+
+## Source and data statement {#sec-data-source}
+
+::: {.callout-tip appearance="simple"}
+## Data source at a glance
+
+| | |
+|:--|:--|
+| **Publisher** | Statistics South Africa (Stats SA) |
+| **Publication** | *Tourist Accommodation*, statistical release P6410 (monthly) |
+| **Where to get it** | Stats SA website, P6410 time series data: <https://www.statssa.gov.za/?page_id=1854&PPN=P6410> |
+| **File used** | `tourist_data.xlsx` (Stats SA time series spreadsheet for P6410) |
+| **Series analysed** | B64100: Stay units nights sold, Total industry, actual figures, thousands |
+| **Comparison series** | B64101: Stay units nights sold, Hotels |
+| **Coverage of file** | January 2007 to June 2026 |
+| **Date downloaded** | *[add the date you downloaded the file]* |
+| **Licence and privacy** | Public, aggregated official statistics; no personal information, so POPIA does not apply |
+:::
+
+**Reference:** Statistics South Africa (2026) *Tourist Accommodation (Statistical release P6410)*, time series data, January 2007 to June 2026. Pretoria: Statistics South Africa. Available at: <https://www.statssa.gov.za/?page_id=1854&PPN=P6410> (Accessed: *[date]*).
+
+The data come from the Statistics South Africa Tourist Accommodation release (P6410), downloaded as the time series spreadsheet from the Stats SA website. The file holds monthly series from January 2007 to June 2026 for stay units available, stay unit nights sold, occupancy rates and income, by type of accommodation. The data are aggregated industry totals, so there is no personal information and POPIA does not apply. The variable analysed is **B64100: stay unit nights sold, total industry, actual (not seasonally adjusted) figures, in thousands**. The hotels series (B64101) is used once in the exploratory analysis for comparison.
+
+## Reading and reshaping the data
+
+The Stats SA file has one row per series and one column per month, with month columns named `MOmmyyyy`. The code below reshapes it to long format and builds a `tsibble`.
+
+```{r}
+#| label: load-data
+
+raw <- read_excel(data_file)
+
+tourism_long <- raw |>
+  filter(H03 %in% c("B64100", "B64101")) |>
+  select(H03, H04, starts_with("MO")) |>
+  pivot_longer(starts_with("MO"), names_to = "code", values_to = "nights") |>
+  mutate(
+    Month    = yearmonth(make_date(as.integer(substr(code, 5, 8)),
+                                   as.integer(substr(code, 3, 4)), 1L)),
+    nights   = as.numeric(nights),
+    industry = if_else(H03 == "B64100", "Total industry", "Hotels")
+  ) |>
+  filter(!is.na(nights)) |>
+  select(Month, industry, nights)
+
+# Total industry, January 2015 onwards, with a COVID period label
+nights_sold <- tourism_long |>
+  filter(industry == "Total industry") |>
+  select(Month, nights) |>
+  as_tsibble(index = Month) |>
+  filter_index("2015 Jan" ~ .) |>
+  mutate(period = case_when(
+    Month <  covid_start ~ "Pre-COVID",
+    Month <= covid_end   ~ "COVID window",
+    TRUE                 ~ "Post-COVID"
+  ))
+
+pre_covid <- nights_sold |> filter(Month < covid_start)
+
+has_gaps(nights_sold)
+```
+
+```{r}
+#| label: tbl-data-overview
+#| tbl-cap: "Overview of the analysis series (thousands of stay unit nights sold)."
+
+nights_sold |>
+  as_tibble() |>
+  mutate(period = factor(period, levels = c("Pre-COVID", "COVID window", "Post-COVID"))) |>
+  group_by(period) |>
+  summarise(
+    From    = format(min(Month)),
+    To      = format(max(Month)),
+    Months  = n(),
+    Mean    = mean(nights),
+    Minimum = min(nights),
+    Maximum = max(nights)
+  ) |>
+  kable(digits = 0, format.args = list(big.mark = ","))
+```
+
+The series has no implicit gaps. The analysis starts in January 2015 so that the pre-COVID part of the series (`r nrow(pre_covid)` months) reflects the recent structure of the industry rather than the period straight after the 2008 financial crisis and the 2010 World Cup.
+
+# Exploratory data analysis
+
+## Time plot
+
+```{r}
+#| label: fig-timeplot
+#| fig-cap: "Monthly stay unit nights sold, total industry, January 2007 to June 2026. The shaded band is the COVID window (March 2020 to March 2022); the dashed line marks the start of the analysis window."
+
+full_df <- tourism_long |>
+  filter(industry == "Total industry") |>
+  mutate(date = as.Date(Month))
+
+ggplot(full_df, aes(date, nights)) +
+  annotate("rect",
+           xmin = as.Date(covid_start), xmax = as.Date(covid_end),
+           ymin = -Inf, ymax = Inf, alpha = 0.15, fill = "firebrick") +
+  geom_vline(xintercept = as.Date("2015-01-01"), linetype = "dashed", colour = "grey40") +
+  geom_line(colour = "steelblue4") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = "Nights sold (thousands)")
+```
+
+```{r}
+#| label: eda-numbers
+#| include: false
+apr2020  <- nights_sold |> filter(Month == yearmonth("2020 Apr")) |> pull(nights)
+apr2019  <- nights_sold |> filter(Month == yearmonth("2019 Apr")) |> pull(nights)
+mean2019 <- nights_sold |> filter(year(as.Date(Month)) == 2019) |> pull(nights) |> mean()
+last12   <- nights_sold |> tail(12) |> pull(nights) |> mean()
+```
+
+@fig-timeplot shows three distinct regimes. Before 2020 the series moves around a fairly flat level of about `r fmt(mean2019, 0)` thousand nights a month (2019 average) with a strong and regular seasonal pattern. In April 2020 nights sold fell to `r fmt(apr2020, 0)` thousand, `r pct(apr2020 / apr2019, 1)` of April 2019, and the recovery took roughly two years, with setbacks during the later waves. Over the most recent 12 months the average is `r fmt(last12, 0)` thousand, close to but still below the pre-COVID level. The series is clearly not stationary in mean over the full window, and the variability is much larger during the COVID window than anywhere else.
+
+## Seasonal patterns
+
+```{r}
+#| label: fig-season
+#| fig-cap: "Seasonal plot of nights sold by year (pre-COVID and post-COVID years only)."
+
+nights_sold |>
+  filter(period != "COVID window") |>
+  fill_gaps() |>
+  gg_season(nights, labels = "right") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(y = "Nights sold (thousands)", x = NULL)
+```
+
+```{r}
+#| label: fig-subseries
+#| fig-cap: "Seasonal subseries plot for the pre-COVID years (2015 to 2019). Blue lines are the monthly means."
+
+pre_covid |>
+  gg_subseries(nights) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(y = "Nights sold (thousands)", x = NULL)
+```
+
+@fig-season and @fig-subseries show that the *shape* of the seasonal pattern is very stable from year to year: a dip in January, a local peak in March (Easter and school holidays), a low in May and June, then a steady rise to the highest values in October to December. The post-COVID years sit lower but follow the same shape. This matters for modelling: a stable seasonal shape suggests a seasonal difference (or a seasonal MA term close to the boundary), and it means that the seasonal naive method is a strong benchmark.
+
+## STL decomposition
+
+```{r}
+#| label: fig-stl
+#| fig-cap: "Robust STL decomposition of log nights sold, January 2015 to June 2026, with a fixed (periodic) seasonal component."
+
+nights_sold |>
+  model(STL(log(nights) ~ trend(window = 13) + season(window = "periodic"),
+            robust = TRUE)) |>
+  components() |>
+  autoplot() +
+  labs(x = NULL)
+```
+
+```{r}
+#| label: stl-strength
+#| include: false
+stl_feats <- pre_covid |>
+  mutate(log_nights = log(nights)) |>
+  features(log_nights, feat_stl)
+```
+
+The log scale is used because the seasonal swings are roughly proportional to the level (they shrank when the level fell in 2020 and 2021), so a log transformation turns multiplicative seasonality into additive seasonality. On the pre-COVID data the strength of seasonality is `r fmt(stl_feats$seasonal_strength_year, 2)` and the strength of trend is `r fmt(stl_feats$trend_strength, 2)` (both measured from 0 to 1), so seasonality is the dominant feature. In @fig-stl the COVID collapse is absorbed almost entirely by the trend and the remainder, while the seasonal component is unaffected.
+
+## Hotels compared with the total industry
+
+```{r}
+#| label: fig-hotels
+#| fig-cap: "Hotel nights sold against total industry nights sold, coloured by period."
+
+tourism_long |>
+  pivot_wider(names_from = industry, values_from = nights) |>
+  filter(Month >= yearmonth("2015 Jan")) |>
+  mutate(period = case_when(
+    Month <  covid_start ~ "Pre-COVID",
+    Month <= covid_end   ~ "COVID window",
+    TRUE                 ~ "Post-COVID"
+  )) |>
+  ggplot(aes(`Total industry`, Hotels, colour = period)) +
+  geom_point(alpha = 0.8) +
+  scale_colour_manual(values = c("Pre-COVID" = "steelblue4",
+                                 "COVID window" = "firebrick",
+                                 "Post-COVID" = "darkorange")) +
+  scale_x_continuous(labels = scales::label_comma()) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = "Total industry (thousands)", y = "Hotels (thousands)", colour = NULL)
+```
+
+Hotels account for more than half of all nights sold and move almost one for one with the total, in every period (@fig-hotels). The COVID points simply slide down the same line rather than forming a separate cloud, so the shock hit all accommodation types together. This supports modelling the total industry series on its own.
+
+## Stationarity and identification (pre-COVID data)
+
+Identification is done on the pre-COVID data only, because the COVID collapse would dominate any ACF calculated over the full series and hide the ordinary dependence structure.
+
+```{r}
+#| label: tbl-unitroot
+#| tbl-cap: "Unit root tests on log nights sold, January 2015 to February 2020."
+
+lx  <- log(pre_covid$nights)
+d12 <- diff(lx, lag = 12)
+
+kpss_lx  <- unitroot_kpss(lx)
+kpss_d12 <- unitroot_kpss(d12)
+nsd_lx   <- unname(unitroot_nsdiffs(lx, .period = 12))
+nd_lx    <- unname(unitroot_ndiffs(lx))
+nd_d12   <- unname(unitroot_ndiffs(d12))
+
+tibble(
+  Series           = c("log nights", "seasonally differenced log nights"),
+  `KPSS statistic` = c(kpss_lx["kpss_stat"], kpss_d12["kpss_stat"]),
+  `KPSS p-value`   = c(kpss_lx["kpss_pvalue"], kpss_d12["kpss_pvalue"]),
+  `First differences suggested (ndiffs)` = c(nd_lx, nd_d12),
+  `Seasonal differences suggested (nsdiffs)` = c(nsd_lx, NA)
+) |>
+  kable(digits = 3)
+```
+
+The seasonal strength test suggests `r nsd_lx` seasonal difference for the log series. After the seasonal difference, @fig-d12 still shows a slowly decaying ACF over the first several lags, the classic sign that the level is wandering, and the KPSS based `ndiffs` on the seasonally differenced series suggests `r nd_d12` further first difference. The KPSS p-values are interpolated from a table that only runs from 0.01 to 0.1, so values at those limits should be read as "at most" or "at least". With only `r length(lx)` pre-COVID months these tests have limited power, so the decision is based on the plots as well as the tests.
+
+```{r}
+#| label: fig-d12
+#| fig-cap: "Seasonally differenced log nights sold (pre-COVID) with its ACF and PACF."
+
+pre_covid |>
+  gg_tsdisplay(difference(log(nights), 12), plot_type = "partial", lag_max = 36)
+```
+
+```{r}
+#| label: fig-d12-d1
+#| fig-cap: "Seasonally and first differenced log nights sold (pre-COVID) with its ACF and PACF."
+
+pre_covid |>
+  gg_tsdisplay(difference(difference(log(nights), 12)), plot_type = "partial", lag_max = 36)
+```
+
+```{r}
+#| label: acf-numbers
+#| include: false
+acf_dd <- pre_covid |>
+  mutate(dd = difference(difference(log(nights), 12))) |>
+  ACF(dd, lag_max = 36)
+r1  <- acf_dd$acf[1]
+r12 <- acf_dd$acf[12]
+```
+
+After both differences (@fig-d12-d1) the series looks stationary. The ACF has a clear negative spike at lag 1 (r~1~ = `r fmt(r1, 2)`) and a negative spike near lag 12 (r~12~ = `r fmt(r12, 2)`), while the PACF tails off over the first few lags. Spikes at lag 1 and lag 12 in the ACF with a decaying PACF point to an MA(1) term and a seasonal MA(1) term. Following the Box and Jenkins workflow, the hand identified model is
+
+$$
+(1 - L)(1 - L^{12}) \log y_t = (1 + \theta_1 L)(1 + \Theta_1 L^{12})\,\varepsilon_t, \qquad \varepsilon_t \sim \text{WN}(0, \sigma^2),
+$$
+
+the SARIMA(0,1,1)(0,1,1)~12~ or "airline" model. No constant is included because with d + D = 2 a constant would imply a quadratic trend in the forecasts.
+
+# Modelling strategy
+
+## The Box and Jenkins workflow
+
+The modelling follows the Box and Jenkins workflow from the notes. Each step maps to a part of this report:
+
+1. **Plot the data:** the time plot, seasonal plots and STL decomposition in the exploratory analysis.
+2. **Difference until approximately stationary:** one seasonal and one first difference of log nights sold, chosen from the unit root tests and the ACF.
+3. **Read the ACF and PACF to identify candidate orders:** the lag 1 and lag 12 spikes point to the SARIMA(0,1,1)(0,1,1)~12~ model. The automatic search and the simpler ARMA and ARIMA models are included as alternative candidates.
+4. **Estimate by maximum likelihood:** `ARIMA()` in `fable`, under both treatments of the COVID months.
+5. **Diagnose the residuals against the white noise standard:** Ljung and Box tests, residual plots, ACF and histogram.
+6. **Forecast only if the diagnostics pass; otherwise return to step 3.**
+
+Finally, a model that survives the loop must still beat the benchmarks on the test set before it earns its place. In this report, models that fail step 5 are still forecast on the test set, but only as reference points showing *why* the loop matters. They are not candidates for the final model.
+
+## The COVID problem
+
+ARIMA models assume that one set of parameters describes the whole series. The COVID window breaks this in two ways. First, the April 2020 collapse produces residuals many times larger than normal, which inflates $\hat\sigma^2$ and therefore every prediction interval. Second, the estimation tries to explain the shock and the recovery with the same MA and AR terms that describe normal month-to-month behaviour, which pulls the coefficients away from their usual values. Simply deleting the COVID months is not possible, because an ARIMA model needs equally spaced observations.
+
+Two designs are compared:
+
+* **Design A (COVID kept):** fit every model to the observed series, including the COVID months.
+* **Design B (COVID as missing):** replace March 2020 to March 2022 by `NA`. The ARIMA likelihood is computed with the Kalman filter, which skips missing observations and simply runs the prediction step through the gap, so the parameters are estimated only from the pre-COVID and post-COVID months while the time ordering is kept intact. The benchmark methods also cope with missing values (for example, seasonal naive uses the last observed value for each month).
+
+This is a deliberately simple treatment of the break. A more structural treatment with intervention variables is left for Project 3.
+
+## Training and test sets
+
+```{r}
+#| label: split
+
+train_A <- nights_sold |> filter(Month < test_start)
+train_B <- train_A |>
+  mutate(nights = if_else(period == "COVID window", NA_real_, nights))
+test    <- nights_sold |> filter(Month >= test_start)
+
+design_levels <- c("A: COVID kept", "B: COVID as missing")
+
+train <- bind_rows(
+  as_tibble(train_A) |> mutate(design = design_levels[1]),
+  as_tibble(train_B) |> mutate(design = design_levels[2])
+) |>
+  as_tsibble(index = Month, key = design)
+
+# Full observed series with the design key, used for accuracy() so that
+# both designs are scored against the same actual values and the MASE
+# uses the same scaling for both designs.
+nights_keyed <- bind_rows(
+  as_tibble(nights_sold) |> mutate(design = design_levels[1]),
+  as_tibble(nights_sold) |> mutate(design = design_levels[2])
+) |>
+  as_tsibble(index = Month, key = design)
+```
+
+The models are trained on January 2015 to June 2024 (`r nrow(train_A)` months, of which `r sum(is.na(train_B$nights))` are set to missing in Design B) and tested on July 2024 to June 2026 (`r nrow(test)` months). A two year test set covers two full seasonal cycles, so every calendar month is forecast twice, at short and long horizons.
+
+## Candidate models
+
+| Model | Specification | Role |
+|:--|:--|:--|
+| Mean | $\hat y_{T+h} = \bar y$ | Benchmark |
+| Naive | $\hat y_{T+h} = y_T$ | Benchmark |
+| Seasonal naive | $\hat y_{T+h} = y_{T+h-12k}$ | Benchmark |
+| Drift | Naive plus average historical change | Benchmark |
+| ARMA | ARMA(p, q) with constant on $\log y_t$, orders by AICc, no differencing | Ignores trend and seasonality |
+| ARIMA | ARIMA(p, 1, q) on $\log y_t$, orders by AICc | Handles the level, ignores seasonality |
+| SARIMA (auto) | ARIMA(p, 1, q)(P, 1, Q)~12~ on $\log y_t$, orders by AICc | Automatic seasonal model |
+| SARIMA (0,1,1)(0,1,1) | Hand identified airline model on $\log y_t$ | Box and Jenkins model |
+
+: Candidate models. The ARMA, ARIMA and SARIMA models form a ladder in which each step adds one feature of the data. {#tbl-models}
+
+The differencing orders are fixed from the identification step rather than chosen by unit root tests inside `ARIMA()`, so that both designs use the same differencing and the comparison isolates the effect of the COVID treatment. Point forecasts from the log scale models are back-transformed with the bias adjustment that `fable` applies by default, so they are forecasts of the mean rather than the median.
+
+# Model fitting
+
+```{r}
+#| label: fit-models
+
+fit <- train |>
+  model(
+    Mean        = MEAN(nights),
+    Naive       = NAIVE(nights),
+    SNaive      = SNAIVE(nights),
+    Drift       = RW(nights ~ drift()),
+    ARMA        = ARIMA(log(nights) ~ 1 + pdq(d = 0) + PDQ(0, 0, 0)),
+    ARIMA       = ARIMA(log(nights) ~ pdq(d = 1) + PDQ(0, 0, 0)),
+    SARIMA_auto = ARIMA(log(nights) ~ pdq(d = 1) + PDQ(D = 1)),
+    SARIMA_BJ   = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
+  )
+
+arima_models <- c("ARMA", "ARIMA", "SARIMA_auto", "SARIMA_BJ")
+
+model_labels <- c(
+  Mean = "Mean", Naive = "Naive", SNaive = "Seasonal naive", Drift = "Drift",
+  ARMA = "ARMA", ARIMA = "ARIMA", SARIMA_auto = "SARIMA (auto)",
+  SARIMA_BJ = "SARIMA (0,1,1)(0,1,1)"
+)
+```
+
+## Selected orders and information criteria
+
+```{r}
+#| label: tbl-orders
+#| tbl-cap: "Selected ARIMA orders, residual variance (log scale) and AICc for each design. AICc values are only comparable within a design, since the two designs are fitted to different data."
+
+orders <- fit |>
+  select(design, all_of(arima_models)) |>
+  pivot_longer(-design, names_to = ".model", values_to = "spec") |>
+  as_tibble() |>
+  mutate(spec = vapply(spec, function(m) fabletools::model_sum(m$fit), character(1))) |>
+  select(design, .model, spec)
+
+ic <- glance(fit) |>
+  filter(.model %in% arima_models) |>
+  select(design, .model, sigma2, AICc)
+
+order_tbl <- orders |> left_join(ic, by = c("design", ".model"))
+
+order_tbl |>
+  mutate(.model = model_labels[.model]) |>
+  rename(Design = design, Model = .model, Specification = spec,
+         `sigma^2 (log scale)` = sigma2) |>
+  kable(digits = c(0, 0, 0, 4, 1))
+
+get_spec  <- function(d, m) order_tbl$spec[order_tbl$design == d & order_tbl$.model == m]
+get_sig2  <- function(d, m) order_tbl$sigma2[order_tbl$design == d & order_tbl$.model == m]
+get_aicc  <- function(d, m) order_tbl$AICc[order_tbl$design == d & order_tbl$.model == m]
+```
+
+```{r}
+#| label: tbl-coefs
+#| tbl-cap: "Estimated coefficients of the hand identified SARIMA(0,1,1)(0,1,1) model under both designs."
+
+coef_tbl <- tidy(fit) |>
+  filter(.model == "SARIMA_BJ") |>
+  select(design, term, estimate, std.error)
+
+kable(coef_tbl, digits = 3, col.names = c("Design", "Term", "Estimate", "Std. error"))
+
+sma_A <- coef_tbl |> filter(design == design_levels[1], term == "sma1") |> pull(estimate)
+sma_B <- coef_tbl |> filter(design == design_levels[2], term == "sma1") |> pull(estimate)
+ma_A  <- coef_tbl |> filter(design == design_levels[1], term == "ma1")  |> pull(estimate)
+ma_B  <- coef_tbl |> filter(design == design_levels[2], term == "ma1")  |> pull(estimate)
+```
+
+The two designs give very different models from the same data. Under Design A the residual variance of the airline model is `r fmt(get_sig2(design_levels[1], "SARIMA_BJ"), 4)` on the log scale, against `r fmt(get_sig2(design_levels[2], "SARIMA_BJ"), 4)` under Design B, about `r fmt(get_sig2(design_levels[1], "SARIMA_BJ") / get_sig2(design_levels[2], "SARIMA_BJ"), 0)` times larger. The coefficients move too (@tbl-coefs). Under Design A the seasonal MA coefficient is `r fmt(sma_A, 3)`. A value at or near -1 means the seasonal MA factor $(1 + \Theta_1 L^{12})$ almost cancels the seasonal difference $(1 - L^{12})$: the model is close to non-invertible and is effectively saying that the seasonal pattern is fixed and should not have been differenced. It also sits on the boundary of the parameter space, where the usual standard errors are unreliable. Under Design B the estimate is `r fmt(sma_B, 3)` and the non-seasonal MA coefficient is `r fmt(ma_B, 3)` (against `r fmt(ma_A, 3)` under Design A). The Design B values are inside the invertible region and agree in sign with the negative lag 1 and lag 12 autocorrelations found in the identification step.
+
+Under Design B the automatic search chose `r get_spec(design_levels[2], "SARIMA_auto")` with AICc `r fmt(get_aicc(design_levels[2], "SARIMA_auto"))`, compared with `r fmt(get_aicc(design_levels[2], "SARIMA_BJ"))` for the hand identified model. Whether the extra flexibility is worth it is answered by the test set below, not by the AICc.
+
+## Residual diagnostics
+
+```{r}
+#| label: residuals
+
+aug <- augment(fit) |> filter(.model %in% arima_models)
+
+dof_tbl <- tidy(fit) |>
+  filter(.model %in% arima_models, term != "constant") |>
+  count(design, .model, name = "dof")
+
+lb_tbl <- aug |>
+  as_tibble() |>
+  left_join(dof_tbl, by = c("design", ".model")) |>
+  group_by(design, .model) |>
+  summarise(
+    dof     = first(dof),
+    lb_stat = Box.test(.innov, lag = 24, type = "Ljung-Box", fitdf = first(dof))$statistic,
+    lb_p    = Box.test(.innov, lag = 24, type = "Ljung-Box", fitdf = first(dof))$p.value,
+    max_abs = max(abs(.innov), na.rm = TRUE) / sd(.innov, na.rm = TRUE),
+    .groups = "drop"
+  )
+```
+
+```{r}
+#| label: tbl-ljung
+#| tbl-cap: "Ljung and Box tests on the innovation residuals (24 lags, degrees of freedom reduced by the number of ARMA coefficients), the largest absolute residual in standard deviation units, and whether the residuals pass the white noise test at the 5% level."
+
+lb_tbl <- lb_tbl |>
+  mutate(passes_lb = if_else(lb_p > 0.05, "Yes", "No"))
+
+lb_tbl |>
+  mutate(.model = model_labels[.model]) |>
+  kable(digits = c(0, 0, 0, 2, 3, 1, 0),
+        col.names = c("Design", "Model", "ARMA coefs", "Q*", "p-value",
+                      "Max |residual| / sd", "Passes white noise test"))
+```
+
+```{r}
+#| label: fig-resid
+#| fig-cap: "Innovation residuals of the SARIMA(0,1,1)(0,1,1) model under both designs. Under Design B the COVID window is missing, so there are no residuals for those months."
+#| fig-height: 5
+
+aug |>
+  filter(.model == "SARIMA_BJ") |>
+  ggplot(aes(as.Date(Month), .innov)) +
+  geom_hline(yintercept = 0, colour = "grey50") +
+  geom_line(colour = "steelblue4") +
+  facet_wrap(vars(design), ncol = 1, scales = "free_y") +
+  labs(x = NULL, y = "Innovation residual (log scale)")
+```
+
+```{r}
+#| label: fig-resid-acf
+#| fig-cap: "ACF and histogram of the Design B airline model residuals. The ACF is computed with missing values passed through, so the pre-COVID and post-COVID residuals are both used."
+#| fig-height: 3.5
+
+resid_B <- aug |>
+  filter(.model == "SARIMA_BJ", design == design_levels[2])
+
+p_acf <- resid_B |>
+  ACF(.innov, lag_max = 36, na.action = na.pass) |>
+  autoplot() + labs(title = "ACF")
+
+p_hist <- resid_B |>
+  ggplot(aes(.innov)) +
+  geom_histogram(bins = 20, fill = "steelblue4", colour = "white") +
+  labs(x = "Innovation residual", y = "Count", title = "Histogram")
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  patchwork::wrap_plots(p_acf, p_hist, nrow = 1)
+} else {
+  print(p_acf); print(p_hist)
+}
+```
+
+```{r}
+#| label: lb-numbers
+#| include: false
+lb_get <- function(d, m, col) lb_tbl[[col]][lb_tbl$design == d & lb_tbl$.model == m]
+```
+
+Under Design A the residual plot is dominated by a handful of enormous residuals in 2020 (the largest is `r fmt(lb_get(design_levels[1], "SARIMA_BJ", "max_abs"), 1)` standard deviations from zero), so the normality assumption behind the prediction intervals fails badly, even though the Ljung and Box test (p = `r fmt(lb_get(design_levels[1], "SARIMA_BJ", "lb_p"), 3)`) does not detect autocorrelation. This is a useful reminder that a white noise test only checks the correlation structure: residuals can be uncorrelated and still be far from the identically distributed errors the model assumes. Under Design B the airline residuals look like white noise (p = `r fmt(lb_get(design_levels[2], "SARIMA_BJ", "lb_p"), 3)`), the ACF has no important spikes, and the histogram is roughly symmetric. The ARMA model without differencing leaves strong autocorrelation in its residuals under Design B (p = `r fmt(lb_get(design_levels[2], "ARMA", "lb_p"), 3)`), which is expected: it has no way to represent the seasonal pattern.
+
+```{r}
+#| label: bj-loop
+#| include: false
+pass_B <- lb_tbl |> filter(design == design_levels[2], passes_lb == "Yes") |> pull(.model)
+fail_B <- lb_tbl |> filter(design == design_levels[2], passes_lb == "No") |> pull(.model)
+list_models <- function(x) if (length(x) == 0) "none" else paste(model_labels[x], collapse = ", ")
+```
+
+**Applying step 6 of the loop.** Under Design B the models that pass the white noise test are: `r list_models(pass_B)`. The models that fail are: `r list_models(fail_B)`. For a model that fails, the workflow says to return to step 3 rather than forecast. For the ARMA and non-seasonal ARIMA models, returning to step 3 means recognising from their residual ACF that the seasonal autocorrelation has not been modelled, which leads straight to the seasonal models. `r if ("SARIMA_auto" %in% fail_B) "The automatically selected SARIMA also leaves significant autocorrelation, so it fails the loop despite its lower AICc. This is a good illustration that choosing orders by an information criterion alone does not replace the diagnostic step." else "The automatically selected SARIMA passes as well, so it remains a candidate alongside the hand identified model."` Under Design A every model technically passes the Ljung and Box test, but the airline model fails step 5 in a different way: its residuals are far from identically distributed (the COVID residuals are extreme outliers) and its seasonal MA coefficient sits on the invertibility boundary. Returning to step 3 under Design A would not fix this, because the problem is the data, not the orders. The fix is to change how the break is handled, which is what Design B does.
+
+**Candidates for the final model.** Only the models that pass the loop under Design B are candidates for forecasting. The test set comparison below then checks the last condition from the notes: whether these candidates beat the benchmarks.
+
+# Forecast evaluation on the test set
+
+```{r}
+#| label: forecast-test
+
+fc <- fit |> forecast(h = "2 years")
+
+acc <- fc |>
+  accuracy(nights_keyed, measures = c(point_accuracy_measures, interval_accuracy_measures)) |>
+  select(design, .model, RMSE, MAE, MAPE, MASE, winkler)
+
+coverage <- fc |>
+  hilo(level = c(80, 95)) |>
+  unpack_hilo(c(`80%`, `95%`)) |>
+  as_tibble() |>
+  select(design, .model, Month, `80%_lower`, `80%_upper`, `95%_lower`, `95%_upper`) |>
+  left_join(as_tibble(test) |> select(Month, actual = nights), by = "Month") |>
+  group_by(design, .model) |>
+  summarise(
+    cover80 = mean(actual >= `80%_lower` & actual <= `80%_upper`),
+    cover95 = mean(actual >= `95%_lower` & actual <= `95%_upper`),
+    width95 = mean(`95%_upper` - `95%_lower`),
+    .groups = "drop"
+  )
+
+results <- acc |>
+  left_join(coverage, by = c("design", ".model")) |>
+  arrange(design, RMSE)
+```
+
+```{r}
+#| label: tbl-accuracy
+#| tbl-cap: "Test set accuracy, July 2024 to June 2026 (24 months). RMSE, MAE and the mean 95% interval width are in thousands of nights. MASE is scaled by the in-sample seasonal naive error of the observed training data, so it is comparable across designs. Coverage is the share of test months inside the 80% and 95% prediction intervals. Rows are sorted by RMSE within each design."
+
+results |>
+  mutate(.model = model_labels[.model],
+         cover80 = pct(cover80), cover95 = pct(cover95)) |>
+  kable(digits = c(0, 0, 1, 1, 2, 2, 0, 0, 0, 0),
+        col.names = c("Design", "Model", "RMSE", "MAE", "MAPE (%)", "MASE",
+                      "Winkler (95%)", "Cover 80%", "Cover 95%", "Mean 95% width"),
+        format.args = list(big.mark = ","))
+```
+
+```{r}
+#| label: acc-numbers
+#| include: false
+res_get <- function(d, m, col) results[[col]][results$design == d & results$.model == m]
+A <- design_levels[1]; B <- design_levels[2]
+
+best_A <- results |> filter(design == A) |> slice_min(RMSE, n = 1) |> pull(.model)
+best_B <- results |> filter(design == B) |> slice_min(RMSE, n = 1) |> pull(.model)
+best_bench <- results |>
+  filter(design == B, .model %in% c("Mean", "Naive", "SNaive", "Drift")) |>
+  slice_min(RMSE, n = 1) |> pull(.model)
+
+better_or_worse <- function(x, y) if (x < y) "lower" else "higher"
+```
+
+```{r}
+#| label: fig-forecasts
+#| fig-cap: "Test set forecasts with 95% prediction intervals from the seasonal naive benchmark (SNaive), the automatic SARIMA (SARIMA_auto) and the airline model (SARIMA_BJ), under both designs. Black lines are the observed values. Under Design A the intervals are so wide that they dominate the vertical axis."
+#| fig-height: 6.5
+
+fc |>
+  filter(.model %in% c("SNaive", "SARIMA_auto", "SARIMA_BJ")) |>
+  autoplot(nights_keyed |> filter_index("2021 Jan" ~ .), level = 95) +
+  facet_wrap(vars(design), ncol = 1, scales = "free_y") +
+  labs(x = NULL, y = "Nights sold (thousands)", colour = "Model", fill = "Model")
+```
+
+**Design A.** With the COVID months kept, the most accurate model on the test set is the `r model_labels[best_A]` model. The airline SARIMA has an RMSE of `r fmt(res_get(A, "SARIMA_BJ", "RMSE"))` thousand nights against `r fmt(res_get(A, "SNaive", "RMSE"))` for the seasonal naive method, and the automatically selected `r get_spec(A, "SARIMA_auto")` has an RMSE of `r fmt(res_get(A, "SARIMA_auto", "RMSE"))`. In other words, the more sophisticated models do not earn their extra parameters. Part of the reason is visible in @fig-forecasts: the residual variance inflated by 2020 makes the 95% intervals extremely wide (mean width `r fmt(res_get(A, "SARIMA_BJ", "width95"), 0)` thousand nights for the airline model), and because the bias adjustment adds a term proportional to $\hat\sigma^2$ when back-transforming from the log scale, the inflated variance also pushes the point forecasts upwards. The intervals reach `r pct(res_get(A, "SARIMA_BJ", "cover95"))` coverage, but only because they are uninformatively wide; the large Winkler scores penalise this.
+
+**Design B.** With the COVID window treated as missing, the ranking changes. The most accurate model is the `r model_labels[best_B]` model. The airline SARIMA reaches an RMSE of `r fmt(res_get(B, "SARIMA_BJ", "RMSE"))` and a MAPE of `r fmt(res_get(B, "SARIMA_BJ", "MAPE"), 2)`%, compared with `r fmt(res_get(B, best_bench, "RMSE"))` for the best benchmark (`r model_labels[best_bench]`) and `r fmt(res_get(B, "SNaive", "RMSE"))` for seasonal naive. Its 95% intervals have a mean width of `r fmt(res_get(B, "SARIMA_BJ", "width95"), 0)` thousand nights, much narrower than under Design A, and still cover `r pct(res_get(B, "SARIMA_BJ", "cover95"))` of the test months (`r pct(res_get(B, "SARIMA_BJ", "cover80"))` for the 80% intervals). The automatically selected model has `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_BJ"))` AICc than the airline model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_BJ", "RMSE"))` test RMSE (`r fmt(res_get(B, "SARIMA_auto", "RMSE"))`), which shows that an in-sample criterion and out-of-sample accuracy do not have to agree.
+
+**The model ladder.** Under Design B, moving from ARMA (RMSE `r fmt(res_get(B, "ARMA", "RMSE"))`) to ARIMA (`r fmt(res_get(B, "ARIMA", "RMSE"))`) does not help on its own: differencing removes the level but a non-seasonal model still cannot reproduce the December peak, so its forecasts flatten out after a few months. The large gain comes only when the seasonal structure is modelled explicitly with the SARIMA. The MASE values below 1 or above 1 should be read with care: the scaling uses the in-sample seasonal naive error over the whole training period, which includes the COVID collapse, so all MASE values are small in absolute terms; they are useful for ranking, not as an absolute measure.
+
+# Rolling-origin cross-validation
+
+A single test set is only one forecast origin, and the ranking above could change if the split moved by a few months. Following the notes, the comparison is repeated with an expanding window: the first origin is June 2023 and the origin moves forward one month at a time until June 2025, giving 25 origins. At each origin the models are refitted on all data up to that month and used to forecast 1 to 12 months ahead. The orders of the SARIMA models are kept fixed at each refit so that the exercise measures forecasting performance rather than the order selection procedure.
+
+```{r}
+#| label: cv
+
+cv_data <- bind_rows(
+  as_tibble(nights_sold) |> mutate(design = design_levels[1]),
+  as_tibble(nights_sold) |>
+    mutate(design = design_levels[2],
+           nights = if_else(period == "COVID window", NA_real_, nights))
+) |>
+  as_tsibble(index = Month, key = design)
+
+init_n <- nights_sold |> filter(Month <= yearmonth("2023 Jun")) |> nrow()
+
+cv_stretch <- cv_data |>
+  filter(Month <= yearmonth("2025 Jun")) |>
+  stretch_tsibble(.init = init_n, .step = 1)
+
+cv_fit <- cv_stretch |>
+  model(
+    Mean      = MEAN(nights),
+    SNaive    = SNAIVE(nights),
+    SARIMA_BJ = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
+  )
+
+cv_fc <- cv_fit |>
+  forecast(h = 12) |>
+  group_by(design, .model, .id) |>
+  mutate(h = row_number()) |>
+  ungroup() |>
+  as_fable(response = "nights", distribution = nights)
+
+cv_acc_h <- cv_fc |>
+  accuracy(nights_keyed, by = c("h", ".model", "design"), measures = list(RMSE = RMSE))
+
+cv_acc_all <- cv_acc_h |>
+  group_by(design, .model) |>
+  summarise(`Mean RMSE over h = 1 to 12` = mean(RMSE), .groups = "drop")
+```
+
+```{r}
+#| label: tbl-cv
+#| tbl-cap: "Rolling-origin cross-validation: RMSE averaged over horizons 1 to 12 (thousands of nights)."
+
+cv_acc_all |>
+  mutate(.model = model_labels[.model]) |>
+  arrange(design, `Mean RMSE over h = 1 to 12`) |>
+  kable(digits = 1, col.names = c("Design", "Model", "Mean RMSE (h = 1 to 12)"))
+```
+
+```{r}
+#| label: fig-cv
+#| fig-cap: "Cross-validated RMSE by forecast horizon. A log scale is used because the Design A SARIMA errors are an order of magnitude larger than the others."
+
+cv_acc_h |>
+  mutate(.model = model_labels[.model]) |>
+  ggplot(aes(h, RMSE, colour = .model)) +
+  geom_line() +
+  geom_point(size = 1.2) +
+  facet_wrap(vars(design), nrow = 1) +
+  scale_x_continuous(breaks = 1:12) +
+  scale_y_log10(labels = scales::label_comma()) +
+  labs(x = "Forecast horizon (months)", y = "RMSE (log scale)", colour = "Model")
+```
+
+```{r}
+#| label: cv-numbers
+#| include: false
+cv_get <- function(d, m) {
+  cv_acc_all$`Mean RMSE over h = 1 to 12`[cv_acc_all$design == d & cv_acc_all$.model == m]
+}
+```
+
+Cross-validation confirms the test set conclusions and makes the contrast between the designs sharper. Under Design A the airline model averages an RMSE of `r fmt(cv_get(A, "SARIMA_BJ"))` across horizons, far worse than seasonal naive (`r fmt(cv_get(A, "SNaive"))`), and its error grows quickly with the horizon (@fig-cv). The reason is the bias adjustment again: with $\hat\sigma^2$ inflated by the COVID months, the variance of a log scale forecast grows with $h$, and so does the upward adjustment to the back-transformed mean. Under Design B the same model has the lowest error at every horizon, with an average RMSE of `r fmt(cv_get(B, "SARIMA_BJ"))` against `r fmt(cv_get(B, "SNaive"))` for seasonal naive and `r fmt(cv_get(B, "Mean"))` for the mean method. Neighbouring origins share most of their data, so these 25 origins are not independent replicates, but the ranking is consistent across every horizon.
+
+# Final model and forecasts
+
+The final model is the SARIMA(0,1,1)(0,1,1)~12~ on log nights sold with the COVID window treated as missing, refitted to all data up to June 2026.
+
+```{r}
+#| label: final-model
+
+final_data <- nights_sold |>
+  mutate(nights = if_else(period == "COVID window", NA_real_, nights))
+
+final_fit <- final_data |>
+  model(SARIMA_BJ = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)))
+
+report(final_fit)
+
+final_fc <- final_fit |> forecast(h = "2 years")
+```
+
+```{r}
+#| label: fig-final
+#| fig-cap: "Forecasts of monthly stay unit nights sold, July 2026 to June 2028, from the final model, with 80% and 95% prediction intervals."
+
+final_fc |>
+  autoplot(nights_sold |> filter_index("2022 Apr" ~ .), level = c(80, 95)) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = "Nights sold (thousands)")
+```
+
+```{r}
+#| label: tbl-final
+#| tbl-cap: "Selected point forecasts and 95% prediction intervals (thousands of nights)."
+
+final_fc |>
+  hilo(level = 95) |>
+  unpack_hilo(`95%`) |>
+  as_tibble() |>
+  filter(month(as.Date(Month)) %in% c(1, 4, 7, 10, 12)) |>
+  transmute(Month = format(Month), Forecast = .mean,
+            `Lower 95%` = `95%_lower`, `Upper 95%` = `95%_upper`) |>
+  kable(digits = 0, format.args = list(big.mark = ","))
+```
+
+```{r}
+#| label: final-numbers
+#| include: false
+dec_fc <- final_fc |> as_tibble() |> filter(month(as.Date(Month)) == 12) |> slice(1)
+dec_pi <- final_fc |>
+  filter(Month == dec_fc$Month) |>
+  hilo(level = 95) |>
+  unpack_hilo(`95%`) |>
+  as_tibble()
+```
+
+The model projects the familiar seasonal shape forward on a level close to that of the last two years, with December `r format(dec_fc$Month)` forecast at `r fmt(dec_fc$.mean, 0)` thousand nights (95% interval `r fmt(dec_pi$"95%_lower", 0)` to `r fmt(dec_pi$"95%_upper", 0)`). The intervals widen with the horizon because the model contains two unit roots, so uncertainty about the level accumulates. These intervals assume that no new shock of the COVID kind occurs; they describe ordinary month-to-month uncertainty only.
+
+# Discussion
+
+## Key findings {#sec-findings}
+
+1. **Seasonality is the dominant and most stable feature of the series.** The seasonal shape barely changed even through the COVID years, which is why the seasonal naive method is hard to beat and why the non-seasonal ARMA and ARIMA models perform poorly.
+2. **How the break is handled matters more than which ARIMA model is chosen.** With the COVID months kept (Design A), the seasonal ARIMA models were worse than the seasonal naive benchmark on the test set and much worse in cross-validation. The cause is a residual variance inflated by about `r fmt(get_sig2(A, "SARIMA_BJ") / get_sig2(B, "SARIMA_BJ"), 0)` times, a seasonal MA coefficient pushed to the invertibility boundary (`r fmt(sma_A, 3)`), and point forecasts pushed upwards by the bias adjustment.
+3. **With the COVID window treated as missing (Design B), the Box and Jenkins airline model was the only model to pass the full loop and beat the benchmarks**: it passed the diagnostic step and performed best, with a test RMSE of `r fmt(res_get(B, "SARIMA_BJ", "RMSE"))` thousand nights (MAPE `r fmt(res_get(B, "SARIMA_BJ", "MAPE"), 2)`%), white noise residuals and well calibrated prediction intervals. It also had the lowest cross-validated error at every horizon from 1 to 12 months.
+4. **A lower AICc did not guarantee better forecasts.** The automatically selected seasonal model had a `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_BJ"))` AICc than the hand identified model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_BJ", "RMSE"))` test RMSE, so the simpler model identified from the ACF and PACF was preferred.
+
+## Issues and limitations
+
+* **Choice of COVID window.** The window (March 2020 to March 2022) follows the national state of disaster. The data suggest the recovery continued after April 2022, so some post-COVID months still carry the recovery trend into the training data. A sensitivity check with a window ending in December 2022 would test how much this matters.
+* **Treating the shock as missing discards information.** Setting 25 months to missing throws away real data, and the approach would not work for a shock at the very end of a series. An intervention model (a level shift or a ramp with a gradual recovery) would use those months instead of ignoring them; this is the starting point for Project 3.
+* **Level shift after COVID.** Demand has recovered to slightly below its pre-COVID level. The differenced models adapt to this because they forecast from the most recent level, but the mean benchmark only did reasonably well because the recovered level happens to sit near the long-run average, which would not hold in general.
+* **MASE scaling.** The MASE denominator uses an in-sample period that contains the COVID collapse, so the MASE values are deflated. RMSE and MAPE were used as the main measures.
+* **Bias adjustment.** Back-transforming with the mean (bias adjusted) forecast is the right choice when the forecasts are added up, for example into annual totals, but it makes the forecasts very sensitive to an inflated $\hat\sigma^2$. This was a large part of the failure of Design A and is easy to miss.
+* **Short post-COVID history.** Only about two years of post-COVID data are in the training set, and the test set is two years long, so the conclusions rest on a fairly short stretch of "normal" data.
+
+## What I would do differently
+
+I would model the COVID shock directly with intervention variables in a regression with ARIMA errors, so that the 25 months are used rather than discarded, and compare a sliding window with the expanding window, since a sliding window is the natural choice when structural breaks are plausible. Project 3 takes up both ideas on the same series and the same test set, which allows a direct comparison with the SARIMA results from this project.
+
+# Reproducibility {.unnumbered}
+
+All results in this document are produced by the code above from the Stats SA P6410 spreadsheet (`tourist_data.xlsx`). The random seed is fixed, although none of the methods used here are random.
+
+```{r}
+#| label: session-info
+#| echo: false
+sessionInfo()
+```

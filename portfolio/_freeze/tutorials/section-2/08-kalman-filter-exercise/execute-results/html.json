@@ -1,0 +1,15 @@
+{
+  "hash": "6714e922f1b62267ef0b429ddf8a777b",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Kalman Filter Exercise\"\nsubtitle: \"Section 2: Exponential smoothing, state-space and hidden Markov models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Topics covered:** The Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations.\n:::\n\n## Overview of the key concepts\n\n*Summarise the main ideas of this session in your own words.*\n\n## Worked exercises\n\n*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*\n\n## Implementation in R\n\n*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# your code here\n```\n:::\n\n\n## Reflection\n\n**What was most challenging:**\n\n**What I now understand:**\n\n**Advantages and limitations of the methods:**\n\n**Links:** related projects and journal entries.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

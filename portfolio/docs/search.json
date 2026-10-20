@@ -1,0 +1,1220 @@
+[
+  {
+    "objectID": "tutorials/section-2/09-hidden-markov-model-exercise.html",
+    "href": "tutorials/section-2/09-hidden-markov-model-exercise.html",
+    "title": "Hidden Markov Model Exercise",
+    "section": "",
+    "text": "Topics covered: Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm."
+  },
+  {
+    "objectID": "tutorials/section-2/09-hidden-markov-model-exercise.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-2/09-hidden-markov-model-exercise.html#overview-of-the-key-concepts",
+    "title": "Hidden Markov Model Exercise",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-2/09-hidden-markov-model-exercise.html#worked-exercises",
+    "href": "tutorials/section-2/09-hidden-markov-model-exercise.html#worked-exercises",
+    "title": "Hidden Markov Model Exercise",
+    "section": "Worked exercises",
+    "text": "Worked exercises\n\nExercises from the chapter\n\nTwo-state Poisson HMM: compute the probability that the first three observations are 0, 2, 1, by enumerating state sequences and by the matrix formula.\nShow that the HMM likelihood reduces to the independent mixture likelihood when the Markov chain is degenerate.\nBernoulli HMM: forward probabilities, likelihood, forecast distribution, Viterbi path and state prediction."
+  },
+  {
+    "objectID": "tutorials/section-2/09-hidden-markov-model-exercise.html#implementation-in-r",
+    "href": "tutorials/section-2/09-hidden-markov-model-exercise.html#implementation-in-r",
+    "title": "Hidden Markov Model Exercise",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-2/09-hidden-markov-model-exercise.html#reflection",
+    "href": "tutorials/section-2/09-hidden-markov-model-exercise.html#reflection",
+    "title": "Hidden Markov Model Exercise",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-2/07-state-space-model-exercise.html",
+    "href": "tutorials/section-2/07-state-space-model-exercise.html",
+    "title": "State Space Model Exercise",
+    "section": "",
+    "text": "Topics covered: Local level, linear growth and basic structural models written in state-space form."
+  },
+  {
+    "objectID": "tutorials/section-2/07-state-space-model-exercise.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-2/07-state-space-model-exercise.html#overview-of-the-key-concepts",
+    "title": "State Space Model Exercise",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-2/07-state-space-model-exercise.html#worked-exercises",
+    "href": "tutorials/section-2/07-state-space-model-exercise.html#worked-exercises",
+    "title": "State Space Model Exercise",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-2/07-state-space-model-exercise.html#implementation-in-r",
+    "href": "tutorials/section-2/07-state-space-model-exercise.html#implementation-in-r",
+    "title": "State Space Model Exercise",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-2/07-state-space-model-exercise.html#reflection",
+    "href": "tutorials/section-2/07-state-space-model-exercise.html#reflection",
+    "title": "State Space Model Exercise",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-1/05-spectral-analysis-lab.html",
+    "href": "tutorials/section-1/05-spectral-analysis-lab.html",
+    "title": "Spectral Analysis Lab",
+    "section": "",
+    "text": "Topics covered: Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models."
+  },
+  {
+    "objectID": "tutorials/section-1/05-spectral-analysis-lab.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-1/05-spectral-analysis-lab.html#overview-of-the-key-concepts",
+    "title": "Spectral Analysis Lab",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/05-spectral-analysis-lab.html#worked-exercises",
+    "href": "tutorials/section-1/05-spectral-analysis-lab.html#worked-exercises",
+    "title": "Spectral Analysis Lab",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-1/05-spectral-analysis-lab.html#implementation-in-r",
+    "href": "tutorials/section-1/05-spectral-analysis-lab.html#implementation-in-r",
+    "title": "Spectral Analysis Lab",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-1/05-spectral-analysis-lab.html#reflection",
+    "href": "tutorials/section-1/05-spectral-analysis-lab.html#reflection",
+    "title": "Spectral Analysis Lab",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-1/03-tsa-part1-exercise-2.html",
+    "href": "tutorials/section-1/03-tsa-part1-exercise-2.html",
+    "title": "Time Series Analysis Part 1: Exercise 2",
+    "section": "",
+    "text": "Summarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/03-tsa-part1-exercise-2.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-1/03-tsa-part1-exercise-2.html#overview-of-the-key-concepts",
+    "title": "Time Series Analysis Part 1: Exercise 2",
+    "section": "",
+    "text": "Summarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/03-tsa-part1-exercise-2.html#worked-exercises",
+    "href": "tutorials/section-1/03-tsa-part1-exercise-2.html#worked-exercises",
+    "title": "Time Series Analysis Part 1: Exercise 2",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-1/03-tsa-part1-exercise-2.html#implementation-in-r",
+    "href": "tutorials/section-1/03-tsa-part1-exercise-2.html#implementation-in-r",
+    "title": "Time Series Analysis Part 1: Exercise 2",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-1/03-tsa-part1-exercise-2.html#reflection",
+    "href": "tutorials/section-1/03-tsa-part1-exercise-2.html#reflection",
+    "title": "Time Series Analysis Part 1: Exercise 2",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-1/01-ts-intro.html",
+    "href": "tutorials/section-1/01-ts-intro.html",
+    "title": "TS Intro",
+    "section": "",
+    "text": "Topics covered: Introduction to time series: the nature of time series data, the forecasting problem, and exploring a series."
+  },
+  {
+    "objectID": "tutorials/section-1/01-ts-intro.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-1/01-ts-intro.html#overview-of-the-key-concepts",
+    "title": "TS Intro",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/01-ts-intro.html#worked-exercises",
+    "href": "tutorials/section-1/01-ts-intro.html#worked-exercises",
+    "title": "TS Intro",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-1/01-ts-intro.html#implementation-in-r",
+    "href": "tutorials/section-1/01-ts-intro.html#implementation-in-r",
+    "title": "TS Intro",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-1/01-ts-intro.html#reflection",
+    "href": "tutorials/section-1/01-ts-intro.html#reflection",
+    "title": "TS Intro",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "reflective-commentary.html",
+    "href": "reflective-commentary.html",
+    "title": "Reflective Commentary",
+    "section": "",
+    "text": "Target length: 1000 to 2000 words."
+  },
+  {
+    "objectID": "reflective-commentary.html#learning-achievements",
+    "href": "reflective-commentary.html#learning-achievements",
+    "title": "Reflective Commentary",
+    "section": "Learning achievements",
+    "text": "Learning achievements"
+  },
+  {
+    "objectID": "reflective-commentary.html#methodological-challenges",
+    "href": "reflective-commentary.html#methodological-challenges",
+    "title": "Reflective Commentary",
+    "section": "Methodological challenges",
+    "text": "Methodological challenges"
+  },
+  {
+    "objectID": "reflective-commentary.html#ethical-and-reproducibility-considerations",
+    "href": "reflective-commentary.html#ethical-and-reproducibility-considerations",
+    "title": "Reflective Commentary",
+    "section": "Ethical and reproducibility considerations",
+    "text": "Ethical and reproducibility considerations"
+  },
+  {
+    "objectID": "reflective-commentary.html#future-areas-for-development",
+    "href": "reflective-commentary.html#future-areas-for-development",
+    "title": "Reflective Commentary",
+    "section": "Future areas for development",
+    "text": "Future areas for development"
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "",
+    "text": "NoteExecutive summary\n\n\n\nTitle: Modelling the COVID-19 shock in South African accommodation demand\nSection and topic: Section 2. Exponential smoothing (ETS), regression with ARIMA errors and intervention (transfer function) terms, state-space models and the Kalman filter.\nType of project: Model comparison on real-world data, with a profile likelihood search for the intervention decay rate. It extends Project 1 on the same series and the same test set, so the results of the two projects can be compared directly.\nQuestion: In Project 1 the COVID-19 months were either kept, which broke the SARIMA model, or deleted, which threw information away. Can the shock be modelled instead, and does that, or adding the exchange rate as a predictor, give better forecasts of accommodation demand than ETS and the Project 1 SARIMA?\nData: Real-world, publicly available data. Statistics South Africa, Tourist Accommodation release P6410, series B64100 (stay unit nights sold, total industry), and the monthly average rand per US dollar exchange rate (FRED series EXSFUS), January 2015 to June 2026. Full source details are in Section 2.1.\nMethods: ETS; regression with ARIMA errors containing deterministic seasonal dummies and COVID intervention terms (a geometrically decaying shock, two pulses and a level shift), with the decay rate chosen by profile likelihood; the same model with the log exchange rate added, forecast both ex ante and ex post; a basic structural model (local level, slope and seasonal) fitted by maximum likelihood with the Kalman filter, with the COVID months treated as missing. All models go through the Box and Jenkins loop and are compared with the Project 1 SARIMA and the seasonal naive benchmark on the July 2024 to June 2026 test set.\nKey findings: See Section 8.1.\nWhat I would do differently: Use rolling-origin cross-validation for the final comparison, and estimate the decay rate jointly with the other parameters rather than on a grid.\nDetailed analysis: the sections below."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#sec-data-source",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#sec-data-source",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "2.1 Source and data statement",
+    "text": "2.1 Source and data statement\n\n\n\n\n\n\nTipData sources at a glance\n\n\n\n\n\n\nAccommodation data\nStatistics South Africa (Stats SA), Tourist Accommodation, statistical release P6410 (monthly), file tourist_data.xlsx, series B64100 (stay units nights sold, total industry, actual figures, thousands). Available from https://www.statssa.gov.za/?page_id=1854&PPN=P6410\n\n\nExchange rate\nBoard of Governors of the Federal Reserve System (US), South African Rand to U.S. Dollar Spot Exchange Rate (EXSFUS), monthly average of daily rates, rand per US dollar, via FRED: https://fred.stlouisfed.org/series/EXSFUS. Saved as usdzar_monthly_fred.csv\n\n\nPeriod analysed\nJanuary 2015 to June 2026\n\n\nLicence and privacy\nPublic, aggregated official statistics; no personal information, so POPIA does not apply\n\n\n\n\n\nReferences:\n\nStatistics South Africa (2026) Tourist Accommodation (Statistical release P6410), time series data. Pretoria: Statistics South Africa. Available at: https://www.statssa.gov.za/?page_id=1854&PPN=P6410.\nBoard of Governors of the Federal Reserve System (US) (2026) South African Rand to U.S. Dollar Spot Exchange Rate [EXSFUS]. Retrieved from FRED, Federal Reserve Bank of St. Louis. Available at: https://fred.stlouisfed.org/series/EXSFUS."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#reading-the-data",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#reading-the-data",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "2.2 Reading the data",
+    "text": "2.2 Reading the data\nThe accommodation series is read exactly as in Project 1. The exchange rate is downloaded from FRED the first time the document is rendered and saved as usdzar_monthly_fred.csv; later renders use the saved file. If the download fails, download the CSV from the FRED page above and save it under that name in the same folder as this file.\n\n\nCode\n# Accommodation (as in Project 1) -----------------------------------------\nraw &lt;- read_excel(tourism_file)\n\nnights_sold &lt;- raw |&gt;\n  filter(H03 == \"B64100\") |&gt;\n  select(starts_with(\"MO\")) |&gt;\n  pivot_longer(everything(), names_to = \"code\", values_to = \"nights\") |&gt;\n  mutate(Month  = yearmonth(make_date(as.integer(substr(code, 5, 8)),\n                                      as.integer(substr(code, 3, 4)), 1L)),\n         nights = as.numeric(nights)) |&gt;\n  filter(!is.na(nights)) |&gt;\n  select(Month, nights) |&gt;\n  as_tsibble(index = Month) |&gt;\n  filter_index(\"2015 Jan\" ~ .) |&gt;\n  mutate(period = case_when(\n    Month &lt;  covid_start ~ \"Pre-COVID\",\n    Month &lt;= covid_end   ~ \"COVID window\",\n    TRUE                 ~ \"Post-COVID\"\n  ))\n\n# Exchange rate -------------------------------------------------------------\nif (!file.exists(zar_file)) {\n  fred_url &lt;- paste0(\"https://fred.stlouisfed.org/graph/fredgraph.csv?id=EXSFUS\",\n                     \"&cosd=2015-01-01&coed=2026-06-01\")\n  download.file(fred_url, zar_file, mode = \"wb\")\n}\n\nzar &lt;- read.csv(zar_file, na.strings = c(\".\", \"\"))\nnames(zar) &lt;- c(\"date\", \"zar\")\nzar &lt;- zar |&gt;\n  mutate(Month = yearmonth(as.Date(date)), zar = as.numeric(zar)) |&gt;\n  filter(!is.na(zar)) |&gt;\n  select(Month, zar)\n\nnights_sold &lt;- nights_sold |&gt;\n  left_join(zar, by = \"Month\") |&gt;\n  mutate(log_zar = log(zar))\n\nsum(is.na(nights_sold$zar))   # should be 0\n\n\n[1] 0\n\n\n\n\nCode\np_n &lt;- nights_sold |&gt;\n  ggplot(aes(as.Date(Month), nights)) +\n  annotate(\"rect\", xmin = as.Date(covid_start), xmax = as.Date(covid_end),\n           ymin = -Inf, ymax = Inf, alpha = 0.15, fill = \"firebrick\") +\n  geom_line(colour = \"steelblue4\") +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(x = NULL, y = \"Nights sold (thousands)\")\n\np_z &lt;- nights_sold |&gt;\n  ggplot(aes(as.Date(Month), zar)) +\n  annotate(\"rect\", xmin = as.Date(covid_start), xmax = as.Date(covid_end),\n           ymin = -Inf, ymax = Inf, alpha = 0.15, fill = \"firebrick\") +\n  geom_line(colour = \"darkorange3\") +\n  labs(x = NULL, y = \"ZAR per USD\")\n\nif (requireNamespace(\"patchwork\", quietly = TRUE)) {\n  patchwork::wrap_plots(p_n, p_z, ncol = 1)\n} else {\n  print(p_n); print(p_z)\n}\n\n\n\n\n\n\n\n\nFigure 1: Top: monthly stay unit nights sold (thousands), with the COVID window shaded. Bottom: monthly average rand per US dollar.\n\n\n\n\n\nThe full exploratory analysis of the accommodation series is in Project 1 and is not repeated here. The points that matter for this project are: the seasonal shape is very stable from year to year; the April 2020 collapse was followed by a recovery that took about two years, with setbacks in the later COVID waves; and the post-COVID level is still slightly below the pre-COVID level. The rand weakened over the period, with a sharp depreciation at the start of the pandemic (Figure 1), so the exchange rate and the COVID shock are partly confounded in 2020. This is one reason the exchange rate is added only after the shock has been modelled."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#training-and-test-sets",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#training-and-test-sets",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "2.3 Training and test sets",
+    "text": "2.3 Training and test sets\n\n\nCode\ntrain   &lt;- nights_sold |&gt; filter(Month &lt; test_start)\ntest    &lt;- nights_sold |&gt; filter(Month &gt;= test_start)\ntrain_B &lt;- train |&gt;\n  mutate(nights = if_else(period == \"COVID window\", NA_real_, nights))\n\n\nThe training and test sets are identical to Project 1: training from January 2015 to June 2024 (114 months) and testing from July 2024 to June 2026 (24 months). Using the same split is what allows the results to be compared across the two projects."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#why-deterministic-seasonality",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#why-deterministic-seasonality",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.1 Why deterministic seasonality",
+    "text": "4.1 Why deterministic seasonality\nIn Project 1, every seasonal ARIMA model fitted with the COVID months included estimated a seasonal MA coefficient at or near -1. A seasonal MA factor \\((1 - L^{12})\\) that cancels the seasonal difference \\((1 - L^{12})\\) is the classic sign that the seasonal pattern is fixed rather than evolving, so that seasonal differencing is over-differencing. The seasonal plots in Project 1 point the same way. In this model the seasonality is therefore represented by 11 monthly dummy variables, while a first difference in the errors handles the wandering level."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#modelling-the-shock",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#modelling-the-shock",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.2 Modelling the shock",
+    "text": "4.2 Modelling the shock\nThe intervention terms follow the transfer function idea from Chapter 2: the effect of an event is described by a small set of explanatory variables whose shape reflects how the event unfolded. With \\(t_0\\) = April 2020 and everything on the log scale:\n\nDecaying shock: \\(D_t(\\delta) = \\delta^{\\,t - t_0}\\) for \\(t \\ge t_0\\) and 0 before. Its coefficient \\(\\omega\\) is the immediate effect in April 2020, which then dies out geometrically at rate \\(\\delta\\). This is the transfer function \\(\\omega / (1 - \\delta L)\\) applied to a pulse at \\(t_0\\).\nPulses for March 2020 (lockdown started on 27 March, so the month was only partly affected) and May 2020 (the industry stayed almost completely closed, so the bottom of the collapse lasted two months rather than one).\nLevel shift: \\(S_t = 1\\) for \\(t \\ge t_0\\), allowing a permanent difference between the pre-COVID and post-COVID levels.\n\nThe model is\n\\[\n\\log y_t = \\sum_{j=1}^{11} \\gamma_j M_{jt} + \\omega D_t(\\delta) + \\kappa_1 P^{\\text{Mar20}}_t + \\kappa_2 P^{\\text{May20}}_t + \\lambda S_t + \\eta_t, \\qquad (1 - L)\\,\\phi(L)\\,\\eta_t = \\theta(L)\\,\\varepsilon_t ,\n\\]\nwhere \\(M_{jt}\\) are monthly dummies and \\(\\eta_t\\) follows an ARIMA(\\(p\\), 1, \\(q\\)) process.\n\n\nCode\ncovid_vars &lt;- function(df, delta) {\n  k0 &lt;- month_num(shock_month)\n  df |&gt;\n    mutate(k     = month_num(Month) - k0,\n           decay = if_else(k &gt;= 0, delta^pmax(k, 0), 0),\n           mar20 = as.numeric(k == -1),\n           may20 = as.numeric(k == 1),\n           step  = as.numeric(k &gt;= 0))\n}"
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#choosing-the-decay-rate-by-profile-likelihood",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#choosing-the-decay-rate-by-profile-likelihood",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.3 Choosing the decay rate by profile likelihood",
+    "text": "4.3 Choosing the decay rate by profile likelihood\nThe decay rate \\(\\delta\\) enters the model non-linearly, so it cannot be estimated by ARIMA() directly. Instead I profile it: for each \\(\\delta\\) on a grid from 0.70 to 0.96, the model is fitted (with the ARIMA error orders chosen by AICc) and the AICc recorded. The value of \\(\\delta\\) with the smallest AICc is used. Because \\(\\delta\\) is estimated, the model really has one more parameter than ARIMA() reports; this does not change the ranking along the grid.\n\n\nCode\ndelta_grid &lt;- seq(0.70, 0.96, by = 0.02)\n\nprofile &lt;- bind_rows(lapply(delta_grid, function(dl) {\n  f &lt;- covid_vars(train, dl) |&gt;\n    model(reg = ARIMA(log(nights) ~ season() + decay + mar20 + may20 + step +\n                        pdq(d = 1) + PDQ(0, 0, 0)))\n  tibble(delta = dl,\n         AICc  = glance(f)$AICc,\n         spec  = fabletools::model_sum(f$reg[[1]]$fit))\n}))\n\ndelta_hat &lt;- profile$delta[which.min(profile$AICc)]\n\n\n\n\nCode\nggplot(profile, aes(delta, AICc)) +\n  geom_line(colour = \"grey40\") +\n  geom_point(colour = \"grey40\") +\n  geom_point(data = filter(profile, delta == delta_hat), colour = \"firebrick\", size = 3) +\n  labs(x = expression(delta), y = \"AICc\")\n\n\n\n\n\n\n\n\nFigure 2: Profile of AICc against the decay rate. The selected value is marked in red.\n\n\n\n\n\nThe AICc is minimised at \\(\\hat\\delta\\) = 0.76 (Figure 2). A decay rate of 0.76 means that the temporary part of the shock halves every 2.5 months and has fallen to 4% of its initial size after a year."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#fitting-the-model-box-and-jenkins-loop",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#fitting-the-model-box-and-jenkins-loop",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.4 Fitting the model (Box and Jenkins loop)",
+    "text": "4.4 Fitting the model (Box and Jenkins loop)\n\n\nCode\ntrain_reg &lt;- covid_vars(train, delta_hat)\ntest_reg  &lt;- covid_vars(test, delta_hat)\n\n# Step 2 and 3: residuals from the regression part, before choosing the ARIMA errors\nols &lt;- train_reg |&gt;\n  model(TSLM(log(nights) ~ season() + decay + mar20 + may20 + step))\nols_resid &lt;- augment(ols)\n\n\n\n\nCode\nols_resid |&gt;\n  gg_tsdisplay(difference(.resid), plot_type = \"partial\", lag_max = 36)\n\n\n\n\n\n\n\n\nFigure 3: Box and Jenkins steps 2 and 3 for the error process. First differences of the residuals from the regression part, with their ACF and PACF.\n\n\n\n\n\nFollowing the Box and Jenkins workflow, the regression residuals are examined before choosing the error model. The residuals from the regression part wander (they are a non-stationary level once the shock is removed), so a first difference is taken. Figure 3 shows the differenced residuals with their ACF and PACF, which suggest a low order ARMA structure for the error. The orders are then chosen by AICc, and the model is estimated by maximum likelihood.\n\n\nCode\nfit_reg &lt;- train_reg |&gt;\n  model(\n    Reg = ARIMA(log(nights) ~ season() + decay + mar20 + may20 + step +\n                  pdq(d = 1) + PDQ(0, 0, 0)),\n    `Reg + ZAR` = ARIMA(log(nights) ~ season() + decay + mar20 + may20 + step +\n                          log_zar + pdq(d = 1) + PDQ(0, 0, 0))\n  )\n\nreg_spec &lt;- fabletools::model_sum(fit_reg$Reg[[1]]$fit)\nzar_spec &lt;- fabletools::model_sum(fit_reg$`Reg + ZAR`[[1]]$fit)\n\n\n\n\nCode\nreg_coef &lt;- tidy(fit_reg) |&gt;\n  filter(term %in% c(\"decay\", \"mar20\", \"may20\", \"step\", \"log_zar\"))\n\nreg_coef |&gt;\n  select(Model = .model, Term = term, Estimate = estimate,\n         `Std. error` = std.error, `p-value` = p.value) |&gt;\n  kable(digits = 3)\nrc &lt;- function(m, t, col = \"estimate\") reg_coef[[col]][reg_coef$.model == m & reg_coef$term == t]\n\n\n\n\nTable 1: Estimated intervention and exchange rate coefficients (log scale). Seasonal dummy and ARMA coefficients are omitted for space.\n\n\n\n\n\n\nModel\nTerm\nEstimate\nStd. error\np-value\n\n\n\n\nReg\ndecay\n-3.187\n0.133\n0.000\n\n\nReg\nmar20\n-0.542\n0.073\n0.000\n\n\nReg\nmay20\n-0.531\n0.057\n0.000\n\n\nReg\nstep\n-0.515\n0.112\n0.000\n\n\nReg + ZAR\ndecay\n-3.262\n0.135\n0.000\n\n\nReg + ZAR\nmar20\n-0.576\n0.076\n0.000\n\n\nReg + ZAR\nmay20\n-0.541\n0.058\n0.000\n\n\nReg + ZAR\nstep\n-0.517\n0.099\n0.000\n\n\nReg + ZAR\nlog_zar\n0.270\n0.198\n0.175\n\n\n\n\n\n\n\n\n\n\nCode\neffect &lt;- train_reg |&gt;\n  as_tibble() |&gt;\n  mutate(log_effect = rc(\"Reg\", \"decay\") * decay + rc(\"Reg\", \"mar20\") * mar20 +\n           rc(\"Reg\", \"may20\") * may20 + rc(\"Reg\", \"step\") * step,\n         lost = 1 - exp(log_effect)) |&gt;\n  filter(Month &gt;= yearmonth(\"2019 Jul\"))\n\nggplot(effect, aes(as.Date(Month), 100 * lost)) +\n  geom_col(fill = \"firebrick\", alpha = 0.7) +\n  labs(x = NULL, y = \"Demand lost to COVID (%)\")\n\n\n\n\n\n\n\n\nFigure 4: Estimated total COVID effect on log nights sold from the regression model (decay, pulses and level shift combined), expressed as the percentage of demand lost relative to a no-COVID baseline.\n\n\n\n\n\nThe selected error model is LM w/ ARIMA(2,1,1) errors. The estimates have a direct interpretation on the log scale. The decaying shock has \\(\\hat\\omega\\) = -3.19; combined with the May 2020 pulse and the level shift, this reproduces a loss of almost all demand in April and May 2020. The level shift is \\(\\hat\\lambda\\) = -0.515 (p &lt; 0.001), which corresponds to a lasting change of -40.3% in the level of demand compared with what the pre-COVID pattern would imply. Figure 4 turns these estimates into the estimated share of demand lost each month."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#residual-diagnostics",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#residual-diagnostics",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.5 Residual diagnostics",
+    "text": "4.5 Residual diagnostics\n\n\nCode\nreg_aug &lt;- augment(fit_reg)\n\nn_arma &lt;- tidy(fit_reg) |&gt;\n  filter(grepl(\"^(ar|ma)[0-9]+$\", term)) |&gt;\n  count(.model, name = \"dof\")\n\nreg_lb &lt;- reg_aug |&gt;\n  as_tibble() |&gt;\n  left_join(n_arma, by = \".model\") |&gt;\n  mutate(dof = coalesce(dof, 0L)) |&gt;\n  group_by(.model) |&gt;\n  summarise(lb_p = Box.test(.innov, lag = 24, type = \"Ljung-Box\",\n                            fitdf = first(dof))$p.value,\n            .groups = \"drop\")\n\nlbp &lt;- function(m) reg_lb$lb_p[reg_lb$.model == m]\n\n\n\n\nCode\nfit_reg |&gt; select(Reg) |&gt; gg_tsresiduals(lag_max = 36)\n\n\n\n\n\n\n\n\nFigure 5: Residual diagnostics for the regression model with ARIMA errors (without the exchange rate).\n\n\n\n\n\nThe Ljung and Box test on 24 lags gives p = 0.556 for the regression model and p = 0.544 for the model with the exchange rate. The residuals of the regression model are consistent with white noise and show no remaining seasonal structure, so the deterministic seasonal dummies are adequate. Unlike the Project 1 SARIMA fitted to the full data, the COVID months no longer dominate the residuals, because the shock is now explained by the intervention terms. The model passes step 5 and can be used to forecast."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#does-the-exchange-rate-help",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#does-the-exchange-rate-help",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "4.6 Does the exchange rate help?",
+    "text": "4.6 Does the exchange rate help?\nBecause the model is in logs, the coefficient on log USD/ZAR is an elasticity: a 10% weakening of the rand is associated with a change of about 2.7% in nights sold, holding the seasonal and COVID terms fixed. The estimate is 0.270 (p 0.175), and the AICc gets worse from -227.1 to -225.9. The exchange rate does not add significant information once the seasonal pattern and the COVID shock are accounted for, which is not surprising since most stays are domestic and the effect of the rand on foreign arrivals works with a lag. The model is in first differences, so the coefficient measures the effect of changes in the rand on changes in demand within the same month.\nA model with an explanatory variable has a practical catch: to forecast nights sold, I need future values of the exchange rate, which are not known when the forecast is made. Two versions are therefore evaluated:\n\nEx ante (realistic): the exchange rate is assumed to stay at its last observed value (June 2024), a naive forecast.\nEx post (optimistic): the actual exchange rate during the test period is used. This is not a genuine forecast, since it uses information that would not have been available in June 2024. It shows the best the model could do if the rand were forecast perfectly."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#forecasts-on-the-test-set",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#forecasts-on-the-test-set",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "6.1 Forecasts on the test set",
+    "text": "6.1 Forecasts on the test set\nAll models produce forecasts for July 2024 to June 2026 from the end of June 2024, with 80% and 95% prediction intervals. Two reference models are included: the seasonal naive benchmark and the SARIMA(0,1,1)(0,1,1)12 model from Project 1 (Design B), refitted here with exactly the same specification so that the comparison uses identical code and data. For models fitted on the log scale, point forecasts are back-transformed to the mean (with the bias adjustment), as in Project 1.\n\n\nCode\n# ETS, Project 1 SARIMA and seasonal naive (fable)\nfit_ref &lt;- train_B |&gt;\n  model(`SARIMA (Project 1)` = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)))\nfit_sn  &lt;- train |&gt; model(`Seasonal naive` = SNAIVE(nights))\n\nfc_fable &lt;- bind_rows(\n  forecast(fit_ets, h = 24) |&gt; as_tibble(),\n  forecast(fit_ref, h = 24) |&gt; as_tibble(),\n  forecast(fit_sn,  h = 24) |&gt; as_tibble(),\n  forecast(fit_reg |&gt; select(Reg), new_data = test_reg) |&gt; as_tibble(),\n  forecast(fit_reg |&gt; select(`Reg + ZAR`),\n           new_data = test_reg |&gt; mutate(log_zar = last(train$log_zar))) |&gt;\n    as_tibble() |&gt; mutate(.model = \"Reg + ZAR (ex ante)\"),\n  forecast(fit_reg |&gt; select(`Reg + ZAR`), new_data = test_reg) |&gt;\n    as_tibble() |&gt; mutate(.model = \"Reg + ZAR (ex post)\")\n)\n\nfc_fable_tbl &lt;- fc_fable |&gt;\n  mutate(lo80 = quantile(nights, 0.10), hi80 = quantile(nights, 0.90),\n         lo95 = quantile(nights, 0.025), hi95 = quantile(nights, 0.975)) |&gt;\n  select(.model, Month, mean = .mean, lo80, hi80, lo95, hi95)\n\n# BSM forecasts (StructTS): normal on the log scale, back-transformed\nbsm_fc &lt;- function(fit, label) {\n  p &lt;- predict(fit, n.ahead = 24)\n  m &lt;- as.numeric(p$pred); s &lt;- as.numeric(p$se)\n  tibble(.model = label, Month = test$Month,\n         mean = exp(m + s^2 / 2),\n         lo80 = exp(m - qnorm(0.90) * s),  hi80 = exp(m + qnorm(0.90) * s),\n         lo95 = exp(m - qnorm(0.975) * s), hi95 = exp(m + qnorm(0.975) * s))\n}\n\nfc_all &lt;- bind_rows(\n  fc_fable_tbl,\n  bsm_fc(bsm_free,  \"BSM\"),\n  bsm_fc(bsm_fixed, \"BSM (fixed slope)\")\n) |&gt;\n  left_join(as_tibble(test) |&gt; select(Month, actual = nights), by = \"Month\")\n\n\n\n\nCode\n# MASE scale: in-sample seasonal naive MAE on the observed training data\nmase_scale &lt;- mean(abs(diff(train$nights, lag = 12)))\n\nmodel_order &lt;- c(\"Seasonal naive\", \"SARIMA (Project 1)\", \"ETS\", \"Reg\",\n                 \"Reg + ZAR (ex ante)\", \"Reg + ZAR (ex post)\",\n                 \"BSM\", \"BSM (fixed slope)\")\n\nresults &lt;- fc_all |&gt;\n  group_by(Model = .model) |&gt;\n  summarise(\n    RMSE = sqrt(mean((actual - mean)^2)),\n    MAE  = mean(abs(actual - mean)),\n    MAPE = 100 * mean(abs(actual - mean) / actual),\n    MASE = mean(abs(actual - mean)) / mase_scale,\n    cover80 = mean(actual &gt;= lo80 & actual &lt;= hi80),\n    cover95 = mean(actual &gt;= lo95 & actual &lt;= hi95),\n    width95 = mean(hi95 - lo95),\n    .groups = \"drop\"\n  ) |&gt;\n  mutate(Model = factor(Model, levels = model_order)) |&gt;\n  arrange(Model)\n\ndiag_status &lt;- tibble(\n  Model = factor(model_order, levels = model_order),\n  `Passes diagnostics` = c(\"Benchmark\", \"Yes (Project 1)\",\n                           NA, if_else(lbp(\"Reg\") &gt; 0.05, \"Yes\", \"No\"),\n                           rep(if_else(lbp(\"Reg + ZAR\") &gt; 0.05, \"Yes\", \"No\"), 2),\n                           if_else(lb_free &gt; 0.05, \"Yes\", \"No\"),\n                           if_else(lb_fixed &gt; 0.05, \"Yes\", \"No\"))\n)\n\nets_lb &lt;- augment(fit_ets) |&gt;\n  as_tibble() |&gt;\n  summarise(p = Box.test(.innov, lag = 24, type = \"Ljung-Box\")$p.value) |&gt;\n  pull(p)\ndiag_status$`Passes diagnostics`[diag_status$Model == \"ETS\"] &lt;-\n  if_else(ets_lb &gt; 0.05, \"Yes\", \"No\")\n\nresults &lt;- results |&gt; left_join(diag_status, by = \"Model\")\n\n\n\n\nCode\nresults |&gt;\n  mutate(cover80 = pct(cover80), cover95 = pct(cover95)) |&gt;\n  kable(digits = c(0, 1, 1, 2, 2, 0, 0, 0, 0),\n        col.names = c(\"Model\", \"RMSE\", \"MAE\", \"MAPE (%)\", \"MASE\",\n                      \"Cover 80%\", \"Cover 95%\", \"Mean 95% width\", \"Passes diagnostics\"),\n        format.args = list(big.mark = \",\"))\n\n\n\n\nTable 3: Test set accuracy, July 2024 to June 2026. RMSE, MAE and mean 95% interval width are in thousands of nights. MASE uses the in-sample seasonal naive error as its scale, the same for every model. The last column records whether the model passed the residual diagnostics (Ljung and Box, 24 lags, 5% level).\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModel\nRMSE\nMAE\nMAPE (%)\nMASE\nCover 80%\nCover 95%\nMean 95% width\nPasses diagnostics\n\n\n\n\nSeasonal naive\n132.6\n112.2\n5.81\n0.32\n100%\n100%\n2,898\nBenchmark\n\n\nSARIMA (Project 1)\n101.6\n81.4\n4.25\n0.23\n92%\n100%\n545\nYes (Project 1)\n\n\nETS\n130.0\n112.1\n5.90\n0.32\n100%\n100%\n2,292\nYes\n\n\nReg\n98.8\n85.7\n4.51\n0.25\n100%\n100%\n1,060\nYes\n\n\nReg + ZAR (ex ante)\n106.2\n91.4\n4.81\n0.26\n100%\n100%\n972\nYes\n\n\nReg + ZAR (ex post)\n130.3\n109.5\n5.75\n0.32\n100%\n100%\n957\nYes\n\n\nBSM\n184.7\n166.7\n8.62\n0.48\n100%\n100%\n933\nNo\n\n\nBSM (fixed slope)\n102.9\n86.8\n4.49\n0.25\n100%\n100%\n988\nNo\n\n\n\n\n\n\n\n\n\n\nCode\nshow_models &lt;- c(\"SARIMA (Project 1)\", \"ETS\", \"Reg\", \"BSM (fixed slope)\")\n\nhist_df &lt;- nights_sold |&gt;\n  as_tibble() |&gt;\n  filter(Month &gt;= yearmonth(\"2022 Jan\"))\n\nfc_all |&gt;\n  filter(.model %in% show_models) |&gt;\n  mutate(.model = factor(.model, levels = show_models)) |&gt;\n  ggplot(aes(as.Date(Month))) +\n  geom_ribbon(aes(ymin = lo95, ymax = hi95), fill = \"steelblue\", alpha = 0.25) +\n  geom_line(aes(y = mean), colour = \"steelblue4\", linewidth = 0.6) +\n  geom_line(data = hist_df, aes(as.Date(Month), nights), colour = \"black\", linewidth = 0.4) +\n  facet_wrap(vars(.model), ncol = 2) +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(x = NULL, y = \"Nights sold (thousands)\")\n\n\n\n\n\n\n\n\nFigure 8: Test set forecasts and 95% prediction intervals for the main models. Black: observed values."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#results",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#results",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "6.2 Results",
+    "text": "6.2 Results\nOverall ranking. The lowest test RMSE is achieved by the Reg model (98.8 thousand nights). Among the models that passed the diagnostic step, the best is the Reg model. For reference, the Project 1 SARIMA has an RMSE of 101.6 and the seasonal naive benchmark 132.6.\nETS. ETS reaches an RMSE of 130.0, beating the seasonal naive benchmark even though it was fitted to data that include the COVID collapse. Its fast-moving level lets it recover from the shock without any special treatment, which a SARIMA with the COVID months included could not do in Project 1. Its 95% intervals are, however, wider than those of the regression model, because the COVID months still inflate its estimated error variance (mean width 2,292 against 1,060 thousand nights).\nRegression with intervention terms. Modelling the shock explicitly gives an RMSE of 98.8 and a MAPE of 4.51%, better than the Project 1 SARIMA that simply deleted the COVID months. Its intervals cover 100% of the test months at the 95% level and 100% at the 80% level. The two approaches reach very similar forecast accuracy, which makes sense: by June 2024 the temporary part of the shock had almost disappeared (\\(\\hat\\delta^{\\,50} \\approx\\) 1.1e-06), so the main forecasting information in both models comes from the post-COVID level and the seasonal pattern. The advantage of the regression model is not mainly accuracy but interpretation: it estimates the size, shape and persistence of the shock (Figure 4) instead of discarding it.\nExchange rate. Adding the rand changes the RMSE to 106.2 ex ante and 130.3 ex post. Neither version improves on the model without the exchange rate. The gap between the ex ante and ex post results is a reminder that a regression model’s forecasts are only as good as the forecasts of its explanatory variables.\nState-space models. The full BSM has an RMSE of 184.7 and the fixed slope version 102.9. The difference comes from the slope: in the full model the slope adapts to the steep recovery in 2022 and 2023 and this growth is extrapolated forward, whereas with a fixed slope the long-run average growth is used. This shows that two models with almost identical likelihoods can give very different forecasts, because the likelihood is dominated by one-step-ahead fit while forecasts two years ahead depend on how the trend is extrapolated. Both BSMs failed the residual diagnostics, so even if their forecasts happen to be competitive on this test set, they are not candidates under the Box and Jenkins rule."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#sec-findings",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#sec-findings",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "8.1 Key findings",
+    "text": "8.1 Key findings\n\nDeterministic seasonality. The seasonal MA coefficient of -1 found in Project 1 is evidence of a fixed seasonal pattern. Replacing seasonal differencing with monthly dummies gave a regression model with white noise residuals (Ljung and Box p = 0.556).\nThe shock can be modelled parsimoniously. A decaying intervention with \\(\\hat\\delta\\) = 0.76 (half-life about 2.5 months), two pulses and a level shift capture the collapse and recovery with five parameters instead of 25 deleted months.\nForecast accuracy. The best model on the test set was Reg, and the best model that also passed the diagnostics was Reg. The regression model (RMSE 98.8) and the Project 1 SARIMA (RMSE 101.6) were close, because by 2024 the temporary part of the shock had died out.\nETS is a robust baseline. Without any special treatment of COVID, ETS reached an RMSE of 130.0, because its level adapts quickly.\nThe exchange rate had an estimated elasticity of 0.270 (p 0.175). Ex ante, it did not improve the forecasts.\nThe BSM interpolates the level through the COVID gap and its forecasts depend strongly on whether the slope is allowed to vary, but its innovations were not white noise, so it failed the Box and Jenkins diagnostic step."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#issues-and-limitations",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#issues-and-limitations",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "8.2 Issues and limitations",
+    "text": "8.2 Issues and limitations\n\nSingle test period. All comparisons rest on one 24 month test set. Project 1 showed that rolling-origin cross-validation gives a more reliable ranking; with more time I would repeat it here, although refitting the BSM and repeating the \\(\\delta\\) profile at every origin is slow.\nChoice of intervention shape. The decay, pulses and step were chosen by looking at the data, so there is a risk of over-fitting the shape of the shock to this particular series. The AICc profile guards against some of this, but the pulse months were picked by eye.\nConfounding with the exchange rate. The rand depreciated sharply in March and April 2020, at the same time as the lockdown. Adding the exchange rate after the intervention terms avoids attributing the COVID collapse to the rand, but it also means the exchange rate effect is estimated mainly from the non-COVID months.\nSame-month effect only. The exchange rate enters without a lag. Foreign visitors book weeks or months ahead, so a lagged effect would be more realistic and would also make ex ante forecasting easier for short horizons.\nBSM limitations in StructTS(). The irregular variance was estimated at zero and the innovations were autocorrelated. A more flexible state-space model (for example in dlm or KFAS, with an AR(1) component or explanatory variables in the state equation) would be the natural next step.\nProfile likelihood standard errors. Treating \\(\\hat\\delta\\) as known when computing the other standard errors understates their uncertainty."
+  },
+  {
+    "objectID": "projects/project-03/project-03-covid-intervention-tourism_v2.html#what-i-would-do-differently",
+    "href": "projects/project-03/project-03-covid-intervention-tourism_v2.html#what-i-would-do-differently",
+    "title": "Project 3: Modelling the COVID-19 Shock in South African Accommodation Demand",
+    "section": "8.3 What I would do differently",
+    "text": "8.3 What I would do differently\nI would estimate \\(\\delta\\) jointly with the other parameters by maximising the likelihood directly, use rolling-origin cross-validation for the final ranking, try a lagged exchange rate, and build the state-space model in dlm so that an AR(1) component and the intervention terms could be added to it, combining the strengths of the regression and state-space approaches in one model."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "",
+    "text": "NoteExecutive summary\n\n\n\nTitle: Forecasting South African accommodation demand with ARIMA and SARIMA models\nSection and topic: Section 1. Benchmarks, stationarity and differencing, ARMA, ARIMA and SARIMA models, the Box and Jenkins workflow, forecast evaluation.\nType of project: Implementation and model comparison on real-world data.\nQuestion: How much forecast accuracy is gained by moving from simple benchmark methods to ARMA, ARIMA and seasonal ARIMA models for monthly stay unit nights sold in South Africa, and how sensitive is that gain to the way the COVID-19 structural break is handled?\nData: Real-world, publicly available data from Statistics South Africa (Stats SA), Tourist Accommodation statistical release P6410, series B64100 (stay unit nights sold, total industry, thousands), monthly. Analysis window January 2015 to June 2026. Full source details are in Section 2.1.\nMethods: Four benchmarks (mean, naive, seasonal naive, drift); ARMA, ARIMA and SARIMA models on the log scale, including an automatically selected SARIMA and a SARIMA identified by hand from the ACF and PACF. Every model is fitted under two designs: (A) the COVID months are kept as observed, and (B) the COVID months (March 2020 to March 2022) are treated as missing values and handled by the Kalman filter inside the ARIMA likelihood. Models are compared on a 24 month hold-out test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding window rolling-origin cross-validation.\nKey findings: See Section 9.1. In short: with the COVID months left in the data, the seasonal ARIMA models are no better than the seasonal naive benchmark, because the collapse in April 2020 dominates the estimated variance and distorts the parameters. Treating the COVID window as missing gives a stable SARIMA(0,1,1)(0,1,1)12 “airline” model with well behaved residuals, and that model gives the most accurate forecasts on both the test set and in cross-validation.\nWhat I would do differently: Model the shock explicitly with intervention variables (planned for Project 3), and compare the expanding window with a sliding window that forgets the pre-COVID years.\nDetailed analysis: the sections below."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#sec-data-source",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#sec-data-source",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "2.1 Source and data statement",
+    "text": "2.1 Source and data statement\n\n\n\n\n\n\nTipData source at a glance\n\n\n\n\n\n\nPublisher\nStatistics South Africa (Stats SA)\n\n\nPublication\nTourist Accommodation, statistical release P6410 (monthly)\n\n\nWhere to get it\nStats SA website, P6410 time series data: https://www.statssa.gov.za/?page_id=1854&PPN=P6410\n\n\nFile used\ntourist_data.xlsx (Stats SA time series spreadsheet for P6410)\n\n\nSeries analysed\nB64100: Stay units nights sold, Total industry, actual figures, thousands\n\n\nComparison series\nB64101: Stay units nights sold, Hotels\n\n\nCoverage of file\nJanuary 2007 to June 2026\n\n\nDate downloaded\n[add the date you downloaded the file]\n\n\nLicence and privacy\nPublic, aggregated official statistics; no personal information, so POPIA does not apply\n\n\n\n\n\nReference: Statistics South Africa (2026) Tourist Accommodation (Statistical release P6410), time series data, January 2007 to June 2026. Pretoria: Statistics South Africa. Available at: https://www.statssa.gov.za/?page_id=1854&PPN=P6410 (Accessed: [date]).\nThe data come from the Statistics South Africa Tourist Accommodation release (P6410), downloaded as the time series spreadsheet from the Stats SA website. The file holds monthly series from January 2007 to June 2026 for stay units available, stay unit nights sold, occupancy rates and income, by type of accommodation. The data are aggregated industry totals, so there is no personal information and POPIA does not apply. The variable analysed is B64100: stay unit nights sold, total industry, actual (not seasonally adjusted) figures, in thousands. The hotels series (B64101) is used once in the exploratory analysis for comparison."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#reading-and-reshaping-the-data",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#reading-and-reshaping-the-data",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "2.2 Reading and reshaping the data",
+    "text": "2.2 Reading and reshaping the data\nThe Stats SA file has one row per series and one column per month, with month columns named MOmmyyyy. The code below reshapes it to long format and builds a tsibble.\n\n\nCode\nraw &lt;- read_excel(data_file)\n\ntourism_long &lt;- raw |&gt;\n  filter(H03 %in% c(\"B64100\", \"B64101\")) |&gt;\n  select(H03, H04, starts_with(\"MO\")) |&gt;\n  pivot_longer(starts_with(\"MO\"), names_to = \"code\", values_to = \"nights\") |&gt;\n  mutate(\n    Month    = yearmonth(make_date(as.integer(substr(code, 5, 8)),\n                                   as.integer(substr(code, 3, 4)), 1L)),\n    nights   = as.numeric(nights),\n    industry = if_else(H03 == \"B64100\", \"Total industry\", \"Hotels\")\n  ) |&gt;\n  filter(!is.na(nights)) |&gt;\n  select(Month, industry, nights)\n\n# Total industry, January 2015 onwards, with a COVID period label\nnights_sold &lt;- tourism_long |&gt;\n  filter(industry == \"Total industry\") |&gt;\n  select(Month, nights) |&gt;\n  as_tsibble(index = Month) |&gt;\n  filter_index(\"2015 Jan\" ~ .) |&gt;\n  mutate(period = case_when(\n    Month &lt;  covid_start ~ \"Pre-COVID\",\n    Month &lt;= covid_end   ~ \"COVID window\",\n    TRUE                 ~ \"Post-COVID\"\n  ))\n\npre_covid &lt;- nights_sold |&gt; filter(Month &lt; covid_start)\n\nhas_gaps(nights_sold)\n\n\n# A tibble: 1 × 1\n  .gaps\n  &lt;lgl&gt;\n1 FALSE\n\n\n\n\nCode\nnights_sold |&gt;\n  as_tibble() |&gt;\n  mutate(period = factor(period, levels = c(\"Pre-COVID\", \"COVID window\", \"Post-COVID\"))) |&gt;\n  group_by(period) |&gt;\n  summarise(\n    From    = format(min(Month)),\n    To      = format(max(Month)),\n    Months  = n(),\n    Mean    = mean(nights),\n    Minimum = min(nights),\n    Maximum = max(nights)\n  ) |&gt;\n  kable(digits = 0, format.args = list(big.mark = \",\"))\n\n\n\n\nTable 1: Overview of the analysis series (thousands of stay unit nights sold).\n\n\n\n\n\n\nperiod\nFrom\nTo\nMonths\nMean\nMinimum\nMaximum\n\n\n\n\nPre-COVID\n2015 Jan\n2020 Feb\n62\n2,268\n1,933\n2,581\n\n\nCOVID window\n2020 Mar\n2022 Mar\n25\n981\n57\n1,627\n\n\nPost-COVID\n2022 Apr\n2026 Jun\n51\n1,813\n1,466\n2,133\n\n\n\n\n\n\n\n\nThe series has no implicit gaps. The analysis starts in January 2015 so that the pre-COVID part of the series (62 months) reflects the recent structure of the industry rather than the period straight after the 2008 financial crisis and the 2010 World Cup."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#time-plot",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#time-plot",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "3.1 Time plot",
+    "text": "3.1 Time plot\n\n\nCode\nfull_df &lt;- tourism_long |&gt;\n  filter(industry == \"Total industry\") |&gt;\n  mutate(date = as.Date(Month))\n\nggplot(full_df, aes(date, nights)) +\n  annotate(\"rect\",\n           xmin = as.Date(covid_start), xmax = as.Date(covid_end),\n           ymin = -Inf, ymax = Inf, alpha = 0.15, fill = \"firebrick\") +\n  geom_vline(xintercept = as.Date(\"2015-01-01\"), linetype = \"dashed\", colour = \"grey40\") +\n  geom_line(colour = \"steelblue4\") +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(x = NULL, y = \"Nights sold (thousands)\")\n\n\n\n\n\n\n\n\nFigure 1: Monthly stay unit nights sold, total industry, January 2007 to June 2026. The shaded band is the COVID window (March 2020 to March 2022); the dashed line marks the start of the analysis window.\n\n\n\n\n\nFigure 1 shows three distinct regimes. Before 2020 the series moves around a fairly flat level of about 2,212 thousand nights a month (2019 average) with a strong and regular seasonal pattern. In April 2020 nights sold fell to 57 thousand, 2.7% of April 2019, and the recovery took roughly two years, with setbacks during the later waves. Over the most recent 12 months the average is 1,954 thousand, close to but still below the pre-COVID level. The series is clearly not stationary in mean over the full window, and the variability is much larger during the COVID window than anywhere else."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#seasonal-patterns",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#seasonal-patterns",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "3.2 Seasonal patterns",
+    "text": "3.2 Seasonal patterns\n\n\nCode\nnights_sold |&gt;\n  filter(period != \"COVID window\") |&gt;\n  fill_gaps() |&gt;\n  gg_season(nights, labels = \"right\") +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(y = \"Nights sold (thousands)\", x = NULL)\n\n\n\n\n\n\n\n\nFigure 2: Seasonal plot of nights sold by year (pre-COVID and post-COVID years only).\n\n\n\n\n\n\n\nCode\npre_covid |&gt;\n  gg_subseries(nights) +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(y = \"Nights sold (thousands)\", x = NULL)\n\n\n\n\n\n\n\n\nFigure 3: Seasonal subseries plot for the pre-COVID years (2015 to 2019). Blue lines are the monthly means.\n\n\n\n\n\nFigure 2 and Figure 3 show that the shape of the seasonal pattern is very stable from year to year: a dip in January, a local peak in March (Easter and school holidays), a low in May and June, then a steady rise to the highest values in October to December. The post-COVID years sit lower but follow the same shape. This matters for modelling: a stable seasonal shape suggests a seasonal difference (or a seasonal MA term close to the boundary), and it means that the seasonal naive method is a strong benchmark."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#stl-decomposition",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#stl-decomposition",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "3.3 STL decomposition",
+    "text": "3.3 STL decomposition\n\n\nCode\nnights_sold |&gt;\n  model(STL(log(nights) ~ trend(window = 13) + season(window = \"periodic\"),\n            robust = TRUE)) |&gt;\n  components() |&gt;\n  autoplot() +\n  labs(x = NULL)\n\n\n\n\n\n\n\n\nFigure 4: Robust STL decomposition of log nights sold, January 2015 to June 2026, with a fixed (periodic) seasonal component.\n\n\n\n\n\nThe log scale is used because the seasonal swings are roughly proportional to the level (they shrank when the level fell in 2020 and 2021), so a log transformation turns multiplicative seasonality into additive seasonality. On the pre-COVID data the strength of seasonality is 0.93 and the strength of trend is 0.64 (both measured from 0 to 1), so seasonality is the dominant feature. In Figure 4 the COVID collapse is absorbed almost entirely by the trend and the remainder, while the seasonal component is unaffected."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#hotels-compared-with-the-total-industry",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#hotels-compared-with-the-total-industry",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "3.4 Hotels compared with the total industry",
+    "text": "3.4 Hotels compared with the total industry\n\n\nCode\ntourism_long |&gt;\n  pivot_wider(names_from = industry, values_from = nights) |&gt;\n  filter(Month &gt;= yearmonth(\"2015 Jan\")) |&gt;\n  mutate(period = case_when(\n    Month &lt;  covid_start ~ \"Pre-COVID\",\n    Month &lt;= covid_end   ~ \"COVID window\",\n    TRUE                 ~ \"Post-COVID\"\n  )) |&gt;\n  ggplot(aes(`Total industry`, Hotels, colour = period)) +\n  geom_point(alpha = 0.8) +\n  scale_colour_manual(values = c(\"Pre-COVID\" = \"steelblue4\",\n                                 \"COVID window\" = \"firebrick\",\n                                 \"Post-COVID\" = \"darkorange\")) +\n  scale_x_continuous(labels = scales::label_comma()) +\n  scale_y_continuous(labels = scales::label_comma()) +\n  labs(x = \"Total industry (thousands)\", y = \"Hotels (thousands)\", colour = NULL)\n\n\n\n\n\n\n\n\nFigure 5: Hotel nights sold against total industry nights sold, coloured by period.\n\n\n\n\n\nHotels account for more than half of all nights sold and move almost one for one with the total, in every period (Figure 5). The COVID points simply slide down the same line rather than forming a separate cloud, so the shock hit all accommodation types together. This supports modelling the total industry series on its own."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#stationarity-and-identification-pre-covid-data",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#stationarity-and-identification-pre-covid-data",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "3.5 Stationarity and identification (pre-COVID data)",
+    "text": "3.5 Stationarity and identification (pre-COVID data)\nIdentification is done on the pre-COVID data only, because the COVID collapse would dominate any ACF calculated over the full series and hide the ordinary dependence structure.\n\n\nCode\nlx  &lt;- log(pre_covid$nights)\nd12 &lt;- diff(lx, lag = 12)\n\nkpss_lx  &lt;- unitroot_kpss(lx)\nkpss_d12 &lt;- unitroot_kpss(d12)\nnsd_lx   &lt;- unname(unitroot_nsdiffs(lx, .period = 12))\nnd_lx    &lt;- unname(unitroot_ndiffs(lx))\nnd_d12   &lt;- unname(unitroot_ndiffs(d12))\n\ntibble(\n  Series           = c(\"log nights\", \"seasonally differenced log nights\"),\n  `KPSS statistic` = c(kpss_lx[\"kpss_stat\"], kpss_d12[\"kpss_stat\"]),\n  `KPSS p-value`   = c(kpss_lx[\"kpss_pvalue\"], kpss_d12[\"kpss_pvalue\"]),\n  `First differences suggested (ndiffs)` = c(nd_lx, nd_d12),\n  `Seasonal differences suggested (nsdiffs)` = c(nsd_lx, NA)\n) |&gt;\n  kable(digits = 3)\n\n\n\n\nTable 2: Unit root tests on log nights sold, January 2015 to February 2020.\n\n\n\n\n\n\n\n\n\n\n\n\n\nSeries\nKPSS statistic\nKPSS p-value\nFirst differences suggested (ndiffs)\nSeasonal differences suggested (nsdiffs)\n\n\n\n\nlog nights\n0.248\n0.1\n0\n1\n\n\nseasonally differenced log nights\n0.326\n0.1\n0\nNA\n\n\n\n\n\n\n\n\nThe seasonal strength test suggests 1 seasonal difference for the log series. After the seasonal difference, Figure 6 still shows a slowly decaying ACF over the first several lags, the classic sign that the level is wandering, and the KPSS based ndiffs on the seasonally differenced series suggests 0 further first difference. The KPSS p-values are interpolated from a table that only runs from 0.01 to 0.1, so values at those limits should be read as “at most” or “at least”. With only 62 pre-COVID months these tests have limited power, so the decision is based on the plots as well as the tests.\n\n\nCode\npre_covid |&gt;\n  gg_tsdisplay(difference(log(nights), 12), plot_type = \"partial\", lag_max = 36)\n\n\n\n\n\n\n\n\nFigure 6: Seasonally differenced log nights sold (pre-COVID) with its ACF and PACF.\n\n\n\n\n\n\n\nCode\npre_covid |&gt;\n  gg_tsdisplay(difference(difference(log(nights), 12)), plot_type = \"partial\", lag_max = 36)\n\n\n\n\n\n\n\n\nFigure 7: Seasonally and first differenced log nights sold (pre-COVID) with its ACF and PACF.\n\n\n\n\n\nAfter both differences (Figure 7) the series looks stationary. The ACF has a clear negative spike at lag 1 (r1 = -0.39) and a negative spike near lag 12 (r12 = 0.11), while the PACF tails off over the first few lags. Spikes at lag 1 and lag 12 in the ACF with a decaying PACF point to an MA(1) term and a seasonal MA(1) term. Following the Box and Jenkins workflow, the hand identified model is\n\\[\n(1 - L)(1 - L^{12}) \\log y_t = (1 + \\theta_1 L)(1 + \\Theta_1 L^{12})\\,\\varepsilon_t, \\qquad \\varepsilon_t \\sim \\text{WN}(0, \\sigma^2),\n\\]\nthe SARIMA(0,1,1)(0,1,1)12 or “airline” model. No constant is included because with d + D = 2 a constant would imply a quadratic trend in the forecasts."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#the-box-and-jenkins-workflow",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#the-box-and-jenkins-workflow",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "4.1 The Box and Jenkins workflow",
+    "text": "4.1 The Box and Jenkins workflow\nThe modelling follows the Box and Jenkins workflow from the notes. Each step maps to a part of this report:\n\nPlot the data: the time plot, seasonal plots and STL decomposition in the exploratory analysis.\nDifference until approximately stationary: one seasonal and one first difference of log nights sold, chosen from the unit root tests and the ACF.\nRead the ACF and PACF to identify candidate orders: the lag 1 and lag 12 spikes point to the SARIMA(0,1,1)(0,1,1)12 model. The automatic search and the simpler ARMA and ARIMA models are included as alternative candidates.\nEstimate by maximum likelihood: ARIMA() in fable, under both treatments of the COVID months.\nDiagnose the residuals against the white noise standard: Ljung and Box tests, residual plots, ACF and histogram.\nForecast only if the diagnostics pass; otherwise return to step 3.\n\nFinally, a model that survives the loop must still beat the benchmarks on the test set before it earns its place. In this report, models that fail step 5 are still forecast on the test set, but only as reference points showing why the loop matters. They are not candidates for the final model."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#the-covid-problem",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#the-covid-problem",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "4.2 The COVID problem",
+    "text": "4.2 The COVID problem\nARIMA models assume that one set of parameters describes the whole series. The COVID window breaks this in two ways. First, the April 2020 collapse produces residuals many times larger than normal, which inflates \\(\\hat\\sigma^2\\) and therefore every prediction interval. Second, the estimation tries to explain the shock and the recovery with the same MA and AR terms that describe normal month-to-month behaviour, which pulls the coefficients away from their usual values. Simply deleting the COVID months is not possible, because an ARIMA model needs equally spaced observations.\nTwo designs are compared:\n\nDesign A (COVID kept): fit every model to the observed series, including the COVID months.\nDesign B (COVID as missing): replace March 2020 to March 2022 by NA. The ARIMA likelihood is computed with the Kalman filter, which skips missing observations and simply runs the prediction step through the gap, so the parameters are estimated only from the pre-COVID and post-COVID months while the time ordering is kept intact. The benchmark methods also cope with missing values (for example, seasonal naive uses the last observed value for each month).\n\nThis is a deliberately simple treatment of the break. A more structural treatment with intervention variables is left for Project 3."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#training-and-test-sets",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#training-and-test-sets",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "4.3 Training and test sets",
+    "text": "4.3 Training and test sets\n\n\nCode\ntrain_A &lt;- nights_sold |&gt; filter(Month &lt; test_start)\ntrain_B &lt;- train_A |&gt;\n  mutate(nights = if_else(period == \"COVID window\", NA_real_, nights))\ntest    &lt;- nights_sold |&gt; filter(Month &gt;= test_start)\n\ndesign_levels &lt;- c(\"A: COVID kept\", \"B: COVID as missing\")\n\ntrain &lt;- bind_rows(\n  as_tibble(train_A) |&gt; mutate(design = design_levels[1]),\n  as_tibble(train_B) |&gt; mutate(design = design_levels[2])\n) |&gt;\n  as_tsibble(index = Month, key = design)\n\n# Full observed series with the design key, used for accuracy() so that\n# both designs are scored against the same actual values and the MASE\n# uses the same scaling for both designs.\nnights_keyed &lt;- bind_rows(\n  as_tibble(nights_sold) |&gt; mutate(design = design_levels[1]),\n  as_tibble(nights_sold) |&gt; mutate(design = design_levels[2])\n) |&gt;\n  as_tsibble(index = Month, key = design)\n\n\nThe models are trained on January 2015 to June 2024 (114 months, of which 25 are set to missing in Design B) and tested on July 2024 to June 2026 (24 months). A two year test set covers two full seasonal cycles, so every calendar month is forecast twice, at short and long horizons."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#candidate-models",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#candidate-models",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "4.4 Candidate models",
+    "text": "4.4 Candidate models\n\n\n\nTable 3: Candidate models. The ARMA, ARIMA and SARIMA models form a ladder in which each step adds one feature of the data.\n\n\n\n\n\n\n\n\n\n\nModel\nSpecification\nRole\n\n\n\n\nMean\n\\(\\hat y_{T+h} = \\bar y\\)\nBenchmark\n\n\nNaive\n\\(\\hat y_{T+h} = y_T\\)\nBenchmark\n\n\nSeasonal naive\n\\(\\hat y_{T+h} = y_{T+h-12k}\\)\nBenchmark\n\n\nDrift\nNaive plus average historical change\nBenchmark\n\n\nARMA\nARMA(p, q) with constant on \\(\\log y_t\\), orders by AICc, no differencing\nIgnores trend and seasonality\n\n\nARIMA\nARIMA(p, 1, q) on \\(\\log y_t\\), orders by AICc\nHandles the level, ignores seasonality\n\n\nSARIMA (auto)\nARIMA(p, 1, q)(P, 1, Q)12 on \\(\\log y_t\\), orders by AICc\nAutomatic seasonal model\n\n\nSARIMA (0,1,1)(0,1,1)\nHand identified airline model on \\(\\log y_t\\)\nBox and Jenkins model\n\n\n\n\n\n\nThe differencing orders are fixed from the identification step rather than chosen by unit root tests inside ARIMA(), so that both designs use the same differencing and the comparison isolates the effect of the COVID treatment. Point forecasts from the log scale models are back-transformed with the bias adjustment that fable applies by default, so they are forecasts of the mean rather than the median."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#selected-orders-and-information-criteria",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#selected-orders-and-information-criteria",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "5.1 Selected orders and information criteria",
+    "text": "5.1 Selected orders and information criteria\n\n\nCode\norders &lt;- fit |&gt;\n  select(design, all_of(arima_models)) |&gt;\n  pivot_longer(-design, names_to = \".model\", values_to = \"spec\") |&gt;\n  as_tibble() |&gt;\n  mutate(spec = vapply(spec, function(m) fabletools::model_sum(m$fit), character(1))) |&gt;\n  select(design, .model, spec)\n\nic &lt;- glance(fit) |&gt;\n  filter(.model %in% arima_models) |&gt;\n  select(design, .model, sigma2, AICc)\n\norder_tbl &lt;- orders |&gt; left_join(ic, by = c(\"design\", \".model\"))\n\norder_tbl |&gt;\n  mutate(.model = model_labels[.model]) |&gt;\n  rename(Design = design, Model = .model, Specification = spec,\n         `sigma^2 (log scale)` = sigma2) |&gt;\n  kable(digits = c(0, 0, 0, 4, 1))\nget_spec  &lt;- function(d, m) order_tbl$spec[order_tbl$design == d & order_tbl$.model == m]\nget_sig2  &lt;- function(d, m) order_tbl$sigma2[order_tbl$design == d & order_tbl$.model == m]\nget_aicc  &lt;- function(d, m) order_tbl$AICc[order_tbl$design == d & order_tbl$.model == m]\n\n\n\n\nTable 4: Selected ARIMA orders, residual variance (log scale) and AICc for each design. AICc values are only comparable within a design, since the two designs are fitted to different data.\n\n\n\n\n\n\n\n\n\n\n\n\n\nDesign\nModel\nSpecification\nsigma^2 (log scale)\nAICc\n\n\n\n\nA: COVID kept\nARMA\nARIMA(1,0,1) w/ mean\n0.1048\n73.0\n\n\nA: COVID kept\nARIMA\nARIMA(1,1,2)\n0.1071\n74.7\n\n\nA: COVID kept\nSARIMA (auto)\nARIMA(0,1,3)(2,1,0)[12]\n0.1567\n112.3\n\n\nA: COVID kept\nSARIMA (0,1,1)(0,1,1)\nARIMA(0,1,1)(0,1,1)[12]\n0.1073\n92.4\n\n\nB: COVID as missing\nARMA\nARIMA(3,0,1) w/ mean\n0.0038\n-207.3\n\n\nB: COVID as missing\nARIMA\nARIMA(0,1,4)\n0.0039\n-207.0\n\n\nB: COVID as missing\nSARIMA (auto)\nARIMA(0,1,1)(0,1,2)[12]\n0.0007\n-293.3\n\n\nB: COVID as missing\nSARIMA (0,1,1)(0,1,1)\nARIMA(0,1,1)(0,1,1)[12]\n0.0008\n-288.0\n\n\n\n\n\n\n\n\n\n\nCode\ncoef_tbl &lt;- tidy(fit) |&gt;\n  filter(.model == \"SARIMA_BJ\") |&gt;\n  select(design, term, estimate, std.error)\n\nkable(coef_tbl, digits = 3, col.names = c(\"Design\", \"Term\", \"Estimate\", \"Std. error\"))\nsma_A &lt;- coef_tbl |&gt; filter(design == design_levels[1], term == \"sma1\") |&gt; pull(estimate)\nsma_B &lt;- coef_tbl |&gt; filter(design == design_levels[2], term == \"sma1\") |&gt; pull(estimate)\nma_A  &lt;- coef_tbl |&gt; filter(design == design_levels[1], term == \"ma1\")  |&gt; pull(estimate)\nma_B  &lt;- coef_tbl |&gt; filter(design == design_levels[2], term == \"ma1\")  |&gt; pull(estimate)\n\n\n\n\nTable 5: Estimated coefficients of the hand identified SARIMA(0,1,1)(0,1,1) model under both designs.\n\n\n\n\n\n\nDesign\nTerm\nEstimate\nStd. error\n\n\n\n\nA: COVID kept\nma1\n0.280\n0.110\n\n\nA: COVID kept\nsma1\n-1.000\n0.114\n\n\nB: COVID as missing\nma1\n-0.332\n0.103\n\n\nB: COVID as missing\nsma1\n-0.499\n0.148\n\n\n\n\n\n\n\n\nThe two designs give very different models from the same data. Under Design A the residual variance of the airline model is 0.1073 on the log scale, against 0.0008 under Design B, about 134 times larger. The coefficients move too (Table 5). Under Design A the seasonal MA coefficient is -1.000. A value at or near -1 means the seasonal MA factor \\((1 + \\Theta_1 L^{12})\\) almost cancels the seasonal difference \\((1 - L^{12})\\): the model is close to non-invertible and is effectively saying that the seasonal pattern is fixed and should not have been differenced. It also sits on the boundary of the parameter space, where the usual standard errors are unreliable. Under Design B the estimate is -0.499 and the non-seasonal MA coefficient is -0.332 (against 0.280 under Design A). The Design B values are inside the invertible region and agree in sign with the negative lag 1 and lag 12 autocorrelations found in the identification step.\nUnder Design B the automatic search chose ARIMA(0,1,1)(0,1,2)[12] with AICc -293.3, compared with -288.0 for the hand identified model. Whether the extra flexibility is worth it is answered by the test set below, not by the AICc."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#residual-diagnostics",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#residual-diagnostics",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "5.2 Residual diagnostics",
+    "text": "5.2 Residual diagnostics\n\n\nCode\naug &lt;- augment(fit) |&gt; filter(.model %in% arima_models)\n\ndof_tbl &lt;- tidy(fit) |&gt;\n  filter(.model %in% arima_models, term != \"constant\") |&gt;\n  count(design, .model, name = \"dof\")\n\nlb_tbl &lt;- aug |&gt;\n  as_tibble() |&gt;\n  left_join(dof_tbl, by = c(\"design\", \".model\")) |&gt;\n  group_by(design, .model) |&gt;\n  summarise(\n    dof     = first(dof),\n    lb_stat = Box.test(.innov, lag = 24, type = \"Ljung-Box\", fitdf = first(dof))$statistic,\n    lb_p    = Box.test(.innov, lag = 24, type = \"Ljung-Box\", fitdf = first(dof))$p.value,\n    max_abs = max(abs(.innov), na.rm = TRUE) / sd(.innov, na.rm = TRUE),\n    .groups = \"drop\"\n  )\n\n\n\n\nCode\nlb_tbl &lt;- lb_tbl |&gt;\n  mutate(passes_lb = if_else(lb_p &gt; 0.05, \"Yes\", \"No\"))\n\nlb_tbl |&gt;\n  mutate(.model = model_labels[.model]) |&gt;\n  kable(digits = c(0, 0, 0, 2, 3, 1, 0),\n        col.names = c(\"Design\", \"Model\", \"ARMA coefs\", \"Q*\", \"p-value\",\n                      \"Max |residual| / sd\", \"Passes white noise test\"))\n\n\n\n\nTable 6: Ljung and Box tests on the innovation residuals (24 lags, degrees of freedom reduced by the number of ARMA coefficients), the largest absolute residual in standard deviation units, and whether the residuals pass the white noise test at the 5% level.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nDesign\nModel\nARMA coefs\nQ*\np-value\nMax |residual| / sd\nPasses white noise test\n\n\n\n\nA: COVID kept\nARIMA\n3\n12.72\n0.918\n9.9\nYes\n\n\nA: COVID kept\nARMA\n2\n12.54\n0.945\n9.8\nYes\n\n\nA: COVID kept\nSARIMA (0,1,1)(0,1,1)\n2\n13.69\n0.912\n8.9\nYes\n\n\nA: COVID kept\nSARIMA (auto)\n5\n13.92\n0.788\n8.3\nYes\n\n\nB: COVID as missing\nARIMA\n4\n117.73\n0.000\n2.9\nNo\n\n\nB: COVID as missing\nARMA\n4\n113.93\n0.000\n2.7\nNo\n\n\nB: COVID as missing\nSARIMA (0,1,1)(0,1,1)\n2\n29.19\n0.140\n2.9\nYes\n\n\nB: COVID as missing\nSARIMA (auto)\n3\n32.63\n0.051\n2.8\nYes\n\n\n\n\n\n\n\n\n\n\nCode\naug |&gt;\n  filter(.model == \"SARIMA_BJ\") |&gt;\n  ggplot(aes(as.Date(Month), .innov)) +\n  geom_hline(yintercept = 0, colour = \"grey50\") +\n  geom_line(colour = \"steelblue4\") +\n  facet_wrap(vars(design), ncol = 1, scales = \"free_y\") +\n  labs(x = NULL, y = \"Innovation residual (log scale)\")\n\n\n\n\n\n\n\n\nFigure 8: Innovation residuals of the SARIMA(0,1,1)(0,1,1) model under both designs. Under Design B the COVID window is missing, so there are no residuals for those months.\n\n\n\n\n\n\n\nCode\nresid_B &lt;- aug |&gt;\n  filter(.model == \"SARIMA_BJ\", design == design_levels[2])\n\np_acf &lt;- resid_B |&gt;\n  ACF(.innov, lag_max = 36, na.action = na.pass) |&gt;\n  autoplot() + labs(title = \"ACF\")\n\np_hist &lt;- resid_B |&gt;\n  ggplot(aes(.innov)) +\n  geom_histogram(bins = 20, fill = \"steelblue4\", colour = \"white\") +\n  labs(x = \"Innovation residual\", y = \"Count\", title = \"Histogram\")\n\nif (requireNamespace(\"patchwork\", quietly = TRUE)) {\n  patchwork::wrap_plots(p_acf, p_hist, nrow = 1)\n} else {\n  print(p_acf); print(p_hist)\n}\n\n\n\n\n\n\n\n\nFigure 9: ACF and histogram of the Design B airline model residuals. The ACF is computed with missing values passed through, so the pre-COVID and post-COVID residuals are both used.\n\n\n\n\n\nUnder Design A the residual plot is dominated by a handful of enormous residuals in 2020 (the largest is 8.9 standard deviations from zero), so the normality assumption behind the prediction intervals fails badly, even though the Ljung and Box test (p = 0.912) does not detect autocorrelation. This is a useful reminder that a white noise test only checks the correlation structure: residuals can be uncorrelated and still be far from the identically distributed errors the model assumes. Under Design B the airline residuals look like white noise (p = 0.140), the ACF has no important spikes, and the histogram is roughly symmetric. The ARMA model without differencing leaves strong autocorrelation in its residuals under Design B (p = 0.000), which is expected: it has no way to represent the seasonal pattern.\nApplying step 6 of the loop. Under Design B the models that pass the white noise test are: SARIMA (0,1,1)(0,1,1), SARIMA (auto). The models that fail are: ARIMA, ARMA. For a model that fails, the workflow says to return to step 3 rather than forecast. For the ARMA and non-seasonal ARIMA models, returning to step 3 means recognising from their residual ACF that the seasonal autocorrelation has not been modelled, which leads straight to the seasonal models. The automatically selected SARIMA passes as well, so it remains a candidate alongside the hand identified model. Under Design A every model technically passes the Ljung and Box test, but the airline model fails step 5 in a different way: its residuals are far from identically distributed (the COVID residuals are extreme outliers) and its seasonal MA coefficient sits on the invertibility boundary. Returning to step 3 under Design A would not fix this, because the problem is the data, not the orders. The fix is to change how the break is handled, which is what Design B does.\nCandidates for the final model. Only the models that pass the loop under Design B are candidates for forecasting. The test set comparison below then checks the last condition from the notes: whether these candidates beat the benchmarks."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#sec-findings",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#sec-findings",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "9.1 Key findings",
+    "text": "9.1 Key findings\n\nSeasonality is the dominant and most stable feature of the series. The seasonal shape barely changed even through the COVID years, which is why the seasonal naive method is hard to beat and why the non-seasonal ARMA and ARIMA models perform poorly.\nHow the break is handled matters more than which ARIMA model is chosen. With the COVID months kept (Design A), the seasonal ARIMA models were worse than the seasonal naive benchmark on the test set and much worse in cross-validation. The cause is a residual variance inflated by about 134 times, a seasonal MA coefficient pushed to the invertibility boundary (-1.000), and point forecasts pushed upwards by the bias adjustment.\nWith the COVID window treated as missing (Design B), the Box and Jenkins airline model was the only model to pass the full loop and beat the benchmarks: it passed the diagnostic step and performed best, with a test RMSE of 101.6 thousand nights (MAPE 4.25%), white noise residuals and well calibrated prediction intervals. It also had the lowest cross-validated error at every horizon from 1 to 12 months.\nA lower AICc did not guarantee better forecasts. The automatically selected seasonal model had a lower AICc than the hand identified model but higher test RMSE, so the simpler model identified from the ACF and PACF was preferred."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#issues-and-limitations",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#issues-and-limitations",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "9.2 Issues and limitations",
+    "text": "9.2 Issues and limitations\n\nChoice of COVID window. The window (March 2020 to March 2022) follows the national state of disaster. The data suggest the recovery continued after April 2022, so some post-COVID months still carry the recovery trend into the training data. A sensitivity check with a window ending in December 2022 would test how much this matters.\nTreating the shock as missing discards information. Setting 25 months to missing throws away real data, and the approach would not work for a shock at the very end of a series. An intervention model (a level shift or a ramp with a gradual recovery) would use those months instead of ignoring them; this is the starting point for Project 3.\nLevel shift after COVID. Demand has recovered to slightly below its pre-COVID level. The differenced models adapt to this because they forecast from the most recent level, but the mean benchmark only did reasonably well because the recovered level happens to sit near the long-run average, which would not hold in general.\nMASE scaling. The MASE denominator uses an in-sample period that contains the COVID collapse, so the MASE values are deflated. RMSE and MAPE were used as the main measures.\nBias adjustment. Back-transforming with the mean (bias adjusted) forecast is the right choice when the forecasts are added up, for example into annual totals, but it makes the forecasts very sensitive to an inflated \\(\\hat\\sigma^2\\). This was a large part of the failure of Design A and is easy to miss.\nShort post-COVID history. Only about two years of post-COVID data are in the training set, and the test set is two years long, so the conclusions rest on a fairly short stretch of “normal” data."
+  },
+  {
+    "objectID": "projects/project-01/project-01-sarima-tourism_v4.html#what-i-would-do-differently",
+    "href": "projects/project-01/project-01-sarima-tourism_v4.html#what-i-would-do-differently",
+    "title": "Project 1: Forecasting South African Accommodation Demand with ARIMA and SARIMA Models",
+    "section": "9.3 What I would do differently",
+    "text": "9.3 What I would do differently\nI would model the COVID shock directly with intervention variables in a regression with ARIMA errors, so that the 25 months are used rather than discarded, and compare a sliding window with the expanding window, since a sliding window is the natural choice when structural breaks are plausible. Project 3 takes up both ideas on the same series and the same test set, which allows a direct comparison with the SARIMA results from this project."
+  },
+  {
+    "objectID": "journal/index.html",
+    "href": "journal/index.html",
+    "title": "Journal",
+    "section": "",
+    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 03\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 04\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
+  },
+  {
+    "objectID": "journal/entries/week-11.html",
+    "href": "journal/entries/week-11.html",
+    "title": "Week 11",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-11.html#what-i-did",
+    "href": "journal/entries/week-11.html#what-i-did",
+    "title": "Week 11",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-11.html#what-i-learned",
+    "href": "journal/entries/week-11.html#what-i-learned",
+    "title": "Week 11",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-11.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-11.html#difficulties-or-open-questions",
+    "title": "Week 11",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-11.html#what-to-do-next",
+    "href": "journal/entries/week-11.html#what-to-do-next",
+    "title": "Week 11",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-09.html",
+    "href": "journal/entries/week-09.html",
+    "title": "Week 09",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-09.html#what-i-did",
+    "href": "journal/entries/week-09.html#what-i-did",
+    "title": "Week 09",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-09.html#what-i-learned",
+    "href": "journal/entries/week-09.html#what-i-learned",
+    "title": "Week 09",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-09.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-09.html#difficulties-or-open-questions",
+    "title": "Week 09",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-09.html#what-to-do-next",
+    "href": "journal/entries/week-09.html#what-to-do-next",
+    "title": "Week 09",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-07.html",
+    "href": "journal/entries/week-07.html",
+    "title": "Week 07",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-07.html#what-i-did",
+    "href": "journal/entries/week-07.html#what-i-did",
+    "title": "Week 07",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-07.html#what-i-learned",
+    "href": "journal/entries/week-07.html#what-i-learned",
+    "title": "Week 07",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-07.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-07.html#difficulties-or-open-questions",
+    "title": "Week 07",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-07.html#what-to-do-next",
+    "href": "journal/entries/week-07.html#what-to-do-next",
+    "title": "Week 07",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-05.html",
+    "href": "journal/entries/week-05.html",
+    "title": "Week 05",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-05.html#what-i-did",
+    "href": "journal/entries/week-05.html#what-i-did",
+    "title": "Week 05",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-05.html#what-i-learned",
+    "href": "journal/entries/week-05.html#what-i-learned",
+    "title": "Week 05",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-05.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-05.html#difficulties-or-open-questions",
+    "title": "Week 05",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-05.html#what-to-do-next",
+    "href": "journal/entries/week-05.html#what-to-do-next",
+    "title": "Week 05",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-03.html",
+    "href": "journal/entries/week-03.html",
+    "title": "Week 03",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-03.html#what-i-did",
+    "href": "journal/entries/week-03.html#what-i-did",
+    "title": "Week 03",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-03.html#what-i-learned",
+    "href": "journal/entries/week-03.html#what-i-learned",
+    "title": "Week 03",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-03.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-03.html#difficulties-or-open-questions",
+    "title": "Week 03",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-03.html#what-to-do-next",
+    "href": "journal/entries/week-03.html#what-to-do-next",
+    "title": "Week 03",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-01.html",
+    "href": "journal/entries/week-01.html",
+    "title": "Week 01",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-01.html#what-i-did",
+    "href": "journal/entries/week-01.html#what-i-did",
+    "title": "Week 01",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-01.html#what-i-learned",
+    "href": "journal/entries/week-01.html#what-i-learned",
+    "title": "Week 01",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-01.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-01.html#difficulties-or-open-questions",
+    "title": "Week 01",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-01.html#what-to-do-next",
+    "href": "journal/entries/week-01.html#what-to-do-next",
+    "title": "Week 01",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "appendix/code-and-data.html",
+    "href": "appendix/code-and-data.html",
+    "title": "Code and Data",
+    "section": "",
+    "text": "File\nSource\nUsed in\n\n\n\n\ndata/tourist_data.xlsx\nStatistics South Africa, Tourist Accommodation (P6410), https://www.statssa.gov.za/?page_id=1854&PPN=P6410\nProjects 1 and 3\n\n\ndata/usdzar_fred.csv\nFRED series DEXSFUS (daily rand per US dollar), https://fred.stlouisfed.org/series/DEXSFUS\nProject 2\n\n\ndata/usdzar_monthly_fred.csv\nFRED series EXSFUS (monthly average rand per US dollar), https://fred.stlouisfed.org/series/EXSFUS\nProject 3\n\n\n\nThe two FRED files are downloaded automatically the first time the relevant project is rendered and saved in the data/ folder. All data are public, aggregated statistics with no personal information, so POPIA does not apply."
+  },
+  {
+    "objectID": "appendix/code-and-data.html#data",
+    "href": "appendix/code-and-data.html#data",
+    "title": "Code and Data",
+    "section": "",
+    "text": "File\nSource\nUsed in\n\n\n\n\ndata/tourist_data.xlsx\nStatistics South Africa, Tourist Accommodation (P6410), https://www.statssa.gov.za/?page_id=1854&PPN=P6410\nProjects 1 and 3\n\n\ndata/usdzar_fred.csv\nFRED series DEXSFUS (daily rand per US dollar), https://fred.stlouisfed.org/series/DEXSFUS\nProject 2\n\n\ndata/usdzar_monthly_fred.csv\nFRED series EXSFUS (monthly average rand per US dollar), https://fred.stlouisfed.org/series/EXSFUS\nProject 3\n\n\n\nThe two FRED files are downloaded automatically the first time the relevant project is rendered and saved in the data/ folder. All data are public, aggregated statistics with no personal information, so POPIA does not apply."
+  },
+  {
+    "objectID": "appendix/code-and-data.html#reproducing-the-portfolio",
+    "href": "appendix/code-and-data.html#reproducing-the-portfolio",
+    "title": "Code and Data",
+    "section": "Reproducing the portfolio",
+    "text": "Reproducing the portfolio\n\nInstall R, Quarto (version 1.4 or later) and the packages listed below.\nOpen the portfolio folder (or portfolio.Rproj in RStudio).\nRun quarto render in the terminal, or use Build &gt; Render Website in RStudio.\n\nComputational results are stored in the _freeze folder, so pages are only re-run when their source changes."
+  },
+  {
+    "objectID": "appendix/code-and-data.html#r-packages",
+    "href": "appendix/code-and-data.html#r-packages",
+    "title": "Code and Data",
+    "section": "R packages",
+    "text": "R packages\n\n\nCode\ninstall.packages(c(\"fpp3\", \"readxl\", \"knitr\", \"rmarkdown\", \"patchwork\", \"rugarch\"))"
+  },
+  {
+    "objectID": "appendix/code-and-data.html#code",
+    "href": "appendix/code-and-data.html#code",
+    "title": "Code and Data",
+    "section": "Code",
+    "text": "Code\nThe full code for each project is in the project pages (use the Code button at the top of each page to show or download it):\n\nProject 1\nProject 2\nProject 3"
+  },
+  {
+    "objectID": "ai-use-log.html",
+    "href": "ai-use-log.html",
+    "title": "AI Use Log",
+    "section": "",
+    "text": "A running log of substantive uses of AI that influenced my work, as required by the portfolio guidelines. I remain responsible for checking and understanding everything AI helped me produce.\n\n\n\n\n\n\n\n\n\n\nEntry\nTool used\nWhat I asked it to help with\nLink to prompt or conversation\nWhat I checked or changed myself\n\n\n\n\n1\nClaude\nPlanning the four projects from the course material and guidelines\n[link]\n\n\n\n2\nClaude\nDrafting the Project 1 Quarto analysis\n[link]\n\n\n\n3\nClaude\nDrafting the Project 2 Quarto analysis and fixing a numerical error\n[link]\n\n\n\n4\nClaude\nDrafting the Project 3 Quarto analysis\n[link]\n\n\n\n5\nClaude\nBuilding the structure of this Quarto website\n[link]\n\n\n\n\nAdd the date of each use in the first column if required.\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Time Series Analysis Portfolio",
+    "section": "",
+    "text": "Name: Eden Lipshitz\nStudent number: LPSEDE001\nThis portfolio documents what I learned in the Honours Time Series Analysis module: four substantial projects, worked tutorials for every teaching session, and a journal of my progress. Select a section below to begin."
+  },
+  {
+    "objectID": "index.html#also-in-this-portfolio",
+    "href": "index.html#also-in-this-portfolio",
+    "title": "Time Series Analysis Portfolio",
+    "section": "Also in this portfolio",
+    "text": "Also in this portfolio\n\nReflective commentary: learning achievements, methodological challenges, ethics and reproducibility, and future development.\nAI use log: a record of substantive AI use, with what I checked or changed myself.\nCode and data: data sources, access instructions and how to reproduce every result."
+  },
+  {
+    "objectID": "journal/entries/week-02.html",
+    "href": "journal/entries/week-02.html",
+    "title": "Week 02",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-02.html#what-i-did",
+    "href": "journal/entries/week-02.html#what-i-did",
+    "title": "Week 02",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-02.html#what-i-learned",
+    "href": "journal/entries/week-02.html#what-i-learned",
+    "title": "Week 02",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-02.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-02.html#difficulties-or-open-questions",
+    "title": "Week 02",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-02.html#what-to-do-next",
+    "href": "journal/entries/week-02.html#what-to-do-next",
+    "title": "Week 02",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-04.html",
+    "href": "journal/entries/week-04.html",
+    "title": "Week 04",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-04.html#what-i-did",
+    "href": "journal/entries/week-04.html#what-i-did",
+    "title": "Week 04",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-04.html#what-i-learned",
+    "href": "journal/entries/week-04.html#what-i-learned",
+    "title": "Week 04",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-04.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-04.html#difficulties-or-open-questions",
+    "title": "Week 04",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-04.html#what-to-do-next",
+    "href": "journal/entries/week-04.html#what-to-do-next",
+    "title": "Week 04",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-06.html",
+    "href": "journal/entries/week-06.html",
+    "title": "Week 06",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-06.html#what-i-did",
+    "href": "journal/entries/week-06.html#what-i-did",
+    "title": "Week 06",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-06.html#what-i-learned",
+    "href": "journal/entries/week-06.html#what-i-learned",
+    "title": "Week 06",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-06.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-06.html#difficulties-or-open-questions",
+    "title": "Week 06",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-06.html#what-to-do-next",
+    "href": "journal/entries/week-06.html#what-to-do-next",
+    "title": "Week 06",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-08.html",
+    "href": "journal/entries/week-08.html",
+    "title": "Week 08",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-08.html#what-i-did",
+    "href": "journal/entries/week-08.html#what-i-did",
+    "title": "Week 08",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-08.html#what-i-learned",
+    "href": "journal/entries/week-08.html#what-i-learned",
+    "title": "Week 08",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-08.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-08.html#difficulties-or-open-questions",
+    "title": "Week 08",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-08.html#what-to-do-next",
+    "href": "journal/entries/week-08.html#what-to-do-next",
+    "title": "Week 08",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-10.html",
+    "href": "journal/entries/week-10.html",
+    "title": "Week 10",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-10.html#what-i-did",
+    "href": "journal/entries/week-10.html#what-i-did",
+    "title": "Week 10",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-10.html#what-i-learned",
+    "href": "journal/entries/week-10.html#what-i-learned",
+    "title": "Week 10",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-10.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-10.html#difficulties-or-open-questions",
+    "title": "Week 10",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-10.html#what-to-do-next",
+    "href": "journal/entries/week-10.html#what-to-do-next",
+    "title": "Week 10",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "journal/entries/week-12.html",
+    "href": "journal/entries/week-12.html",
+    "title": "Week 12",
+    "section": "",
+    "text": "Date: [date of entry]\nSession or topic covered:"
+  },
+  {
+    "objectID": "journal/entries/week-12.html#what-i-did",
+    "href": "journal/entries/week-12.html#what-i-did",
+    "title": "Week 12",
+    "section": "What I did",
+    "text": "What I did"
+  },
+  {
+    "objectID": "journal/entries/week-12.html#what-i-learned",
+    "href": "journal/entries/week-12.html#what-i-learned",
+    "title": "Week 12",
+    "section": "What I learned",
+    "text": "What I learned"
+  },
+  {
+    "objectID": "journal/entries/week-12.html#difficulties-or-open-questions",
+    "href": "journal/entries/week-12.html#difficulties-or-open-questions",
+    "title": "Week 12",
+    "section": "Difficulties or open questions",
+    "text": "Difficulties or open questions"
+  },
+  {
+    "objectID": "journal/entries/week-12.html#what-to-do-next",
+    "href": "journal/entries/week-12.html#what-to-do-next",
+    "title": "Week 12",
+    "section": "What to do next",
+    "text": "What to do next\nLinks: [related tutorials and projects]"
+  },
+  {
+    "objectID": "projects/index.html",
+    "href": "projects/index.html",
+    "title": "Projects",
+    "section": "",
+    "text": "Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1 and 3 use the same series and the same test set, so their results can be compared directly. Select a project to open its executive summary and detailed analysis.\n\n\n\nSection 1\n\nProject 1: Forecasting accommodation demand with ARIMA and SARIMA\nBenchmarks, ARMA, ARIMA and SARIMA models for Stats SA monthly nights sold, and how the treatment of the COVID-19 break changes the results.\nImplementation and model comparison, real-world data\n\n\n\n\n\nSection 1\n\nProject 2: Volatility of the rand with ARCH and GARCH\nStylised facts of USD/ZAR returns, ARCH and GARCH models, my own GARCH(1,1) likelihood code, and a rolling Value-at-Risk backtest.\nOwn implementation, simulation check and model comparison, real-world data\n\n\n\n\n\nSection 2\n\nProject 3: Modelling the COVID-19 shock\nETS, regression with ARIMA errors and intervention terms, and a basic structural model fitted with the Kalman filter, compared with Project 1 on the same test set.\nModel comparison, real-world data\n\n\n\n\n\nSection 2\n\nProject 4: Building a Kalman filter\nMy own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series. In progress.\nImplementation and simulation study\n\n\n\n\n\n\n\n\n\n Back to top"
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html",
+    "href": "projects/project-02/project-02-garch-zar_v4.html",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "",
+    "text": "NoteExecutive summary\n\n\n\nTitle: Volatility of the South African rand with ARCH and GARCH models\nSection and topic: Section 1. Conditional variance models: stylised facts of returns, testing for ARCH effects, ARCH, GARCH and asymmetric GARCH models, volatility forecasting.\nType of project: Implementation (own maximum likelihood code for GARCH(1,1), checked against rugarch and by a small simulation study) and model comparison on real-world data. The Value-at-Risk backtest is an idea not covered in the lectures.\nQuestion: Do daily USD/ZAR exchange rate returns show volatility clustering, and which conditional variance model gives the most reliable one-day-ahead risk forecasts?\nData: Real-world, publicly available data: the South African rand to US dollar spot exchange rate (FRED series DEXSFUS, Board of Governors of the Federal Reserve System), daily, January 2010 to September 2026. Full source details are in Section 2.1.\nMethods: Exploratory analysis of the stylised facts; Ljung and Box and ARCH LM tests; the Box and Jenkins loop applied to the mean and the variance equation; ARCH(1), GARCH(1,1) with normal and Student t errors, and GJR-GARCH(1,1) with Student t errors; my own implementation of the GARCH(1,1) likelihood; a rolling out-of-sample evaluation of 1000 one-day-ahead forecasts, scored by Value-at-Risk backtests (Kupiec and Christoffersen tests), quantile loss and QLIKE, against historical simulation and constant variance benchmarks.\nKey findings: The returns show all the stylised facts: almost no autocorrelation in the returns themselves, strong autocorrelation in squared returns, and fat tails. ARCH(1) fails the residual diagnostics, while the GARCH(1,1) models capture the clustering with a very persistent variance. Student t errors fit far better than normal errors. The detailed results of the backtest, including which models give correctly calibrated VaR, are in Section 9.1.\nWhat I would do differently: Use a longer test period so that the 1% VaR tests have more power, and compare GARCH with a regime-switching model of volatility (Project 4).\nDetailed analysis: the sections below."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#sec-data-source",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#sec-data-source",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "2.1 Source and data statement",
+    "text": "2.1 Source and data statement\n\n\n\n\n\n\nTipData source at a glance\n\n\n\n\n\n\nPublisher\nBoard of Governors of the Federal Reserve System (US), via FRED, Federal Reserve Bank of St. Louis\n\n\nSeries\nDEXSFUS: South African Rand to US Dollar Spot Exchange Rate (rand per one US dollar), noon buying rates in New York\n\n\nFrequency\nDaily (business days), not seasonally adjusted\n\n\nWhere to get it\nhttps://fred.stlouisfed.org/series/DEXSFUS\n\n\nFile used\nusdzar_fred.csv, downloaded by the code below from the FRED CSV link\n\n\nPeriod analysed\n1 January 2010 to 30 September 2026\n\n\nDate downloaded\n[add the date you first rendered this file]\n\n\nLicence and privacy\nPublic domain official statistics; no personal information, so POPIA does not apply\n\n\n\n\n\nReference: Board of Governors of the Federal Reserve System (US) (2026) South African Rand to U.S. Dollar Spot Exchange Rate [DEXSFUS]. Retrieved from FRED, Federal Reserve Bank of St. Louis. Available at: https://fred.stlouisfed.org/series/DEXSFUS (Accessed: [date])."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#reading-the-data-and-computing-returns",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#reading-the-data-and-computing-returns",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "2.2 Reading the data and computing returns",
+    "text": "2.2 Reading the data and computing returns\nThe code downloads the series the first time the document is rendered and saves it as usdzar_fred.csv. If the download fails (for example without an internet connection), download the CSV manually from the FRED page above and save it in the same folder as this file under that name.\n\n\nCode\nif (!file.exists(data_file)) {\n  fred_url &lt;- paste0(\"https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXSFUS\",\n                     \"&cosd=\", start_date, \"&coed=\", end_date)\n  download.file(fred_url, data_file, mode = \"wb\")\n}\n\nfx_raw &lt;- read.csv(data_file, na.strings = c(\".\", \"\"))\nnames(fx_raw) &lt;- c(\"date\", \"rate\")\n\nfx &lt;- fx_raw |&gt;\n  mutate(date = as.Date(date), rate = as.numeric(rate)) |&gt;\n  filter(!is.na(rate), date &gt;= start_date, date &lt;= end_date) |&gt;\n  arrange(date) |&gt;\n  mutate(r = 100 * (log(rate) - lag(log(rate)))) |&gt;\n  filter(!is.na(r)) |&gt;\n  mutate(day = row_number())\n\n# tsibble indexed by trading day (the calendar dates are irregular\n# because of weekends and US public holidays)\nfx_ts &lt;- fx |&gt; as_tsibble(index = day)\n\nr &lt;- fx$r\nn &lt;- length(r)\n\n\nDays on which FRED records no rate (US public holidays) are dropped, so returns are measured from one trading day to the next. The return is defined as\n\\[\nr_t = 100 \\times (\\log P_t - \\log P_{t-1}),\n\\]\nwhere \\(P_t\\) is the number of rand per US dollar. A positive return means the rand weakened against the dollar. The analysis uses 4,188 daily returns from 05 January 2010 to 30 September 2026."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#the-exchange-rate-and-its-returns",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#the-exchange-rate-and-its-returns",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "3.1 The exchange rate and its returns",
+    "text": "3.1 The exchange rate and its returns\n\n\nCode\nevents &lt;- as.Date(c(\"2015-12-09\", \"2020-03-11\"))\n\np_level &lt;- ggplot(fx, aes(date, rate)) +\n  geom_line(colour = \"steelblue4\", linewidth = 0.3) +\n  geom_vline(xintercept = events, linetype = \"dashed\", colour = \"grey40\") +\n  labs(x = NULL, y = \"ZAR per USD\")\n\np_ret &lt;- ggplot(fx, aes(date, r)) +\n  geom_line(colour = \"grey30\", linewidth = 0.2) +\n  geom_vline(xintercept = events, linetype = \"dashed\", colour = \"grey40\") +\n  labs(x = NULL, y = \"Daily return (%)\")\n\np_level / p_ret\n\n\n\n\n\n\n\n\nFigure 1: Top: rand per US dollar. Bottom: daily log returns (%). The dashed lines mark 9 December 2015 (dismissal of the finance minister) and 11 March 2020 (WHO declares COVID-19 a pandemic).\n\n\n\n\n\n\n\nCode\nskew   &lt;- mean((r - mean(r))^3) / sd(r)^3\nkurt   &lt;- mean((r - mean(r))^4) / sd(r)^4\njb     &lt;- n / 6 * (skew^2 + (kurt - 3)^2 / 4)\njb_p   &lt;- pchisq(jb, df = 2, lower.tail = FALSE)\nann_vol &lt;- sd(r) * sqrt(252)\n\nbiggest &lt;- fx |&gt; slice_max(abs(r), n = 1, with_ties = FALSE)\n\ntibble(\n  `Trading days` = n,\n  Mean = mean(r), `Std. dev.` = sd(r),\n  Minimum = min(r), Maximum = max(r),\n  Skewness = skew, `Excess kurtosis` = kurt - 3,\n  `Annualised volatility (%)` = ann_vol\n) |&gt;\n  kable(digits = 3)\n\n\n\n\nTable 1: Summary statistics of daily returns (%). Excess kurtosis is kurtosis minus 3, so it is 0 for a normal distribution.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTrading days\nMean\nStd. dev.\nMinimum\nMaximum\nSkewness\nExcess kurtosis\nAnnualised volatility (%)\n\n\n\n\n4188\n0.019\n0.939\n-6.257\n5.146\n0.219\n1.882\n14.905\n\n\n\n\n\n\n\n\nThe rand weakened from about 7.31 to 16.42 per dollar over the period, which shows up as a small positive mean return of 0.0194% a day. This is tiny next to the daily standard deviation of 0.939%, which is the first stylised fact: over one day the mean is close to zero and nearly all the action is in the variance. The annualised volatility is 14.9%. The return series in Figure 1 shows the second stylised fact very clearly: volatility clustering. Large moves come in bursts, most obviously around the two marked events, separated by long calm stretches. The largest single move in the sample is -6.26% on 17 March 2016."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#distribution-of-returns",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#distribution-of-returns",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "3.2 Distribution of returns",
+    "text": "3.2 Distribution of returns\n\n\nCode\np_hist &lt;- ggplot(fx, aes(r)) +\n  geom_histogram(aes(y = after_stat(density)), bins = 80,\n                 fill = \"steelblue4\", colour = \"white\") +\n  stat_function(fun = dnorm, args = list(mean = mean(r), sd = sd(r)),\n                colour = \"firebrick\", linewidth = 0.7) +\n  labs(x = \"Daily return (%)\", y = \"Density\")\n\np_qq &lt;- ggplot(fx, aes(sample = r)) +\n  stat_qq(size = 0.5, colour = \"steelblue4\") +\n  stat_qq_line(colour = \"firebrick\") +\n  labs(x = \"Normal quantiles\", y = \"Sample quantiles\")\n\np_hist + p_qq\n\n\n\n\n\n\n\n\nFigure 2: Left: histogram of daily returns with the normal density that has the same mean and variance. Right: normal QQ plot.\n\n\n\n\n\nThe excess kurtosis of 1.88 and the S-shaped QQ plot in Figure 2 show fat tails: there are many more very small and very large returns than a normal distribution allows. The Jarque and Bera statistic is 651.4 (p &lt; 0.001), so normality is rejected decisively. Part of this is a direct consequence of volatility clustering: a mixture of calm days with a small variance and turbulent days with a large variance has fatter tails than any single normal distribution. Whether returns are still fat-tailed after allowing for a changing variance is a separate question that the Student t models answer below."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#dependence-in-returns-and-in-squared-returns",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#dependence-in-returns-and-in-squared-returns",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "3.3 Dependence in returns and in squared returns",
+    "text": "3.3 Dependence in returns and in squared returns\n\n\nCode\np1 &lt;- fx_ts |&gt; ACF(r, lag_max = 50) |&gt; autoplot() + labs(title = \"Returns\")\np2 &lt;- fx_ts |&gt; ACF(r^2, lag_max = 50) |&gt; autoplot() + labs(title = \"Squared returns\")\np3 &lt;- fx_ts |&gt; ACF(abs(r), lag_max = 50) |&gt; autoplot() + labs(title = \"Absolute returns\")\np1 / p2 / p3\n\n\n\n\n\n\n\n\nFigure 3: ACF of returns, squared returns and absolute returns, up to 50 trading days.\n\n\n\n\n\nFigure 3 is the key plot of the project. The returns themselves have almost no autocorrelation: the largest absolute autocorrelation in the first 20 lags is only 0.042. The squared and absolute returns, in contrast, have positive autocorrelations that are significant at every lag shown and decay very slowly. This is the signature of volatility clustering: the direction of tomorrow’s move is close to unpredictable, but its size depends strongly on recent sizes. The Ljung and Box test on 20 lags gives Q = 31.6 (p 0.048) for the returns and Q = 417.2 (p &lt; 0.001) for the squared returns."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#the-box-and-jenkins-loop-for-returns",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#the-box-and-jenkins-loop-for-returns",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "5.1 The Box and Jenkins loop for returns",
+    "text": "5.1 The Box and Jenkins loop for returns\nThe project follows the Box and Jenkins workflow from the notes, applied to both equations of the model:\n\nPlot the data: done in the exploratory analysis.\nDifference until approximately stationary: working with log returns is the first difference of the log exchange rate. The returns fluctuate around a constant mean, so no further differencing is needed.\nRead the ACF and PACF to identify candidate orders: for the mean equation the ACF of the returns is close to zero at all lags, so a constant mean, ARMA(0,0), is used. For the variance equation the slowly decaying ACF of squared returns suggests that a low order ARCH model will not be enough and that GARCH(1,1) is the natural candidate, since it is an ARCH(\\(\\infty\\)) model with geometrically decaying weights.\nEstimate by maximum likelihood: with rugarch, and with my own code for GARCH(1,1) (Section 6).\nDiagnose residuals against the white noise standard: the standardised residuals \\(\\hat z_t = \\hat\\varepsilon_t / \\hat\\sigma_t\\) should show no autocorrelation (mean equation adequate) and their squares should show no autocorrelation (variance equation adequate).\nForecast only if diagnostics pass; otherwise return to step 3.\n\nFinally, a model that survives the loop must still beat the benchmarks out of sample (Section 7)."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#candidate-models",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#candidate-models",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "5.2 Candidate models",
+    "text": "5.2 Candidate models\nAll models have a constant mean, \\(r_t = \\mu + \\varepsilon_t\\) with \\(\\varepsilon_t = \\sigma_t z_t\\), and differ in the variance equation and in the distribution of \\(z_t\\):\n\n\n\nTable 2: The four candidate models.\n\n\n\n\n\n\n\n\n\n\nModel\nVariance equation\nDistribution of \\(z_t\\)\n\n\n\n\nARCH(1)\n\\(\\sigma_t^2 = \\omega + \\alpha \\varepsilon_{t-1}^2\\)\nNormal\n\n\nGARCH(1,1) normal\n\\(\\sigma_t^2 = \\omega + \\alpha \\varepsilon_{t-1}^2 + \\beta \\sigma_{t-1}^2\\)\nNormal\n\n\nGARCH(1,1) t\nas above\nStandardised Student t with \\(\\nu\\) degrees of freedom\n\n\nGJR-GARCH(1,1) t\n\\(\\sigma_t^2 = \\omega + (\\alpha + \\gamma I_{t-1}) \\varepsilon_{t-1}^2 + \\beta \\sigma_{t-1}^2\\), with \\(I_{t-1} = 1\\) if \\(\\varepsilon_{t-1} &lt; 0\\)\nStandardised Student t\n\n\n\n\n\n\nThe GJR model allows good and bad news to affect volatility differently. For a share price the usual finding is that falls (negative returns) raise volatility more than rises. For USD/ZAR the interpretation is reversed: a negative return is a strengthening of the rand, so \\(\\gamma &gt; 0\\) would mean that rand appreciation raises volatility more, and \\(\\gamma &lt; 0\\) that rand depreciation raises volatility more.\n\n\nCode\nmake_spec &lt;- function(model = \"sGARCH\", order = c(1, 1), dist = \"norm\") {\n  ugarchspec(\n    variance.model     = list(model = model, garchOrder = order),\n    mean.model         = list(armaOrder = c(0, 0), include.mean = TRUE),\n    distribution.model = dist\n  )\n}\n\nspecs &lt;- list(\n  \"ARCH(1) normal\"    = make_spec(order = c(1, 0)),\n  \"GARCH(1,1) normal\" = make_spec(),\n  \"GARCH(1,1) t\"      = make_spec(dist = \"std\"),\n  \"GJR-GARCH(1,1) t\"  = make_spec(model = \"gjrGARCH\", dist = \"std\")\n)\ndists &lt;- c(\"norm\", \"norm\", \"std\", \"std\")\nnames(dists) &lt;- names(specs)\n\nfits &lt;- lapply(specs, function(sp) ugarchfit(spec = sp, data = r, solver = \"hybrid\"))"
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#estimates",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#estimates",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "5.3 Estimates",
+    "text": "5.3 Estimates\n\n\nCode\ncoef_long &lt;- bind_rows(lapply(names(fits), function(m) {\n  mc &lt;- fits[[m]]@fit$matcoef\n  tibble(model = m, term = rownames(mc),\n         value = paste0(formatC(mc[, 1], format = \"f\", digits = 4), \" (\",\n                        formatC(mc[, 2], format = \"f\", digits = 4), \")\"))\n}))\n\ncoef_long |&gt;\n  pivot_wider(names_from = model, values_from = value, values_fill = \"\") |&gt;\n  kable()\n\n\n\n\nTable 3: Parameter estimates with standard errors in brackets. shape is the Student t degrees of freedom; gamma1 is the GJR asymmetry term.\n\n\n\n\n\n\n\n\n\n\n\n\n\nterm\nARCH(1) normal\nGARCH(1,1) normal\nGARCH(1,1) t\nGJR-GARCH(1,1) t\n\n\n\n\nmu\n0.0156 (0.0142)\n0.0148 (0.0132)\n-0.0006 (0.0131)\n0.0099 (0.0132)\n\n\nomega\n0.7875 (0.0215)\n0.0104 (0.0034)\n0.0112 (0.0041)\n0.0087 (0.0019)\n\n\nalpha1\n0.1067 (0.0188)\n0.0469 (0.0070)\n0.0451 (0.0081)\n0.0571 (0.0053)\n\n\nbeta1\n\n0.9418 (0.0093)\n0.9423 (0.0111)\n0.9562 (0.0021)\n\n\nshape\n\n\n10.9808 (1.6150)\n11.3155 (1.6806)\n\n\ngamma1\n\n\n\n-0.0507 (0.0087)\n\n\n\n\n\n\n\n\n\n\nCode\nic_tbl &lt;- bind_rows(lapply(names(fits), function(m) {\n  f  &lt;- fits[[m]]\n  ic &lt;- infocriteria(f)\n  pers &lt;- persistence(f)\n  tibble(Model = m,\n         `Log likelihood` = likelihood(f),\n         AIC = ic[1], BIC = ic[2],\n         Persistence = pers,\n         `Half-life (days)` = log(0.5) / log(pers))\n}))\n\nkable(ic_tbl, digits = c(0, 1, 4, 4, 4, 1))\nbest_bic &lt;- ic_tbl$Model[which.min(ic_tbl$BIC)]\n\n\n\n\nTable 4: Log likelihood, information criteria (per observation, smaller is better), persistence and the half-life of a volatility shock in trading days.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModel\nLog likelihood\nAIC\nBIC\nPersistence\nHalf-life (days)\n\n\n\n\nARCH(1) normal\n-5649.7\n2.6995\n2.7040\n0.1067\n0.3\n\n\nGARCH(1,1) normal\n-5516.4\n2.6363\n2.6423\n0.9887\n61.0\n\n\nGARCH(1,1) t\n-5482.3\n2.6205\n2.6280\n0.9874\n54.7\n\n\nGJR-GARCH(1,1) t\n-5468.0\n2.6141\n2.6232\n0.9880\n57.6\n\n\n\n\n\n\n\n\nInterpreting the GARCH(1,1) t fit. The ARCH coefficient \\(\\hat\\alpha\\) = 0.045 measures how strongly volatility reacts to yesterday’s shock, and \\(\\hat\\beta\\) = 0.942 measures how much of yesterday’s volatility carries over. Their sum, the persistence, is 0.9874, very close to 1. A volatility shock therefore dies out slowly, with a half-life of about 55 trading days. The implied long-run (unconditional) standard deviation is 0.945% a day, or 15.0% a year, and forecasts of volatility revert towards this level.\nNormal or Student t errors? Even after allowing for a changing variance, the estimated degrees of freedom are \\(\\hat\\nu\\) = 11.0, far from the normal limit (\\(\\nu \\to \\infty\\)). The log likelihood improves by 34.1 when moving from normal to t errors for the same variance equation, for just one extra parameter, so the standardised returns are still fat-tailed. This matters for risk: a normal model will understate the probability of extreme days.\nAsymmetry. The GJR term is \\(\\hat\\gamma\\) = -0.051 (p &lt; 0.001). It is negative and significant, so shocks that weaken the rand (positive returns) raise volatility more than shocks that strengthen it. This is the reverse of the leverage effect in share prices, and is typical of emerging market currencies, where sudden depreciations are associated with stress and capital outflows. By BIC the preferred model is the GJR-GARCH(1,1) t model."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#residual-diagnostics-box-and-jenkins-step-5",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#residual-diagnostics-box-and-jenkins-step-5",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "5.4 Residual diagnostics (Box and Jenkins step 5)",
+    "text": "5.4 Residual diagnostics (Box and Jenkins step 5)\n\n\nCode\nn_garch_par &lt;- c(\"ARCH(1) normal\" = 1, \"GARCH(1,1) normal\" = 2,\n                 \"GARCH(1,1) t\" = 2, \"GJR-GARCH(1,1) t\" = 3)\n\ndiag_tbl &lt;- bind_rows(lapply(names(fits), function(m) {\n  z &lt;- as.numeric(residuals(fits[[m]], standardize = TRUE))\n  lbz  &lt;- Box.test(z,   lag = 20, type = \"Ljung-Box\")\n  lbz2 &lt;- Box.test(z^2, lag = 20, type = \"Ljung-Box\", fitdf = n_garch_par[[m]])\n  alm  &lt;- arch_lm(z, q = 12)\n  tibble(Model = m,\n         `LB z (p)` = lbz$p.value,\n         `LB z^2 (p)` = lbz2$p.value,\n         `ARCH LM on z (p)` = unname(alm[\"p.value\"]),\n         `Excess kurtosis of z` = mean((z - mean(z))^4) / var(z)^2 - 3)\n}))\n\ndiag_tbl &lt;- diag_tbl |&gt;\n  mutate(Passes = if_else(`LB z^2 (p)` &gt; 0.05 & `ARCH LM on z (p)` &gt; 0.05,\n                          \"Yes\", \"No\"))\n\n\n\n\nCode\nkable(diag_tbl, digits = 3)\n\n\n\n\nTable 5: Diagnostics on the standardised residuals: Ljung and Box p-values for z and z squared (20 lags; the test on z squared has its degrees of freedom reduced by the number of variance parameters), the ARCH LM test on z (12 lags), and the excess kurtosis of z. A model passes if no ARCH structure remains in z.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nModel\nLB z (p)\nLB z^2 (p)\nARCH LM on z (p)\nExcess kurtosis of z\nPasses\n\n\n\n\nARCH(1) normal\n0.112\n0.000\n0.000\n1.566\nNo\n\n\nGARCH(1,1) normal\n0.289\n0.721\n0.411\n0.904\nYes\n\n\nGARCH(1,1) t\n0.280\n0.696\n0.366\n0.911\nYes\n\n\nGJR-GARCH(1,1) t\n0.268\n0.665\n0.439\n1.011\nYes\n\n\n\n\n\n\n\n\nThe two Ljung and Box tests have different jobs, as the notes stress: autocorrelation left in \\(\\hat z_t\\) would send me back to the mean equation, while autocorrelation left in \\(\\hat z_t^2\\) sends me back to the variance equation.\nFor ARCH(1) the test on \\(\\hat z_t^2\\) gives p &lt; 0.001 and the ARCH LM test on \\(\\hat z_t\\) gives p &lt; 0.001. A single lag of the squared shock cannot reproduce the slow decay seen in the ACF of squared returns, so ARCH(1) fails step 5. Following the loop, I returned to step 3 and moved to GARCH(1,1), which adds the lagged variance and so gives the model a long memory with only one extra parameter. ARCH(1) is kept in the comparison only as a reference point; it is not used for forecasting.\nAll three GARCH(1,1) models pass: no significant autocorrelation remains in the squared standardised residuals, so the variance equation is adequate and the models can be used to forecast (step 6). The test on \\(\\hat z_t\\) itself gives p-values of 0.112, 0.289, 0.280, 0.268 across the four models, so the constant mean is adequate.\n\n\nCode\nfx_sig &lt;- fx |&gt; mutate(sigma = as.numeric(sigma(fits[[\"GARCH(1,1) t\"]])))\n\nggplot(fx_sig, aes(date)) +\n  geom_line(aes(y = r), colour = \"grey65\", linewidth = 0.2) +\n  geom_line(aes(y = 2 * sigma), colour = \"firebrick\", linewidth = 0.4) +\n  geom_line(aes(y = -2 * sigma), colour = \"firebrick\", linewidth = 0.4) +\n  labs(x = NULL, y = \"Return (%)\")\n\n\n\n\n\n\n\n\nFigure 4: Daily returns with plus and minus two conditional standard deviations from the GARCH(1,1) t model.\n\n\n\n\n\n\n\nCode\nz_n &lt;- as.numeric(residuals(fits[[\"GARCH(1,1) normal\"]], standardize = TRUE))\nz_t &lt;- as.numeric(residuals(fits[[\"GARCH(1,1) t\"]], standardize = TRUE))\npp  &lt;- ppoints(n)\n\n# quantiles of a Student t scaled to unit variance\nqstd_unit &lt;- function(p, nu) qt(p, df = nu) * sqrt((nu - 2) / nu)\n\nqq_df &lt;- bind_rows(\n  tibble(model = \"GARCH(1,1) normal\", theo = qnorm(pp), samp = sort(z_n)),\n  tibble(model = \"GARCH(1,1) t\", theo = qstd_unit(pp, nu_g), samp = sort(z_t))\n)\n\nggplot(qq_df, aes(theo, samp)) +\n  geom_abline(colour = \"firebrick\") +\n  geom_point(size = 0.5, colour = \"steelblue4\") +\n  facet_wrap(vars(model), scales = \"free\") +\n  labs(x = \"Theoretical quantiles\", y = \"Standardised residual quantiles\")\n\n\n\n\n\n\n\n\nFigure 5: QQ plots of the standardised residuals of the GARCH(1,1) normal model against the normal distribution (left) and of the GARCH(1,1) t model against its fitted Student t distribution (right).\n\n\n\n\n\nThe conditional standard deviation band in Figure 4 widens in the turbulent periods and narrows in calm periods, which a constant variance model cannot do. The QQ plots in Figure 5 show that the normal model’s residuals still have heavy tails, while the residuals of the t model lie much closer to the line, confirming the choice of the Student t distribution."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#a-small-simulation-check",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#a-small-simulation-check",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "6.1 A small simulation check",
+    "text": "6.1 A small simulation check\nAgreement with a package shows that two implementations agree, not that either is right. As a second check, I simulated 100 series of the same length as the data from a GARCH(1,1) with known parameters (set equal to the rugarch estimates) and refitted each one with my code.\n\n\nCode\nsim_garch11 &lt;- function(n, mu, omega, alpha, beta, burn = 500) {\n  N &lt;- n + burn\n  z &lt;- rnorm(N); e &lt;- s2 &lt;- numeric(N)\n  s2[1] &lt;- omega / (1 - alpha - beta)\n  e[1]  &lt;- sqrt(s2[1]) * z[1]\n  for (t in 2:N) {\n    s2[t] &lt;- omega + alpha * e[t - 1]^2 + beta * s2[t - 1]\n    e[t]  &lt;- sqrt(s2[t]) * z[t]\n  }\n  mu + e[(burn + 1):N]\n}\n\ntrue_par &lt;- rg[, 1]\nnames(true_par) &lt;- c(\"mu\", \"omega\", \"alpha\", \"beta\")\n\nset.seed(42)\nn_sim &lt;- 100\nsim_est &lt;- t(replicate(n_sim, {\n  y &lt;- sim_garch11(n, true_par[\"mu\"], true_par[\"omega\"], true_par[\"alpha\"], true_par[\"beta\"])\n  fit_garch11(y, se = FALSE)$estimate   # standard errors not needed here\n}))\n\n\n\n\nCode\ntibble(\n  Parameter = names(true_par),\n  True = true_par,\n  `Mean estimate` = colMeans(sim_est),\n  Bias = colMeans(sim_est) - true_par,\n  `Empirical s.d.` = apply(sim_est, 2, sd),\n  `Hessian s.e. (data fit)` = own$se\n) |&gt;\n  kable(digits = 4)\n\n\n\n\nTable 7: Simulation check (100 replications, same length as the data): true values, mean estimate, bias, and the empirical standard deviation of the estimates compared with the average Hessian based standard error from the real-data fit.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nParameter\nTrue\nMean estimate\nBias\nEmpirical s.d.\nHessian s.e. (data fit)\n\n\n\n\nmu\n0.0148\n0.0144\n-0.0004\n0.0133\n0.0132\n\n\nomega\n0.0104\n0.0054\n-0.0050\n0.0055\n0.0032\n\n\nalpha\n0.0469\n0.0252\n-0.0216\n0.0243\n0.0064\n\n\nbeta\n0.9418\n0.9692\n0.0274\n0.0297\n0.0083\n\n\n\n\n\n\n\n\nThe estimates are centred on the true values with small bias, and the spread of the estimates across replications is of the same size as the Hessian based standard errors, so both the estimator and its standard errors behave as the theory says they should."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#design",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#design",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "7.1 Design",
+    "text": "7.1 Design\nIn-sample fit does not answer the research question, which is about forecasts. The last 1000 trading days (from 30 September 2022 to 30 September 2026) are used as a test period. For each day in the test period, every model produces a one-day-ahead forecast of the mean and standard deviation using only data up to the previous day. The GARCH models are re-estimated every 25 trading days on an expanding window, which keeps the evaluation free of temporal leakage.\nFrom each forecast distribution I compute the VaR at four levels: the 1% and 5% quantiles (losses for someone holding dollars when the rand strengthens) and the 95% and 99% quantiles (losses for someone who needs dollars, such as an importer, when the rand weakens). For Student t models,\n\\[\n\\text{VaR}_{p,t} = \\hat\\mu_{t|t-1} + \\hat\\sigma_{t|t-1} \\, t_{\\nu}^{-1}(p) \\sqrt{(\\nu - 2)/\\nu},\n\\]\nwhere the last factor rescales the t distribution to unit variance.\nTwo benchmarks without a GARCH variance are included, in the spirit of the benchmark methods in the notes:\n\nHistorical simulation (HS): the VaR is the empirical quantile of the previous 250 returns.\nRolling normal: a normal distribution with the mean and variance of the previous 250 returns.\n\nThe ARCH(1) model failed the residual diagnostics, so following step 6 it is not part of the forecast comparison.\n\n\nCode\nroll_models &lt;- c(\"GARCH(1,1) normal\", \"GARCH(1,1) t\", \"GJR-GARCH(1,1) t\")\n\nrolls &lt;- lapply(specs[roll_models], function(sp) {\n  rl &lt;- ugarchroll(sp, data = r, n.ahead = 1, forecast.length = n_test,\n                   refit.every = refit_every, refit.window = \"recursive\",\n                   solver = \"hybrid\", calculate.VaR = FALSE)\n  if (convergence(rl) != 0) rl &lt;- resume(rl, solver = \"gosolnp\")\n  rl\n})\n\n\n\n\nCode\nlevels_p  &lt;- c(0.01, 0.05, 0.95, 0.99)\ntest_idx  &lt;- (n - n_test + 1):n\nrealised  &lt;- r[test_idx]\n\nvar_quantile &lt;- function(mu, sigma, p, dist, shape = NULL) {\n  if (dist == \"norm\") mu + sigma * qnorm(p) else mu + sigma * qstd_unit(p, shape)\n}\n\n# GARCH model forecasts\nfc_list &lt;- lapply(roll_models, function(m) {\n  d &lt;- as.data.frame(rolls[[m]], which = \"density\")\n  out &lt;- tibble(model = m, t = seq_len(n_test), mu = d$Mu, sigma = d$Sigma,\n                realised = realised)\n  for (p in levels_p) {\n    out[[paste0(\"q\", p)]] &lt;- var_quantile(d$Mu, d$Sigma, p, dists[[m]], d$Shape)\n  }\n  out\n})\n\n# Benchmarks\nbench_hs &lt;- tibble(model = \"Historical simulation\", t = seq_len(n_test),\n                   realised = realised)\nbench_rn &lt;- tibble(model = \"Rolling normal\", t = seq_len(n_test),\n                   realised = realised)\npast &lt;- lapply(test_idx, function(i) r[(i - hs_window):(i - 1)])\nbench_rn$mu    &lt;- sapply(past, mean)\nbench_rn$sigma &lt;- sapply(past, sd)\nbench_hs$mu    &lt;- bench_rn$mu\nbench_hs$sigma &lt;- bench_rn$sigma\nfor (p in levels_p) {\n  bench_hs[[paste0(\"q\", p)]] &lt;- sapply(past, quantile, probs = p, names = FALSE)\n  bench_rn[[paste0(\"q\", p)]] &lt;- bench_rn$mu + bench_rn$sigma * qnorm(p)\n}\n\nfc_all &lt;- bind_rows(fc_list, list(bench_hs, bench_rn)) |&gt;\n  mutate(date = fx$date[test_idx][t])"
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#backtest-tests",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#backtest-tests",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "7.2 Backtest tests",
+    "text": "7.2 Backtest tests\nFor each model and level, a hit is a day on which the realised return falls beyond the VaR (below it for the 1% and 5% levels, above it for the 95% and 99% levels). Under a correct model the hits are independent Bernoulli(\\(p^*\\)) variables, where \\(p^* = p\\) for the lower tail and \\(p^* = 1 - p\\) for the upper tail. I implemented two standard likelihood ratio tests.\n\nKupiec unconditional coverage test: is the hit rate equal to \\(p^*\\)? With \\(x\\) hits in \\(T\\) days and \\(\\hat\\pi = x / T\\), \\(LR_{uc} = -2 \\left[ (T - x)\\log(1 - p^*) + x \\log p^* - (T - x)\\log(1 - \\hat\\pi) - x \\log \\hat\\pi \\right] \\sim \\chi^2_1 .\\)\nChristoffersen conditional coverage test: adds a test of independence, comparing a first-order Markov chain for the hits with an independent sequence, so that clustered hits are detected. \\(LR_{cc} = LR_{uc} + LR_{ind} \\sim \\chi^2_2\\).\n\n\n\nCode\nkupiec_test &lt;- function(hits, p) {\n  n &lt;- length(hits); x &lt;- sum(hits); phat &lt;- x / n\n  ll0 &lt;- (n - x) * log(1 - p) + x * log(p)\n  ll1 &lt;- if (x == 0 || x == n) 0 else (n - x) * log(1 - phat) + x * log(phat)\n  lr  &lt;- -2 * (ll0 - ll1)\n  c(hits = x, expected = n * p, LR_uc = lr, p_uc = pchisq(lr, 1, lower.tail = FALSE))\n}\n\nchristoffersen_test &lt;- function(hits, p) {\n  h0 &lt;- hits[-length(hits)]; h1 &lt;- hits[-1]\n  n00 &lt;- sum(h0 == 0 & h1 == 0); n01 &lt;- sum(h0 == 0 & h1 == 1)\n  n10 &lt;- sum(h0 == 1 & h1 == 0); n11 &lt;- sum(h0 == 1 & h1 == 1)\n  pi01 &lt;- n01 / (n00 + n01)\n  pi11 &lt;- if ((n10 + n11) &gt; 0) n11 / (n10 + n11) else 0\n  pi1  &lt;- (n01 + n11) / (n00 + n01 + n10 + n11)\n  xlogy &lt;- function(x, y) ifelse(x == 0, 0, x * log(y))\n  ll_ind &lt;- xlogy(n00, 1 - pi01) + xlogy(n01, pi01) +\n            xlogy(n10, 1 - pi11) + xlogy(n11, pi11)\n  ll_dep &lt;- xlogy(n00 + n10, 1 - pi1) + xlogy(n01 + n11, pi1)\n  lr_ind &lt;- -2 * (ll_dep - ll_ind)\n  lr_cc  &lt;- kupiec_test(hits, p)[[\"LR_uc\"]] + lr_ind\n  c(p_ind = pchisq(lr_ind, 1, lower.tail = FALSE),\n    p_cc  = pchisq(lr_cc, 2, lower.tail = FALSE))\n}\n\n# quantile (tick) loss: the proper scoring rule for a p quantile\ntick_loss &lt;- function(y, q, p) mean((p - (y &lt; q)) * (y - q))\n\n\n\n\nCode\nbt &lt;- expand_grid(model = unique(fc_all$model), p = levels_p) |&gt;\n  rowwise() |&gt;\n  mutate(res = list({\n    d &lt;- fc_all[fc_all$model == model, ]\n    q &lt;- d[[paste0(\"q\", p)]]\n    y &lt;- d$realised\n    p_star &lt;- if (p &lt; 0.5) p else 1 - p\n    hits &lt;- if (p &lt; 0.5) as.integer(y &lt; q) else as.integer(y &gt; q)\n    k &lt;- kupiec_test(hits, p_star)\n    ch &lt;- christoffersen_test(hits, p_star)\n    tibble(Hits = k[[\"hits\"]], Expected = k[[\"expected\"]],\n           `Kupiec p` = k[[\"p_uc\"]], `Christoffersen p` = ch[[\"p_cc\"]],\n           `Tick loss` = tick_loss(y, q, p))\n  })) |&gt;\n  ungroup() |&gt;\n  unnest(res) |&gt;\n  mutate(Level = paste0(100 * p, \"%\"))\n\n\n\n\nCode\nbt |&gt;\n  select(Level, Model = model, Hits, Expected, `Kupiec p`, `Christoffersen p`, `Tick loss`) |&gt;\n  arrange(Level, `Tick loss`) |&gt;\n  kable(digits = c(0, 0, 0, 0, 3, 3, 5))\n\n\n\n\nTable 8: VaR backtest over the test period. Expected is the number of hits a correct model would produce. p-values below 0.05 indicate a rejected model. Tick loss is the average quantile loss (smaller is better) and allows the models to be ranked at each level.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nLevel\nModel\nHits\nExpected\nKupiec p\nChristoffersen p\nTick loss\n\n\n\n\n1%\nGARCH(1,1) normal\n7\n10\n0.314\n0.573\n0.02334\n\n\n1%\nGJR-GARCH(1,1) t\n4\n10\n0.030\n0.094\n0.02346\n\n\n1%\nGARCH(1,1) t\n4\n10\n0.030\n0.094\n0.02389\n\n\n1%\nRolling normal\n7\n10\n0.314\n0.573\n0.02409\n\n\n1%\nHistorical simulation\n11\n10\n0.754\n0.842\n0.02421\n\n\n5%\nGJR-GARCH(1,1) t\n29\n50\n0.001\n0.004\n0.07911\n\n\n5%\nGARCH(1,1) t\n29\n50\n0.001\n0.004\n0.08063\n\n\n5%\nGARCH(1,1) normal\n29\n50\n0.001\n0.004\n0.08063\n\n\n5%\nRolling normal\n34\n50\n0.014\n0.037\n0.08278\n\n\n5%\nHistorical simulation\n55\n50\n0.475\n0.660\n0.08305\n\n\n95%\nGARCH(1,1) t\n49\n50\n0.884\n0.034\n0.09059\n\n\n95%\nGARCH(1,1) normal\n42\n50\n0.233\n0.052\n0.09075\n\n\n95%\nGJR-GARCH(1,1) t\n54\n50\n0.566\n0.202\n0.09124\n\n\n95%\nRolling normal\n46\n50\n0.557\n0.055\n0.09302\n\n\n95%\nHistorical simulation\n46\n50\n0.557\n0.168\n0.09378\n\n\n99%\nGARCH(1,1) normal\n10\n10\n1.000\n0.904\n0.02657\n\n\n99%\nHistorical simulation\n12\n10\n0.538\n0.715\n0.02658\n\n\n99%\nGARCH(1,1) t\n9\n10\n0.746\n0.875\n0.02660\n\n\n99%\nGJR-GARCH(1,1) t\n11\n10\n0.754\n0.842\n0.02671\n\n\n99%\nRolling normal\n18\n10\n0.022\n0.009\n0.02731"
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#variance-forecast-accuracy",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#variance-forecast-accuracy",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "7.3 Variance forecast accuracy",
+    "text": "7.3 Variance forecast accuracy\nThe VaR tests look at the tails. To compare the variance forecasts as a whole I use the QLIKE loss, \\(L_t = \\log \\hat\\sigma_{t|t-1}^2 + r_t^2 / \\hat\\sigma_{t|t-1}^2\\), with the squared return as a noisy proxy for the true variance. QLIKE is robust to that noise in the sense that it ranks forecasts correctly in expectation, and it penalises under-prediction of variance more heavily than over-prediction, which is the right asymmetry for risk management.\n\n\nCode\nqlike_tbl &lt;- fc_all |&gt;\n  filter(model != \"Historical simulation\") |&gt;\n  group_by(Model = model) |&gt;\n  summarise(QLIKE = mean(log(sigma^2) + (realised - mu)^2 / sigma^2), .groups = \"drop\") |&gt;\n  arrange(QLIKE)\n\nkable(qlike_tbl, digits = 4)\n\n\n\n\nTable 9: Average QLIKE loss of the one-day-ahead variance forecasts over the test period (smaller is better). Historical simulation uses the same rolling variance as the rolling normal benchmark.\n\n\n\n\n\n\nModel\nQLIKE\n\n\n\n\nGJR-GARCH(1,1) t\n0.5623\n\n\nGARCH(1,1) t\n0.5666\n\n\nGARCH(1,1) normal\n0.5674\n\n\nRolling normal\n0.6070\n\n\n\n\n\n\n\n\n\n\nCode\nplot_df &lt;- fc_all |&gt; filter(model %in% c(\"GARCH(1,1) t\", \"Historical simulation\"))\nhits_df &lt;- plot_df |&gt;\n  filter(model == \"GARCH(1,1) t\", realised &lt; q0.01 | realised &gt; q0.99)\n\nggplot(plot_df, aes(date)) +\n  geom_line(data = filter(plot_df, model == \"GARCH(1,1) t\"),\n            aes(y = realised), colour = \"grey60\", linewidth = 0.2) +\n  geom_line(aes(y = q0.01, colour = model), linewidth = 0.4) +\n  geom_line(aes(y = q0.99, colour = model), linewidth = 0.4) +\n  geom_point(data = hits_df, aes(y = realised), colour = \"black\", size = 1) +\n  scale_colour_manual(values = c(\"GARCH(1,1) t\" = \"firebrick\",\n                                 \"Historical simulation\" = \"steelblue\")) +\n  labs(x = NULL, y = \"Return (%)\", colour = NULL) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\n\nFigure 6: Test period returns with the 1% and 99% one-day VaR from the GARCH(1,1) t model (red) and historical simulation (blue). Points mark returns beyond the GARCH 1% or 99% VaR.\n\n\n\n\n\nCoverage. Out of the four levels, the number of rejections (Kupiec or Christoffersen test at 5%) is 1 for GARCH(1,1) normal, 3 for GARCH(1,1) t, 2 for GJR-GARCH(1,1) t, 0 for historical simulation and 2 for the rolling normal benchmark. At the 1% level, where a correct model should be exceeded about 10 times, the GARCH(1,1) normal model is exceeded 7 times in the lower tail and 10 times in the upper tail, against 4 and 9 for the GARCH(1,1) t model. The normal model is exceeded more often in the extreme tails, which is the practical consequence of the fat tails found in its residuals.\nClustering of exceedances. The benchmarks react slowly to a change in volatility: a window of 250 days gives the same weight to a return from a year ago as to yesterday’s. When volatility jumps, their VaR is too narrow for weeks and the hits bunch together, which is what the Christoffersen test detects; when volatility falls, their VaR stays too wide for a long time (Figure 6). The GARCH VaR bands widen and narrow within days.\nRanking. Averaged over the four levels, the lowest quantile loss is achieved by the GJR-GARCH(1,1) t model, and the lowest QLIKE by the GJR-GARCH(1,1) t model."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#sec-findings",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#sec-findings",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "9.1 Key findings",
+    "text": "9.1 Key findings\n\nThe rand shows all the stylised facts of financial returns: almost no autocorrelation in returns, strong and slowly decaying autocorrelation in squared returns, and fat tails (excess kurtosis 1.9). The ARCH LM test confirms a time-varying variance (p &lt; 0.001).\nThe Box and Jenkins loop rejected ARCH(1) because ARCH structure remained in its standardised residuals, and led to GARCH(1,1).\nVolatility is highly persistent: \\(\\hat\\alpha + \\hat\\beta\\) = 0.9874, a half-life of about 55 trading days.\nStudent t errors are clearly better than normal errors (\\(\\hat\\nu\\) = 11.0), so even after removing volatility clustering, extreme days are more common than a normal distribution implies.\nAsymmetry: \\(\\hat\\gamma\\) = -0.051 (p &lt; 0.001). There is significant asymmetry in how depreciation and appreciation shocks affect volatility.\nOut of sample, the preferred model by quantile loss is GJR-GARCH(1,1) t and by QLIKE GJR-GARCH(1,1) t. The number of rejected VaR tests (out of four levels) was 3 for GARCH(1,1) t against 0 for historical simulation and 2 for the rolling normal benchmark."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#issues-and-limitations",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#issues-and-limitations",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "9.2 Issues and limitations",
+    "text": "9.2 Issues and limitations\n\nPower of the tests. With 1000 test days, a correct 1% VaR is expected to be exceeded only 10 times, so the Kupiec test has little power to separate a 1% model from, say, a 1.5% model. A model that “passes” is not proven correct.\nTests with a large sample. The residual tests in-sample use more than 4000 observations, so even very small departures from white noise can be significant. I combined the formal tests with the plots and the out-of-sample results rather than relying on p-values alone.\nVery high persistence. A persistence close to 1 can be a sign of structural breaks in the level of volatility (for example a calmer period after 2020) rather than true long memory, as discussed in the notes. A model with a regime change in volatility would be a natural alternative, and this is the subject of Project 4.\nData choices. FRED noon rates in New York miss moves that happen during South African trading hours after the New York fix, and dropping US holidays makes some returns cover two days. Neither should affect the conclusions much, but a Johannesburg close series would be a useful check.\nRefitting every 25 days rather than daily saves time but means the parameters lag slightly behind; the volatility itself is still updated every day.\nVaR is only one risk measure. It says nothing about how large losses are once the VaR is exceeded. Expected shortfall would be the natural extension."
+  },
+  {
+    "objectID": "projects/project-02/project-02-garch-zar_v4.html#what-i-would-do-differently",
+    "href": "projects/project-02/project-02-garch-zar_v4.html#what-i-would-do-differently",
+    "title": "Project 2: Volatility of the South African Rand with ARCH and GARCH Models",
+    "section": "9.3 What I would do differently",
+    "text": "9.3 What I would do differently\nI would use a longer test period, add expected shortfall to the backtest, and compare GARCH with a hidden Markov model that lets volatility switch between a small number of regimes (Project 4), using the same returns and the same backtest so that the two approaches can be compared directly."
+  },
+  {
+    "objectID": "projects/project-04/project-04-placeholder.html",
+    "href": "projects/project-04/project-04-placeholder.html",
+    "title": "Project 4: Building a Kalman Filter from First Principles",
+    "section": "",
+    "text": "This project is in progress."
+  },
+  {
+    "objectID": "projects/project-04/project-04-placeholder.html#planned-outline",
+    "href": "projects/project-04/project-04-placeholder.html#planned-outline",
+    "title": "Project 4: Building a Kalman Filter from First Principles",
+    "section": "Planned outline",
+    "text": "Planned outline\n\nImplementation: a general linear Gaussian state-space model in matrix form, with the Kalman filter (handling missing observations), the Kalman smoother, the likelihood from the prediction error decomposition, and maximum likelihood estimation of the variances.\nValidation: replicate the local level model for the Nile data from the course notes, and run a simulation study with known variances.\nApplication: fit a structural model with an AR(1) component to the accommodation series with the COVID months treated as missing, check the residual diagnostics that the Project 3 structural model failed, and compare forecasts on the same test set as Projects 1 and 3."
+  },
+  {
+    "objectID": "tutorials/index.html",
+    "href": "tutorials/index.html",
+    "title": "Tutorials and Exercises",
+    "section": "",
+    "text": "Worked tutorials, labs and exercises with my implementations and reflections, organised by the two sections of the course."
+  },
+  {
+    "objectID": "tutorials/index.html#section-1-time-series-foundations-arima-and-volatility-models",
+    "href": "tutorials/index.html#section-1-time-series-foundations-arima-and-volatility-models",
+    "title": "Tutorials and Exercises",
+    "section": "Section 1: Time series foundations, ARIMA and volatility models",
+    "text": "Section 1: Time series foundations, ARIMA and volatility models\n\n\n\nTS Intro\nIntroduction to time series: the nature of time series data, the forecasting problem, and exploring a series.\n\n\n\n\nTime Series Analysis Part 1: Exercise 1\n\n\n\n\nTime Series Analysis Part 1: Exercise 2\n\n\n\n\nARCH and GARCH Lab\nStylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.\n\n\n\n\nSpectral Analysis Lab\nFrequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models."
+  },
+  {
+    "objectID": "tutorials/index.html#section-2-exponential-smoothing-state-space-and-hidden-markov-models",
+    "href": "tutorials/index.html#section-2-exponential-smoothing-state-space-and-hidden-markov-models",
+    "title": "Tutorials and Exercises",
+    "section": "Section 2: Exponential smoothing, state-space and hidden Markov models",
+    "text": "Section 2: Exponential smoothing, state-space and hidden Markov models\n\n\n\nExponential Smoothing Exercise\nSimple exponential smoothing, Holt and Holt-Winters methods, ETS models and their prediction intervals.\n\n\n\n\nState Space Model Exercise\nLocal level, linear growth and basic structural models written in state-space form.\n\n\n\n\nKalman Filter Exercise\nThe Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations.\n\n\n\n\nHidden Markov Model Exercise\nMixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm."
+  },
+  {
+    "objectID": "tutorials/section-1/02-tsa-part1-exercise-1.html",
+    "href": "tutorials/section-1/02-tsa-part1-exercise-1.html",
+    "title": "Time Series Analysis Part 1: Exercise 1",
+    "section": "",
+    "text": "Summarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/02-tsa-part1-exercise-1.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-1/02-tsa-part1-exercise-1.html#overview-of-the-key-concepts",
+    "title": "Time Series Analysis Part 1: Exercise 1",
+    "section": "",
+    "text": "Summarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/02-tsa-part1-exercise-1.html#worked-exercises",
+    "href": "tutorials/section-1/02-tsa-part1-exercise-1.html#worked-exercises",
+    "title": "Time Series Analysis Part 1: Exercise 1",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-1/02-tsa-part1-exercise-1.html#implementation-in-r",
+    "href": "tutorials/section-1/02-tsa-part1-exercise-1.html#implementation-in-r",
+    "title": "Time Series Analysis Part 1: Exercise 1",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-1/02-tsa-part1-exercise-1.html#reflection",
+    "href": "tutorials/section-1/02-tsa-part1-exercise-1.html#reflection",
+    "title": "Time Series Analysis Part 1: Exercise 1",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-1/04-arch-garch-lab.html",
+    "href": "tutorials/section-1/04-arch-garch-lab.html",
+    "title": "ARCH and GARCH Lab",
+    "section": "",
+    "text": "Topics covered: Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting."
+  },
+  {
+    "objectID": "tutorials/section-1/04-arch-garch-lab.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-1/04-arch-garch-lab.html#overview-of-the-key-concepts",
+    "title": "ARCH and GARCH Lab",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-1/04-arch-garch-lab.html#worked-exercises",
+    "href": "tutorials/section-1/04-arch-garch-lab.html#worked-exercises",
+    "title": "ARCH and GARCH Lab",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-1/04-arch-garch-lab.html#implementation-in-r",
+    "href": "tutorials/section-1/04-arch-garch-lab.html#implementation-in-r",
+    "title": "ARCH and GARCH Lab",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-1/04-arch-garch-lab.html#reflection",
+    "href": "tutorials/section-1/04-arch-garch-lab.html#reflection",
+    "title": "ARCH and GARCH Lab",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-2/06-exponential-smoothing-exercise.html",
+    "href": "tutorials/section-2/06-exponential-smoothing-exercise.html",
+    "title": "Exponential Smoothing Exercise",
+    "section": "",
+    "text": "Topics covered: Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and their prediction intervals."
+  },
+  {
+    "objectID": "tutorials/section-2/06-exponential-smoothing-exercise.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-2/06-exponential-smoothing-exercise.html#overview-of-the-key-concepts",
+    "title": "Exponential Smoothing Exercise",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-2/06-exponential-smoothing-exercise.html#worked-exercises",
+    "href": "tutorials/section-2/06-exponential-smoothing-exercise.html#worked-exercises",
+    "title": "Exponential Smoothing Exercise",
+    "section": "Worked exercises",
+    "text": "Worked exercises\n\nExercises from the chapter\n\nShow that the forecast variance for an ETS(A,N,N) model is \\(\\sigma^2[1 + \\alpha^2 (h - 1)]\\).\nWrite down a 95% prediction interval for an ETS(A,N,N) model as a function of \\(\\ell_T\\), \\(\\alpha\\), \\(h\\) and \\(\\sigma\\).\nShow that forecasts from an ARIMA(0,1,1) process are equivalent to simple exponential smoothing."
+  },
+  {
+    "objectID": "tutorials/section-2/06-exponential-smoothing-exercise.html#implementation-in-r",
+    "href": "tutorials/section-2/06-exponential-smoothing-exercise.html#implementation-in-r",
+    "title": "Exponential Smoothing Exercise",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-2/06-exponential-smoothing-exercise.html#reflection",
+    "href": "tutorials/section-2/06-exponential-smoothing-exercise.html#reflection",
+    "title": "Exponential Smoothing Exercise",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  },
+  {
+    "objectID": "tutorials/section-2/08-kalman-filter-exercise.html",
+    "href": "tutorials/section-2/08-kalman-filter-exercise.html",
+    "title": "Kalman Filter Exercise",
+    "section": "",
+    "text": "Topics covered: The Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations."
+  },
+  {
+    "objectID": "tutorials/section-2/08-kalman-filter-exercise.html#overview-of-the-key-concepts",
+    "href": "tutorials/section-2/08-kalman-filter-exercise.html#overview-of-the-key-concepts",
+    "title": "Kalman Filter Exercise",
+    "section": "Overview of the key concepts",
+    "text": "Overview of the key concepts\nSummarise the main ideas of this session in your own words."
+  },
+  {
+    "objectID": "tutorials/section-2/08-kalman-filter-exercise.html#worked-exercises",
+    "href": "tutorials/section-2/08-kalman-filter-exercise.html#worked-exercises",
+    "title": "Kalman Filter Exercise",
+    "section": "Worked exercises",
+    "text": "Worked exercises\nAdd the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images."
+  },
+  {
+    "objectID": "tutorials/section-2/08-kalman-filter-exercise.html#implementation-in-r",
+    "href": "tutorials/section-2/08-kalman-filter-exercise.html#implementation-in-r",
+    "title": "Kalman Filter Exercise",
+    "section": "Implementation in R",
+    "text": "Implementation in R\nFit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.\n\n\nCode\n# your code here"
+  },
+  {
+    "objectID": "tutorials/section-2/08-kalman-filter-exercise.html#reflection",
+    "href": "tutorials/section-2/08-kalman-filter-exercise.html#reflection",
+    "title": "Kalman Filter Exercise",
+    "section": "Reflection",
+    "text": "Reflection\nWhat was most challenging:\nWhat I now understand:\nAdvantages and limitations of the methods:\nLinks: related projects and journal entries."
+  }
+]

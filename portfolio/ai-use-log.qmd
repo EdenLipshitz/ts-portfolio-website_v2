@@ -1,0 +1,15 @@
+---
+title: "AI Use Log"
+---
+
+A running log of substantive uses of AI that influenced my work, as required by the portfolio guidelines. I remain responsible for checking and understanding everything AI helped me produce.
+
+| Entry | Tool used | What I asked it to help with | Link to prompt or conversation | What I checked or changed myself |
+|:--|:--|:--|:--|:--|
+| 1 | Claude | Planning the four projects from the course material and guidelines | *[link]* | |
+| 2 | Claude | Drafting the Project 1 Quarto analysis | *[link]* | |
+| 3 | Claude | Drafting the Project 2 Quarto analysis and fixing a numerical error | *[link]* | |
+| 4 | Claude | Drafting the Project 3 Quarto analysis | *[link]* | |
+| 5 | Claude | Building the structure of this Quarto website | *[link]* | |
+
+*Add the date of each use in the first column if required.*

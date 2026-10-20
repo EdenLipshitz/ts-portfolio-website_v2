@@ -1,0 +1,35 @@
+---
+title: "Kalman Filter Exercise"
+subtitle: "Section 2: Exponential smoothing, state-space and hidden Markov models"
+---
+
+::: {.callout-note appearance="simple"}
+**Topics covered:** The Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations.
+:::
+
+## Overview of the key concepts
+
+*Summarise the main ideas of this session in your own words.*
+
+## Worked exercises
+
+*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*
+
+## Implementation in R
+
+*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*
+
+```{r}
+#| eval: false
+# your code here
+```
+
+## Reflection
+
+**What was most challenging:**
+
+**What I now understand:**
+
+**Advantages and limitations of the methods:**
+
+**Links:** related projects and journal entries.

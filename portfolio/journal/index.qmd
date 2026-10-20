@@ -1,0 +1,16 @@
+---
+title: "Journal"
+toc: false
+listing:
+  contents: entries
+  sort: "title"
+  type: table
+  fields: [title, description]
+  field-display-names:
+    title: "Week"
+    description: "Topic"
+  sort-ui: false
+  filter-ui: false
+---
+
+A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the [AI use log](../ai-use-log.qmd).

@@ -1,0 +1,36 @@
+---
+title: "Code and Data"
+---
+
+## Data
+
+| File | Source | Used in |
+|:--|:--|:--|
+| `data/tourist_data.xlsx` | Statistics South Africa, *Tourist Accommodation* (P6410), <https://www.statssa.gov.za/?page_id=1854&PPN=P6410> | Projects 1 and 3 |
+| `data/usdzar_fred.csv` | FRED series DEXSFUS (daily rand per US dollar), <https://fred.stlouisfed.org/series/DEXSFUS> | Project 2 |
+| `data/usdzar_monthly_fred.csv` | FRED series EXSFUS (monthly average rand per US dollar), <https://fred.stlouisfed.org/series/EXSFUS> | Project 3 |
+
+The two FRED files are downloaded automatically the first time the relevant project is rendered and saved in the `data/` folder. All data are public, aggregated statistics with no personal information, so POPIA does not apply.
+
+## Reproducing the portfolio
+
+1. Install R, Quarto (version 1.4 or later) and the packages listed below.
+2. Open the portfolio folder (or `portfolio.Rproj` in RStudio).
+3. Run `quarto render` in the terminal, or use **Build > Render Website** in RStudio.
+
+Computational results are stored in the `_freeze` folder, so pages are only re-run when their source changes.
+
+## R packages
+
+```{r}
+#| eval: false
+install.packages(c("fpp3", "readxl", "knitr", "rmarkdown", "patchwork", "rugarch"))
+```
+
+## Code
+
+The full code for each project is in the project pages (use the **Code** button at the top of each page to show or download it):
+
+* [Project 1](../projects/project-01/project-01-sarima-tourism_v4.qmd)
+* [Project 2](../projects/project-02/project-02-garch-zar_v4.qmd)
+* [Project 3](../projects/project-03/project-03-covid-intervention-tourism_v2.qmd)

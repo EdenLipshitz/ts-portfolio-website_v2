@@ -1,0 +1,14 @@
+---
+title: "Project 4: Building a Kalman Filter from First Principles"
+subtitle: "Section 2: State-space models"
+---
+
+::: {.callout-warning appearance="simple"}
+This project is in progress.
+:::
+
+## Planned outline
+
+1. **Implementation:** a general linear Gaussian state-space model in matrix form, with the Kalman filter (handling missing observations), the Kalman smoother, the likelihood from the prediction error decomposition, and maximum likelihood estimation of the variances.
+2. **Validation:** replicate the local level model for the Nile data from the course notes, and run a simulation study with known variances.
+3. **Application:** fit a structural model with an AR(1) component to the accommodation series with the COVID months treated as missing, check the residual diagnostics that the Project 3 structural model failed, and compare forecasts on the same test set as Projects 1 and 3.

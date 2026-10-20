@@ -1,0 +1,46 @@
+---
+title: "Time Series Analysis Portfolio"
+subtitle: "STA Honours 2026, Department of Statistical Sciences, University of Cape Town"
+toc: false
+---
+
+::: {.landing-hero}
+**Name:** Eden Lipshitz
+
+**Student number:** LPSEDE001
+
+This portfolio documents what I learned in the Honours Time Series Analysis module: four substantial projects, worked tutorials for every teaching session, and a journal of my progress. Select a section below to begin.
+:::
+
+::: {.grid}
+::: {.g-col-12 .g-col-md-4}
+::: {.portfolio-card}
+### [Projects](projects/index.qmd){.stretched-link}
+
+Four substantial projects, two from each section of the course, each with a one-page executive summary and a full reproducible analysis.
+:::
+:::
+
+::: {.g-col-12 .g-col-md-4}
+::: {.portfolio-card}
+### [Journal](journal/index.qmd){.stretched-link}
+
+Twelve weekly entries on what I did, what I learned, what I found difficult, and what I planned to do next.
+:::
+:::
+
+::: {.g-col-12 .g-col-md-4}
+::: {.portfolio-card}
+### [Tutorials](tutorials/index.qmd){.stretched-link}
+
+Worked tutorials, labs and exercises with implementations and reflections, organised by section.
+:::
+:::
+
+:::
+
+## Also in this portfolio
+
+* [Reflective commentary](reflective-commentary.qmd): learning achievements, methodological challenges, ethics and reproducibility, and future development.
+* [AI use log](ai-use-log.qmd): a record of substantive AI use, with what I checked or changed myself.
+* [Code and data](appendix/code-and-data.qmd): data sources, access instructions and how to reproduce every result.

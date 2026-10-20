@@ -1,0 +1,39 @@
+---
+title: "Exponential Smoothing Exercise"
+subtitle: "Section 2: Exponential smoothing, state-space and hidden Markov models"
+---
+
+::: {.callout-note appearance="simple"}
+**Topics covered:** Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and their prediction intervals.
+:::
+
+## Overview of the key concepts
+
+*Summarise the main ideas of this session in your own words.*
+
+## Worked exercises
+
+### Exercises from the chapter
+
+1. Show that the forecast variance for an ETS(A,N,N) model is $\sigma^2[1 + \alpha^2 (h - 1)]$.
+2. Write down a 95% prediction interval for an ETS(A,N,N) model as a function of $\ell_T$, $\alpha$, $h$ and $\sigma$.
+3. Show that forecasts from an ARIMA(0,1,1) process are equivalent to simple exponential smoothing.
+
+## Implementation in R
+
+*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*
+
+```{r}
+#| eval: false
+# your code here
+```
+
+## Reflection
+
+**What was most challenging:**
+
+**What I now understand:**
+
+**Advantages and limitations of the methods:**
+
+**Links:** related projects and journal entries.

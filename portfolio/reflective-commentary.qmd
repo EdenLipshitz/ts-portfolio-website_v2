@@ -1,0 +1,13 @@
+---
+title: "Reflective Commentary"
+---
+
+*Target length: 1000 to 2000 words.*
+
+## Learning achievements
+
+## Methodological challenges
+
+## Ethical and reproducibility considerations
+
+## Future areas for development

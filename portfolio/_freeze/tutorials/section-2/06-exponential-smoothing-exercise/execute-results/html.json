@@ -1,0 +1,15 @@
+{
+  "hash": "4e8f38df850de20fe3ede3d4cf551869",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Exponential Smoothing Exercise\"\nsubtitle: \"Section 2: Exponential smoothing, state-space and hidden Markov models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Topics covered:** Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and their prediction intervals.\n:::\n\n## Overview of the key concepts\n\n*Summarise the main ideas of this session in your own words.*\n\n## Worked exercises\n\n### Exercises from the chapter\n\n1. Show that the forecast variance for an ETS(A,N,N) model is $\\sigma^2[1 + \\alpha^2 (h - 1)]$.\n2. Write down a 95% prediction interval for an ETS(A,N,N) model as a function of $\\ell_T$, $\\alpha$, $h$ and $\\sigma$.\n3. Show that forecasts from an ARIMA(0,1,1) process are equivalent to simple exponential smoothing.\n\n## Implementation in R\n\n*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# your code here\n```\n:::\n\n\n## Reflection\n\n**What was most challenging:**\n\n**What I now understand:**\n\n**Advantages and limitations of the methods:**\n\n**Links:** related projects and journal entries.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

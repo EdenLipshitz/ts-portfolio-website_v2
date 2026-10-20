@@ -1,0 +1,103 @@
+project:
+  type: website
+  output-dir: output-dir: ../../docs
+
+website:
+  title: "Time Series Portfolio"
+  page-navigation: true
+  back-to-top-navigation: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - text: Projects
+        menu:
+          - href: projects/index.qmd
+            text: All projects
+          - text: "---"
+          - href: projects/project-01/project-01-sarima-tourism_v4.qmd
+            text: "Project 1: ARIMA and SARIMA"
+          - href: projects/project-02/project-02-garch-zar_v4.qmd
+            text: "Project 2: GARCH volatility"
+          - href: projects/project-03/project-03-covid-intervention-tourism_v2.qmd
+            text: "Project 3: Modelling the COVID shock"
+          - href: projects/project-04/project-04-placeholder.qmd
+            text: "Project 4: Kalman filter"
+      - text: Journal
+        menu:
+          - href: journal/index.qmd
+            text: All entries
+          - text: "---"
+          - href: journal/entries/week-01.qmd
+            text: "Week 1"
+          - href: journal/entries/week-02.qmd
+            text: "Week 2"
+          - href: journal/entries/week-03.qmd
+            text: "Week 3"
+          - href: journal/entries/week-04.qmd
+            text: "Week 4"
+          - href: journal/entries/week-05.qmd
+            text: "Week 5"
+          - href: journal/entries/week-06.qmd
+            text: "Week 6"
+          - href: journal/entries/week-07.qmd
+            text: "Week 7"
+          - href: journal/entries/week-08.qmd
+            text: "Week 8"
+          - href: journal/entries/week-09.qmd
+            text: "Week 9"
+          - href: journal/entries/week-10.qmd
+            text: "Week 10"
+          - href: journal/entries/week-11.qmd
+            text: "Week 11"
+          - href: journal/entries/week-12.qmd
+            text: "Week 12"
+      - text: Tutorials
+        menu:
+          - href: tutorials/index.qmd
+            text: All tutorials and exercises
+          - text: "---"
+          - text: "Section 1"
+          - href: tutorials/section-1/01-ts-intro.qmd
+            text: "TS Intro"
+          - href: tutorials/section-1/02-tsa-part1-exercise-1.qmd
+            text: "Time Series Analysis Part 1: Exercise 1"
+          - href: tutorials/section-1/03-tsa-part1-exercise-2.qmd
+            text: "Time Series Analysis Part 1: Exercise 2"
+          - href: tutorials/section-1/04-arch-garch-lab.qmd
+            text: "ARCH and GARCH Lab"
+          - href: tutorials/section-1/05-spectral-analysis-lab.qmd
+            text: "Spectral Analysis Lab"
+          - text: "---"
+          - text: "Section 2"
+          - href: tutorials/section-2/06-exponential-smoothing-exercise.qmd
+            text: "Exponential Smoothing Exercise"
+          - href: tutorials/section-2/07-state-space-model-exercise.qmd
+            text: "State Space Model Exercise"
+          - href: tutorials/section-2/08-kalman-filter-exercise.qmd
+            text: "Kalman Filter Exercise"
+          - href: tutorials/section-2/09-hidden-markov-model-exercise.qmd
+            text: "Hidden Markov Model Exercise"
+    right:
+      - href: reflective-commentary.qmd
+        text: Reflection
+      - href: ai-use-log.qmd
+        text: AI use log
+      - href: appendix/code-and-data.qmd
+        text: Code and data
+  page-footer:
+    center: "Eden | STA Honours 2026 | Time Series Analysis | University of Cape Town"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    toc-depth: 3
+    code-fold: true
+    code-tools: true
+    code-overflow: wrap
+    fig-align: center
+
+execute:
+  freeze: auto

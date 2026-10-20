@@ -1,0 +1,37 @@
+.portfolio-card {
+  position: relative;
+  border: 1px solid #dee2e6;
+  border-radius: 0.6rem;
+  padding: 1.25rem 1.25rem 0.75rem 1.25rem;
+  height: 100%;
+  background: #ffffff;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+.portfolio-card:hover {
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+.portfolio-card h3 {
+  margin-top: 0;
+  font-size: 1.3rem;
+}
+.portfolio-card a {
+  text-decoration: none;
+}
+.portfolio-card .card-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #495057;
+  background: #e9ecef;
+  border-radius: 1rem;
+  padding: 0.1rem 0.6rem;
+  margin-bottom: 0.5rem;
+}
+.landing-hero {
+  padding: 1.5rem 0 1rem 0;
+}
+.section-heading {
+  margin-top: 2rem;
+  border-bottom: 2px solid #2780e3;
+  padding-bottom: 0.3rem;
+}

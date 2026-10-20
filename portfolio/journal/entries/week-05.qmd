@@ -1,0 +1,18 @@
+---
+title: "Week 05"
+description: "*[Session or topic covered this week]*"
+---
+
+**Date:** *[date of entry]*
+
+**Session or topic covered:**
+
+## What I did
+
+## What I learned
+
+## Difficulties or open questions
+
+## What to do next
+
+**Links:** *[related tutorials and projects]*
