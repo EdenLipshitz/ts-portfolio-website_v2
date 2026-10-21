@@ -7,9 +7,9 @@ A running log of substantive uses of AI that influenced my work, as required by 
 | Entry | Tool used | What I asked it to help with | Link to prompt or conversation | What I checked or changed myself |
 |:--|:--|:--|:--|:--|
 | 1 | Claude | Planning the four projects from the course material and guidelines | *[link]* | |
-| 2 | Claude |  | *[link]* | |
-| 3 | Claude |  | *[link]* | |
-| 4 | Claude |  | *[link]* | |
-| 5 | Claude |  | *[link]* | |
+| 2 | Claude | Structure of project 1 | *[link]* | |
+| 3 | Claude | Structure of project 2 | *[link]* | |
+| 4 | Claude | Structure of project 3 | *[link]* | |
+| 5 | Claude | Course work intuitive explanations | *[link]* | |
 
 *Add the date of each use in the first column if required.*
