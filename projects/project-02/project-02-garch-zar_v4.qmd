@@ -20,6 +20,7 @@ library(fpp3)      # tsibble, feasts, dplyr, tidyr, ggplot2, lubridate
 library(rugarch)   # ARCH and GARCH estimation, rolling forecasts
 library(knitr)
 library(patchwork)
+library(tseries)
 
 set.seed(2026)
 theme_set(theme_minimal(base_size = 11))
@@ -63,7 +64,7 @@ rejects <- function(p, a = 0.05) if (p < a) "rejects" else "does not reject"
 
 **Key findings:** The returns show all the stylised facts: almost no autocorrelation in the returns themselves, strong autocorrelation in squared returns, and fat tails. ARCH(1) fails the residual diagnostics, while the GARCH(1,1) models capture the clustering with a very persistent variance. Student t errors fit far better than normal errors. The detailed results of the backtest, including which models give correctly calibrated VaR, are in @sec-findings.
 
-**What I would do differently:** Use a longer test period so that the 1% VaR tests have more power, and compare GARCH with a regime-switching model of volatility (Project 4).
+**What I would do differently:** Use a longer test period so that the 1% VaR tests have more power, and compare GARCH with a regime-switching model of volatility in a potnential future project or comaprison.
 
 **Detailed analysis:** the sections below.
 :::
@@ -85,19 +86,19 @@ The rand is a useful series for this because it is one of the most traded and mo
 ::: {.callout-tip appearance="simple"}
 ## Data source at a glance
 
-| | |
-|:--|:--|
+|  |  |
+|:-----------------------------------|:-----------------------------------|
 | **Publisher** | Board of Governors of the Federal Reserve System (US), via FRED, Federal Reserve Bank of St. Louis |
 | **Series** | DEXSFUS: South African Rand to US Dollar Spot Exchange Rate (rand per one US dollar), noon buying rates in New York |
 | **Frequency** | Daily (business days), not seasonally adjusted |
 | **Where to get it** | <https://fred.stlouisfed.org/series/DEXSFUS> |
 | **File used** | `usdzar_fred.csv`, downloaded by the code below from the FRED CSV link |
 | **Period analysed** | 1 January 2010 to 30 September 2026 |
-| **Date downloaded** | *[add the date you first rendered this file]* |
+| **Date downloaded** | 15 October 2026 |
 | **Licence and privacy** | Public domain official statistics; no personal information, so POPIA does not apply |
 :::
 
-**Reference:** Board of Governors of the Federal Reserve System (US) (2026) *South African Rand to U.S. Dollar Spot Exchange Rate [DEXSFUS]*. Retrieved from FRED, Federal Reserve Bank of St. Louis. Available at: <https://fred.stlouisfed.org/series/DEXSFUS> (Accessed: *[date]*).
+**Reference:** Board of Governors of the Federal Reserve System (US) (2026) *South African Rand to U.S. Dollar Spot Exchange Rate \[DEXSFUS\]*. Retrieved from FRED, Federal Reserve Bank of St. Louis. Available at: <https://fred.stlouisfed.org/series/DEXSFUS> (Accessed: 30 September 2026).
 
 ## Reading the data and computing returns
 
@@ -138,6 +139,24 @@ r_t = 100 \times (\log P_t - \log P_{t-1}),
 $$
 
 where $P_t$ is the number of rand per US dollar. A **positive return means the rand weakened** against the dollar. The analysis uses `r fmt(n, 0)` daily returns from `r format(min(fx$date), "%d %B %Y")` to `r format(max(fx$date), "%d %B %Y")`.
+
+I work with log returns rather than plain differences of the rate, $P_t - P_{t-1}$, for three reasons. First, log returns are scale-free: the rand moved from about R`r fmt(first(fx$rate))` to R`r fmt(last(fx$rate))` per dollar over the sample, so a 10-cent move is a `r fmt(100 * 0.10 / first(fx$rate), 1)`% change at the start but only `r fmt(100 * 0.10 / last(fx$rate), 1)`% at the end, and plain differences would treat these as the same shock. Second, because the size of rand moves grows with the level of the rate, plain differences show a variance that rises over time because of the trend in the level rather than volatility clustering (@fig-diff-vs-log), which would contaminate the variance equation. Third, multiplied by 100, a log return is approximately the percentage change, and log returns add across days, so a multi-day return is the sum of the daily ones.
+
+```{r}
+#| label: fig-diff-vs-log
+#| fig-cap: "Left: plain daily differences of the rate (rand). Right: daily log returns (%). The plain differences fan out as the rate rises; the log returns do not."
+#| fig-height: 3.5
+
+p_diff <- ggplot(fx |> mutate(d = rate - lag(rate)), aes(date, d)) +
+  geom_line(colour = "grey30", linewidth = 0.2) +
+  labs(x = NULL, y = "Daily change (rand)")
+
+p_logr <- ggplot(fx, aes(date, r)) +
+  geom_line(colour = "grey30", linewidth = 0.2) +
+  labs(x = NULL, y = "Daily log return (%)")
+
+p_diff + p_logr
+```
 
 # Exploratory data analysis (Box and Jenkins step 1)
 
@@ -270,12 +289,12 @@ With 12 lags the statistic is `r fmt(arch_raw["statistic"], 1)` on 12 degrees of
 
 The project follows the Box and Jenkins workflow from the notes, applied to both equations of the model:
 
-1. **Plot the data:** done in the exploratory analysis.
-2. **Difference until approximately stationary:** working with log returns is the first difference of the log exchange rate. The returns fluctuate around a constant mean, so no further differencing is needed.
-3. **Read the ACF and PACF to identify candidate orders:** for the *mean* equation the ACF of the returns is close to zero at all lags, so a constant mean, ARMA(0,0), is used. For the *variance* equation the slowly decaying ACF of squared returns suggests that a low order ARCH model will not be enough and that GARCH(1,1) is the natural candidate, since it is an ARCH($\infty$) model with geometrically decaying weights.
-4. **Estimate by maximum likelihood:** with `rugarch`, and with my own code for GARCH(1,1) (@sec-own-code).
-5. **Diagnose residuals against the white noise standard:** the standardised residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should show no autocorrelation (mean equation adequate) and their squares should show no autocorrelation (variance equation adequate).
-6. **Forecast only if diagnostics pass; otherwise return to step 3.**
+1.  **Plot the data:** done in the exploratory analysis.
+2.  **Difference until approximately stationary:** working with log returns is the first difference of the log exchange rate. The returns fluctuate around a constant mean, so no further differencing is needed.
+3.  **Read the ACF and PACF to identify candidate orders:** for the *mean* equation the ACF of the returns is close to zero at all lags, so a constant mean, ARMA(0,0), is used. For the *variance* equation the slowly decaying ACF of squared returns suggests that a low order ARCH model will not be enough and that GARCH(1,1) is the natural candidate, since it is an ARCH($\infty$) model with geometrically decaying weights.
+4.  **Estimate by maximum likelihood:** with `rugarch`, and with my own code for GARCH(1,1) (@sec-own-code).
+5.  **Diagnose residuals against the white noise standard:** the standardised residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should show no autocorrelation (mean equation adequate) and their squares should show no autocorrelation (variance equation adequate).
+6.  **Forecast only if diagnostics pass; otherwise return to step 3.**
 
 Finally, a model that survives the loop must still beat the benchmarks out of sample (@sec-backtest).
 
@@ -284,7 +303,7 @@ Finally, a model that survives the loop must still beat the benchmarks out of sa
 All models have a constant mean, $r_t = \mu + \varepsilon_t$ with $\varepsilon_t = \sigma_t z_t$, and differ in the variance equation and in the distribution of $z_t$:
 
 | Model | Variance equation | Distribution of $z_t$ |
-|:--|:--|:--|
+|:-----------------------|:-----------------------|:-----------------------|
 | ARCH(1) | $\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2$ | Normal |
 | GARCH(1,1) normal | $\sigma_t^2 = \omega + \alpha \varepsilon_{t-1}^2 + \beta \sigma_{t-1}^2$ | Normal |
 | GARCH(1,1) t | as above | Standardised Student t with $\nu$ degrees of freedom |
@@ -629,8 +648,8 @@ where the last factor rescales the t distribution to unit variance.
 
 Two benchmarks without a GARCH variance are included, in the spirit of the benchmark methods in the notes:
 
-* **Historical simulation (HS):** the VaR is the empirical quantile of the previous `r hs_window` returns.
-* **Rolling normal:** a normal distribution with the mean and variance of the previous `r hs_window` returns.
+-   **Historical simulation (HS):** the VaR is the empirical quantile of the previous `r hs_window` returns.
+-   **Rolling normal:** a normal distribution with the mean and variance of the previous `r hs_window` returns.
 
 The ARCH(1) model failed the residual diagnostics, so following step 6 it is not part of the forecast comparison.
 
@@ -694,9 +713,8 @@ fc_all <- bind_rows(fc_list, list(bench_hs, bench_rn)) |>
 
 For each model and level, a *hit* is a day on which the realised return falls beyond the VaR (below it for the 1% and 5% levels, above it for the 95% and 99% levels). Under a correct model the hits are independent Bernoulli($p^*$) variables, where $p^* = p$ for the lower tail and $p^* = 1 - p$ for the upper tail. I implemented two standard likelihood ratio tests.
 
-* **Kupiec unconditional coverage test:** is the hit rate equal to $p^*$? With $x$ hits in $T$ days and $\hat\pi = x / T$,
-  $LR_{uc} = -2 \left[ (T - x)\log(1 - p^*) + x \log p^* - (T - x)\log(1 - \hat\pi) - x \log \hat\pi \right] \sim \chi^2_1 .$
-* **Christoffersen conditional coverage test:** adds a test of independence, comparing a first-order Markov chain for the hits with an independent sequence, so that clustered hits are detected. $LR_{cc} = LR_{uc} + LR_{ind} \sim \chi^2_2$.
+-   **Kupiec unconditional coverage test:** is the hit rate equal to $p^*$? With $x$ hits in $T$ days and $\hat\pi = x / T$, $LR_{uc} = -2 \left[ (T - x)\log(1 - p^*) + x \log p^* - (T - x)\log(1 - \hat\pi) - x \log \hat\pi \right] \sim \chi^2_1 .$
+-   **Christoffersen conditional coverage test:** adds a test of independence, comparing a first-order Markov chain for the hits with an independent sequence, so that clustered hits are detected. $LR_{cc} = LR_{uc} + LR_{ind} \sim \chi^2_2$.
 
 ```{r}
 #| label: backtest-functions
@@ -853,21 +871,21 @@ Using the preferred `r final_model` model fitted to the full sample, the conditi
 
 ## Key findings {#sec-findings}
 
-1. **The rand shows all the stylised facts of financial returns:** almost no autocorrelation in returns, strong and slowly decaying autocorrelation in squared returns, and fat tails (excess kurtosis `r fmt(kurt - 3, 1)`). The ARCH LM test confirms a time-varying variance (p `r pfmt(arch_raw["p.value"])`).
-2. **The Box and Jenkins loop rejected ARCH(1)** because ARCH structure remained in its standardised residuals, and led to GARCH(1,1).
-3. **Volatility is highly persistent:** $\hat\alpha + \hat\beta$ = `r fmt(pers_g, 4)`, a half-life of about `r fmt(half_g, 0)` trading days.
-4. **Student t errors are clearly better than normal errors** ($\hat\nu$ = `r fmt(nu_g, 1)`), so even after removing volatility clustering, extreme days are more common than a normal distribution implies.
-5. **Asymmetry:** $\hat\gamma$ = `r fmt(gamma_j, 3)` (p `r pfmt(gamma_p)`). `r if (gamma_p < 0.05) "There is significant asymmetry in how depreciation and appreciation shocks affect volatility." else "There is no significant asymmetry."`
-6. **Out of sample**, the preferred model by quantile loss is `r best_tick` and by QLIKE `r best_qlike`. The number of rejected VaR tests (out of four levels) was `r rej[["GARCH(1,1) t"]]` for GARCH(1,1) t against `r rej[["Historical simulation"]]` for historical simulation and `r rej[["Rolling normal"]]` for the rolling normal benchmark.
+1.  **The rand shows all the stylised facts of financial returns:** almost no autocorrelation in returns, strong and slowly decaying autocorrelation in squared returns, and fat tails (excess kurtosis `r fmt(kurt - 3, 1)`). The ARCH LM test confirms a time-varying variance (p `r pfmt(arch_raw["p.value"])`).
+2.  **The Box and Jenkins loop rejected ARCH(1)** because ARCH structure remained in its standardised residuals, and led to GARCH(1,1).
+3.  **Volatility is highly persistent:** $\hat\alpha + \hat\beta$ = `r fmt(pers_g, 4)`, a half-life of about `r fmt(half_g, 0)` trading days.
+4.  **Student t errors are clearly better than normal errors** ($\hat\nu$ = `r fmt(nu_g, 1)`), so even after removing volatility clustering, extreme days are more common than a normal distribution implies.
+5.  **Asymmetry:** $\hat\gamma$ = `r fmt(gamma_j, 3)` (p `r pfmt(gamma_p)`). `r if (gamma_p < 0.05) "There is significant asymmetry in how depreciation and appreciation shocks affect volatility." else "There is no significant asymmetry."`
+6.  **Out of sample**, the preferred model by quantile loss is `r best_tick` and by QLIKE `r best_qlike`. The number of rejected VaR tests (out of four levels) was `r rej[["GARCH(1,1) t"]]` for GARCH(1,1) t against `r rej[["Historical simulation"]]` for historical simulation and `r rej[["Rolling normal"]]` for the rolling normal benchmark.
 
 ## Issues and limitations
 
-* **Power of the tests.** With `r n_test` test days, a correct 1% VaR is expected to be exceeded only `r fmt(n_test * 0.01, 0)` times, so the Kupiec test has little power to separate a 1% model from, say, a 1.5% model. A model that "passes" is not proven correct.
-* **Tests with a large sample.** The residual tests in-sample use more than 4000 observations, so even very small departures from white noise can be significant. I combined the formal tests with the plots and the out-of-sample results rather than relying on p-values alone.
-* **Very high persistence.** A persistence close to 1 can be a sign of structural breaks in the level of volatility (for example a calmer period after 2020) rather than true long memory, as discussed in the notes. A model with a regime change in volatility would be a natural alternative, and this is the subject of Project 4.
-* **Data choices.** FRED noon rates in New York miss moves that happen during South African trading hours after the New York fix, and dropping US holidays makes some returns cover two days. Neither should affect the conclusions much, but a Johannesburg close series would be a useful check.
-* **Refitting every 25 days** rather than daily saves time but means the parameters lag slightly behind; the volatility itself is still updated every day.
-* **VaR is only one risk measure.** It says nothing about how large losses are once the VaR is exceeded. Expected shortfall would be the natural extension.
+-   **Power of the tests.** With `r n_test` test days, a correct 1% VaR is expected to be exceeded only `r fmt(n_test * 0.01, 0)` times, so the Kupiec test has little power to separate a 1% model from, say, a 1.5% model. A model that "passes" is not proven correct.
+-   **Tests with a large sample.** The residual tests in-sample use more than 4000 observations, so even very small departures from white noise can be significant. I combined the formal tests with the plots and the out-of-sample results rather than relying on p-values alone.
+-   **Very high persistence.** A persistence close to 1 can be a sign of structural breaks in the level of volatility (for example a calmer period after 2020) rather than true long memory, as discussed in the notes. A model with a regime change in volatility would be a natural alternative, and this is the subject of Project 4.
+-   **Data choices.** FRED noon rates in New York miss moves that happen during South African trading hours after the New York fix, and dropping US holidays makes some returns cover two days. Neither should affect the conclusions much, but a Johannesburg close series would be a useful check.
+-   **Refitting every 25 days** rather than daily saves time but means the parameters lag slightly behind; the volatility itself is still updated every day.
+-   **VaR is only one risk measure.** It says nothing about how large losses are once the VaR is exceeded. Expected shortfall would be the natural extension.
 
 ## What I would do differently
 
