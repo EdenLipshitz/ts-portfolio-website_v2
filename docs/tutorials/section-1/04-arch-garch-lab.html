@@ -104,6 +104,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -301,7 +330,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#overview-of-the-key-concepts" id="toc-overview-of-the-key-concepts" class="nav-link active" data-scroll-target="#overview-of-the-key-concepts">Overview of the key concepts</a></li>
-  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a></li>
+  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a>
+  <ul class="collapse">
+  <li><a href="#part-a-fitting-garch-models-to-the-t-bill-rate" id="toc-part-a-fitting-garch-models-to-the-t-bill-rate" class="nav-link" data-scroll-target="#part-a-fitting-garch-models-to-the-t-bill-rate">Part A: Fitting GARCH models to the T-bill rate</a></li>
+  <li><a href="#part-b-black-monday-19-october-1987" id="toc-part-b-black-monday-19-october-1987" class="nav-link" data-scroll-target="#part-b-black-monday-19-october-1987">Part B: Black Monday (19 October 1987)</a></li>
+  </ul></li>
   <li><a href="#implementation-in-r" id="toc-implementation-in-r" class="nav-link" data-scroll-target="#implementation-in-r">Implementation in R</a></li>
   <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
   </ul>
@@ -337,33 +370,781 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="callout-body-container">
 <p><strong>Topics covered:</strong> Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.</p>
+<p><strong>Data:</strong> <code>Tbrate</code> (quarterly US 91-day T-bill rate, 1950–1996) and <code>SP500</code> (daily S&amp;P 500 returns), both from the <code>Ecdat</code> package on CRAN. <strong>Packages:</strong> <code>Ecdat</code>, <code>fGarch</code>, <code>tseries</code>, <code>knitr</code>.</p>
 </div>
 </div>
 </div>
-<section id="overview-of-the-key-concepts" class="level2">
-<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
-<p><em>Summarise the main ideas of this session in your own words.</em></p>
-</section>
-<section id="worked-exercises" class="level2">
-<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
-<p><em>Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.</em></p>
-</section>
-<section id="implementation-in-r" class="level2">
-<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
-<p><em>Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.</em></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Ecdat)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fGarch)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Helpers used throughout</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>lb  <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">lag =</span> <span class="dv">10</span>, <span class="at">fitdf =</span> <span class="dv">0</span>) <span class="fu">Box.test</span>(x, <span class="at">lag =</span> lag, <span class="at">type =</span> <span class="st">"Ljung-Box"</span>, <span class="at">fitdf =</span> fitdf)<span class="sc">$</span>p.value</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>aic <span class="ot">&lt;-</span> <span class="cf">function</span>(fit) <span class="fu">unname</span>(fit<span class="sc">@</span>fit<span class="sc">$</span>ics[<span class="st">"AIC"</span>]) <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">@</span>data)  <span class="co"># fGarch reports AIC / n</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>bic <span class="ot">&lt;-</span> <span class="cf">function</span>(fit) <span class="fu">unname</span>(fit<span class="sc">@</span>fit<span class="sc">$</span>ics[<span class="st">"BIC"</span>]) <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">@</span>data)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>f2  <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">d =</span> <span class="dv">2</span>) <span class="fu">formatC</span>(x, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> d)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>fp  <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="fu">ifelse</span>(p <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">"&lt; 0.001"</span>, <span class="fu">formatC</span>(p, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<section id="overview-of-the-key-concepts" class="level2">
+<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
+<p>Financial and interest-rate series share a few <strong>stylised facts</strong>: the series itself (or its changes) shows little autocorrelation, but its <em>squares</em> or absolute values are strongly autocorrelated. This is <strong>volatility clustering</strong>: large moves follow large moves and calm follows calm. Returns are also heavier-tailed than a normal distribution.</p>
+<p>An ARMA model only describes the conditional <em>mean</em>, and assumes a constant variance. ARCH and GARCH models add an equation for the conditional <em>variance</em>:</p>
+<p><span class="math display">\[
+\varepsilon_t = \sigma_t z_t, \qquad z_t \overset{iid}{\sim} (0,1)
+\]</span></p>
+<ul>
+<li><strong>ARCH(1):</strong> <span class="math inline">\(\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2\)</span>. Today’s variance depends on yesterday’s squared shock.</li>
+<li><strong>GARCH(1,1):</strong> <span class="math inline">\(\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2\)</span>. Adding the lagged variance gives long memory in volatility with only one extra parameter. Persistence is measured by <span class="math inline">\(\alpha_1 + \beta_1\)</span>; the variance is covariance-stationary only if this is below 1.</li>
+</ul>
+<p>In practice the two are combined: an ARMA model for the mean with GARCH errors, estimated jointly by maximum likelihood. The conditional distribution of <span class="math inline">\(z_t\)</span> can be normal or a standardised <span class="math inline">\(t\)</span> to allow fat tails.</p>
+<p><strong>Diagnostics</strong> work on two kinds of residuals. The <em>raw</em> residuals <span class="math inline">\(\hat\varepsilon_t\)</span> still contain the changing variance, so the ACF of <span class="math inline">\(\hat\varepsilon_t^2\)</span> shows whether ARCH effects are present. The <em>standardised</em> residuals <span class="math inline">\(\hat z_t = \hat\varepsilon_t / \hat\sigma_t\)</span> should be white noise with no remaining structure in their squares if the model is adequate. Ljung-Box tests on <span class="math inline">\(\hat z_t\)</span> and <span class="math inline">\(\hat z_t^2\)</span> formalise this.</p>
+<p>A fitted GARCH model gives a <strong>conditional forecast distribution</strong> for the next observation, which lets us compute probabilities of extreme moves given yesterday’s information. This is the basis of Value-at-Risk.</p>
+</section>
+<section id="worked-exercises" class="level2">
+<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
+<section id="part-a-fitting-garch-models-to-the-t-bill-rate" class="level3">
+<h3 class="anchored" data-anchor-id="part-a-fitting-garch-models-to-the-t-bill-rate">Part A: Fitting GARCH models to the T-bill rate</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Tbrate, <span class="at">package =</span> <span class="st">"Ecdat"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="co"># r = the 91-day treasury bill rate, y = log of real GDP, pi = inflation rate</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Tbill     <span class="ot">&lt;-</span> Tbrate[, <span class="dv">1</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>Del.Tbill <span class="ot">&lt;-</span> <span class="fu">diff</span>(Tbill)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="problem-1-stationarity-and-heteroskedasticity" class="level4">
+<h4 class="anchored" data-anchor-id="problem-1-stationarity-and-heteroskedasticity">Problem 1: Stationarity and heteroskedasticity</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Tbill, <span class="at">main =</span> <span class="st">"Tbill"</span>, <span class="at">ylab =</span> <span class="st">"Rate (%)"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(Tbill, <span class="at">main =</span> <span class="st">"ACF of Tbill"</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Del.Tbill, <span class="at">main =</span> <span class="st">"Del.Tbill"</span>, <span class="at">ylab =</span> <span class="st">"Change (% points)"</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(Del.Tbill, <span class="at">main =</span> <span class="st">"ACF of Del.Tbill"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-tbill-plots" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-tbill-plots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-arch-garch-lab_files/figure-html/fig-tbill-plots-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-tbill-plots-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: T-bill rate (top) and its first difference (bottom): time series plots and ACFs.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ur <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">adf.test</span>(x); k <span class="ot">&lt;-</span> <span class="fu">kpss.test</span>(x)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">ADF =</span> <span class="fu">unname</span>(a<span class="sc">$</span>statistic), <span class="st">`</span><span class="at">ADF p</span><span class="st">`</span> <span class="ot">=</span> a<span class="sc">$</span>p.value,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">KPSS =</span> <span class="fu">unname</span>(k<span class="sc">$</span>statistic), <span class="st">`</span><span class="at">KPSS p</span><span class="st">`</span> <span class="ot">=</span> k<span class="sc">$</span>p.value)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ur_tab <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">Tbill =</span> <span class="fu">ur</span>(Tbill), <span class="at">Del.Tbill =</span> <span class="fu">ur</span>(Del.Tbill))</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(ur_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-unit-root" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-unit-root-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: ADF (H0: unit root) and KPSS (H0: level stationary) tests.
+</figcaption>
+<div aria-describedby="tbl-unit-root-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">ADF</th>
+<th style="text-align: right;">ADF p</th>
+<th style="text-align: right;">KPSS</th>
+<th style="text-align: right;">KPSS p</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Tbill</td>
+<td style="text-align: right;">-1.925</td>
+<td style="text-align: right;">0.608</td>
+<td style="text-align: right;">2.259</td>
+<td style="text-align: right;">0.01</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Del.Tbill</td>
+<td style="text-align: right;">-5.298</td>
+<td style="text-align: right;">0.010</td>
+<td style="text-align: right;">0.158</td>
+<td style="text-align: right;">0.10</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><code>tseries</code> interpolates p-values from a table, so it truncates them at 0.01 and 0.10. A reported 0.01 means “at most 0.01” and 0.10 means “at least 0.10”.</p>
+<p><strong>Which series is stationary?</strong> Tbill is <strong>not</strong> stationary. The ADF test does not reject a unit root (p = 0.608), KPSS rejects stationarity (p ≤ 0.01), and the ACF decays very slowly (lag-1 autocorrelation 0.96). The plot wanders with no fixed level: rates climb from under 1% in 1950 to around 15% in 1981 and then fall.</p>
+<p>Del.Tbill <strong>is</strong> stationary in the mean. Both tests agree: ADF rejects the unit root (p ≤ 0.01) and KPSS does not reject stationarity (p ≥ 0.10). The ACF has one clear spike at lag 1 (0.25) and then cuts off, which points to an AR(1) or MA(1) mean. The tests and the ACF only address the mean, though: the variance of Del.Tbill is clearly not constant.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>periods <span class="ot">&lt;-</span> <span class="fu">cut</span>(<span class="fu">time</span>(Del.Tbill), <span class="fu">c</span>(<span class="dv">1950</span>, <span class="dv">1960</span>, <span class="dv">1970</span>, <span class="dv">1979</span>, <span class="dv">1983</span>, <span class="dv">1990</span>, <span class="dv">1998</span>),</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"1950s"</span>, <span class="st">"1960s"</span>, <span class="st">"1970s"</span>, <span class="st">"1979–83"</span>, <span class="st">"1983–90"</span>, <span class="st">"1990s"</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sd_tab <span class="ot">&lt;-</span> <span class="fu">tapply</span>(Del.Tbill, periods, sd)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">t</span>(sd_tab), <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>lev_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">abs</span>(Del.Tbill), Tbill[<span class="sc">-</span><span class="fu">length</span>(Tbill)])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-sd-by-period" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-sd-by-period-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Standard deviation of Del.Tbill by period.
+</figcaption>
+<div aria-describedby="tbl-sd-by-period-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">1950s</th>
+<th style="text-align: right;">1960s</th>
+<th style="text-align: right;">1970s</th>
+<th style="text-align: right;">1979–83</th>
+<th style="text-align: right;">1983–90</th>
+<th style="text-align: right;">1990s</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">0.47</td>
+<td style="text-align: right;">0.58</td>
+<td style="text-align: right;">0.78</td>
+<td style="text-align: right;">2.18</td>
+<td style="text-align: right;">0.85</td>
+<td style="text-align: right;">1.01</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>Types of heteroskedasticity.</strong> Two kinds are visible:</p>
+<ol type="1">
+<li><strong>Volatility clustering (conditional heteroskedasticity).</strong> Big changes come in bursts. The ACF of the squared changes is strongly significant (Ljung-Box p &lt; 0.001), so a GARCH-type model is justified.</li>
+<li><strong>Level-dependent volatility.</strong> The size of the changes grows with the level of the rate. The correlation between |Del.Tbill| and the previous quarter’s rate is 0.52. The 1979–83 period, when the Federal Reserve targeted money growth and rates were at their peak, has a standard deviation of 2.18, roughly 5 times the 1950s value. GARCH only lets variance depend on past shocks, not on the level, which matters in Problem 4.</li>
+</ol>
+<p>Because Tbill is non-stationary, the model below is fitted to <strong>Del.Tbill</strong>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>garch.model.Tbill <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="at">formula =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                              <span class="at">data =</span> Del.Tbill, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Estimate  Std. Error  t value     Pr(&gt;|t|)
+mu     0.08349652  0.05390549 1.548943 1.213955e-01
+ar1    0.24163450  0.07279700 3.319292 9.024598e-04
+omega  0.33815662  0.06144724 5.503203 3.729535e-08
+alpha1 0.83482811  0.24295106 3.436199 5.899382e-04</code></pre>
+</div>
+</div>
+</section>
+<section id="problem-2-the-fitted-model" class="level4">
+<h4 class="anchored" data-anchor-id="problem-2-the-fitted-model">Problem 2: The fitted model</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch.model.Tbill)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>se.coef</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>(a) Model.</strong> <code>arma(1,0) + garch(1,0)</code> is an <strong>AR(1) mean with ARCH(1) errors</strong>. In the notation of the R output, with <span class="math inline">\(Y_t\)</span> = Del.Tbill:</p>
+<p><span class="math display">\[
+\begin{aligned}
+Y_t &amp;= \mu + \text{ar1}\, Y_{t-1} + \varepsilon_t, \\
+\varepsilon_t &amp;= \sigma_t z_t, \qquad z_t \overset{iid}{\sim} N(0,1), \\
+\sigma_t^2 &amp;= \omega + \text{alpha1}\, \varepsilon_{t-1}^2 .
+\end{aligned}
+\]</span></p>
+<p>In <code>fGarch</code>, <span class="math inline">\(\mu\)</span> is the <strong>intercept</strong> of the AR equation, not the mean of the series. The implied mean is <span class="math inline">\(\mu / (1 - \text{ar1})\)</span> = 0.110. I only realised this when my own likelihood (see the implementation section) gave a different “<span class="math inline">\(\mu\)</span>” with the same likelihood.</p>
+<p><strong>(b) Estimates.</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameter</th>
+<th>Estimate</th>
+<th>Std. error</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mu</td>
+<td>0.0835</td>
+<td>0.0539</td>
+<td>Not significant: no drift in the rate changes</td>
+</tr>
+<tr class="even">
+<td>ar1</td>
+<td>0.2416</td>
+<td>0.0728</td>
+<td>Moderate positive persistence in quarterly changes</td>
+</tr>
+<tr class="odd">
+<td>omega</td>
+<td>0.3382</td>
+<td>0.0614</td>
+<td>Baseline variance</td>
+</tr>
+<tr class="even">
+<td>alpha1</td>
+<td>0.8348</td>
+<td>0.2430</td>
+<td>A large shock strongly raises next quarter’s variance</td>
+</tr>
+</tbody>
+</table>
+<p>The unconditional variance is <span class="math inline">\(\omega / (1 - \alpha_1)\)</span> = 2.05. Since <span class="math inline">\(3\alpha_1^2\)</span> = 2.09 exceeds 1, this ARCH(1) implies an infinite fourth moment, i.e.&nbsp;very heavy unconditional tails.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>res     <span class="ot">&lt;-</span> <span class="fu">residuals</span>(garch.model.Tbill)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>res_std <span class="ot">&lt;-</span> res <span class="sc">/</span> garch.model.Tbill<span class="sc">@</span>sigma.t</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"res"</span>)</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res, <span class="at">main =</span> <span class="st">"acf(res)"</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"acf(res^2)"</span>)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res_std, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"res_std"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res_std, <span class="at">main =</span> <span class="st">"acf(res_std)"</span>)</span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res_std<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"acf(res_std^2)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-arch1-resid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-arch1-resid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-arch-garch-lab_files/figure-html/fig-arch1-resid-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-arch1-resid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Raw residuals (top row) and standardised residuals (bottom row) from the AR(1)/ARCH(1) model for Del.Tbill.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="problem-3-residual-diagnostics" class="level4">
+<h4 class="anchored" data-anchor-id="problem-3-residual-diagnostics">Problem 3: Residual diagnostics</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>lb_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Series =</span> <span class="fu">c</span>(<span class="st">"res"</span>, <span class="st">"res^2"</span>, <span class="st">"res_std"</span>, <span class="st">"res_std^2"</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Lag-1 ACF</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(<span class="fu">list</span>(res, res<span class="sc">^</span><span class="dv">2</span>, res_std, res_std<span class="sc">^</span><span class="dv">2</span>), <span class="cf">function</span>(x) <span class="fu">acf</span>(x, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>acf[<span class="dv">2</span>]),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (lag 10)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(<span class="fu">list</span>(res, res<span class="sc">^</span><span class="dv">2</span>, res_std, res_std<span class="sc">^</span><span class="dv">2</span>), lb),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(lb_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>big <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">abs</span>(res_std) <span class="sc">&gt;</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-lb-arch1" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-lb-arch1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Ljung-Box p-values (lag 10) for the AR(1)/ARCH(1) residuals.
+</figcaption>
+<div aria-describedby="tbl-lb-arch1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Series</th>
+<th style="text-align: right;">Lag-1 ACF</th>
+<th style="text-align: right;">LB p (lag 10)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">res</td>
+<td style="text-align: right;">0.049</td>
+<td style="text-align: right;">0.075</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">res^2</td>
+<td style="text-align: right;">0.258</td>
+<td style="text-align: right;">0.000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">res_std</td>
+<td style="text-align: right;">0.064</td>
+<td style="text-align: right;">0.371</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">res_std^2</td>
+<td style="text-align: right;">-0.040</td>
+<td style="text-align: right;">0.273</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>(a) <code>acf(res)</code></strong> plots the sample autocorrelations of the raw residuals <span class="math inline">\(\hat\varepsilon_t = Y_t - \hat\mu - \widehat{\text{ar1}}\, Y_{t-1}\)</span>. It checks the <strong>mean equation</strong>. Almost all lags lie within the bounds; lag 2 is borderline (-0.14) and the Ljung-Box p-value is 0.075. The AR(1) mean is adequate, though only just at the 10% level.</p>
+<p><strong>(b) <code>acf(res^2)</code></strong> plots the autocorrelations of the squared raw residuals. These are still strongly autocorrelated (lag 4 is 0.55; Ljung-Box p &lt; 0.001). This is <strong>not a sign of poor fit</strong>. The raw residuals are <span class="math inline">\(\sigma_t z_t\)</span>, so they still carry the time-varying variance by construction. The plot tells us that GARCH effects are present in the series, which is the reason for modelling the variance.</p>
+<p><strong>(c) <code>acf(res_std^2)</code></strong> plots the autocorrelations of the squared standardised residuals <span class="math inline">\(\hat z_t^2 = (\hat\varepsilon_t / \hat\sigma_t)^2\)</span>. If the variance equation has captured the clustering, these should be white noise. They nearly are: the largest spike is lag 4 (0.16) and the Ljung-Box p-value is 0.273. ARCH(1) removes most of the volatility clustering. The lag-4 spike in quarterly data hints at more persistence than one lag of ARCH can capture.</p>
+<p><strong>(d) <code>garch.model.Tbill@sigma.t</code></strong> holds the <strong>fitted conditional standard deviations</strong> <span class="math inline">\(\hat\sigma_t = \sqrt{\hat\omega + \hat\alpha_1 \hat\varepsilon_{t-1}^2}\)</span>, one per quarter. They range from 0.58 to 3.86. Dividing the residuals by them gives the standardised residuals.</p>
+<p><strong>(e) <code>plot(res_std)</code>.</strong> Compared with the raw residuals, the bursts of large values around 1980 have been flattened, so standardising has done its job. Two things stand out:</p>
+<ul>
+<li>A few large standardised residuals remain (1986 Q1 (3.09), 1994 Q2 (3.44)). They happen in calm periods, where ARCH(1) predicted a small <span class="math inline">\(\sigma_t\)</span> because the previous shock was small. A moderate move then looks extreme. ARCH(1) forgets too quickly.</li>
+<li>The tails are heavier than normal (kurtosis 4.62, Shapiro-Wilk p &lt; 0.001). A <span class="math inline">\(t\)</span> conditional distribution would be more realistic.</li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>garch11.Tbill <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">data =</span> Del.Tbill, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>g11 <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch11.Tbill)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>As a check I also fitted an AR(1)/GARCH(1,1). It is clearly better by AIC (427.2 vs 455.6), but <span class="math inline">\(\hat\alpha_1 + \hat\beta_1\)</span> = 1.16 &gt; 1, so the implied variance is explosive. That is the level effect from Problem 1 showing through: as rates rose, the variance kept rising, and a GARCH model can only express this as non-stationary volatility.</p>
+</section>
+<section id="problem-4-differences-of-log-rates" class="level4">
+<h4 class="anchored" data-anchor-id="problem-4-differences-of-log-rates">Problem 4: Differences of log rates</h4>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>del.log.tbill <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">log</span>(Tbill))</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(del.log.tbill, <span class="at">main =</span> <span class="st">"diff(log(Tbill))"</span>, <span class="at">ylab =</span> <span class="st">"Log change"</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(del.log.tbill<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"ACF of squared log changes"</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>sd_log <span class="ot">&lt;-</span> <span class="fu">tapply</span>(del.log.tbill, periods, sd)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-dlog-tbill" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-dlog-tbill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-arch-garch-lab_files/figure-html/fig-dlog-tbill-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-dlog-tbill-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Differences of log T-bill rates: series and ACF of the squares.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The log changes are stationary (ADF p ≤ 0.01; KPSS p = 0.080, not rejected at 5%). The level effect has largely gone: the correlation of |change| with the lagged level falls from 0.52 to -0.15, and the 1979–83 standard deviation (0.16) is now in line with other decades (0.09–0.19). Volatility clustering remains (Ljung-Box on squares p &lt; 0.001), so a GARCH model is still needed.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>specs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/ARCH(1), normal"</span>   <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"GARCH(1,1), normal"</span>      <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">0</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/GARCH(1,1), normal"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/GARCH(1,1), t"</span>     <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"std"</span>))</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>dlog_fits <span class="ot">&lt;-</span> <span class="fu">lapply</span>(specs, <span class="cf">function</span>(s) <span class="fu">garchFit</span>(s<span class="sc">$</span>f, <span class="at">data =</span> del.log.tbill, <span class="at">cond.dist =</span> s<span class="sc">$</span>d, <span class="at">trace =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>dlog_tab <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(dlog_fits, <span class="cf">function</span>(g) {</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">residuals</span>(g, <span class="at">standardize =</span> <span class="cn">TRUE</span>); cf <span class="ot">&lt;-</span> <span class="fu">coef</span>(g)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">AIC =</span> <span class="fu">aic</span>(g), <span class="at">BIC =</span> <span class="fu">bic</span>(g),</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">alpha1 + beta1</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">unname</span>(cf[<span class="st">"alpha1"</span>] <span class="sc">+</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(cf[<span class="st">"beta1"</span>]), <span class="dv">0</span>, cf[<span class="st">"beta1"</span>])),</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">LB p (z)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lb</span>(z), <span class="st">`</span><span class="at">LB p (z²)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lb</span>(z<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(dlog_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> dlog_fits[[<span class="st">"AR(1)/GARCH(1,1), t"</span>]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-dlog-models" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-dlog-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Candidate ARMA/GARCH models for diff(log(Tbill)). Ljung-Box p-values at lag 10 on standardised residuals (z) and their squares (z²).
+</figcaption>
+<div aria-describedby="tbl-dlog-models-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 32%">
+<col style="width: 11%">
+<col style="width: 11%">
+<col style="width: 19%">
+<col style="width: 11%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">AIC</th>
+<th style="text-align: right;">BIC</th>
+<th style="text-align: right;">alpha1 + beta1</th>
+<th style="text-align: right;">LB p (z)</th>
+<th style="text-align: right;">LB p (z²)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">AR(1)/ARCH(1), normal</td>
+<td style="text-align: right;">-201.382</td>
+<td style="text-align: right;">-188.457</td>
+<td style="text-align: right;">0.621</td>
+<td style="text-align: right;">0.301</td>
+<td style="text-align: right;">0.069</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">GARCH(1,1), normal</td>
+<td style="text-align: right;">-205.150</td>
+<td style="text-align: right;">-192.225</td>
+<td style="text-align: right;">1.009</td>
+<td style="text-align: right;">0.002</td>
+<td style="text-align: right;">0.931</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AR(1)/GARCH(1,1), normal</td>
+<td style="text-align: right;">-218.061</td>
+<td style="text-align: right;">-201.905</td>
+<td style="text-align: right;">1.014</td>
+<td style="text-align: right;">0.421</td>
+<td style="text-align: right;">0.977</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AR(1)/GARCH(1,1), t</td>
+<td style="text-align: right;">-225.917</td>
+<td style="text-align: right;">-206.530</td>
+<td style="text-align: right;">0.973</td>
+<td style="text-align: right;">0.416</td>
+<td style="text-align: right;">0.636</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<ul>
+<li>Dropping the AR term leaves autocorrelation in the standardised residuals (p = 0.002), so the AR(1) mean is needed.</li>
+<li>AR(1)/ARCH(1) leaves some clustering in the squares (p = 0.069) and has a much worse AIC.</li>
+<li>AR(1)/GARCH(1,1) passes both residual tests. Switching to a <span class="math inline">\(t\)</span> distribution lowers AIC further, and the estimated degrees of freedom (3.21) confirm heavy tails.</li>
+</ul>
+<p><strong>Chosen model: AR(1)/GARCH(1,1) with <span class="math inline">\(t\)</span> errors.</strong></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>best<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>          Estimate  Std. Error  t value     Pr(&gt;|t|)
+mu     0.010378358 0.008583423 1.209116 2.266181e-01
+ar1    0.435685551 0.078306725 5.563833 2.639123e-08
+omega  0.004441368 0.003405769 1.304072 1.922091e-01
+alpha1 0.432444542 0.267378924 1.617347 1.058034e-01
+beta1  0.540476705 0.176994495 3.053636 2.260865e-03
+shape  3.213170529 1.156617955 2.778074 5.468213e-03</code></pre>
+</div>
+</div>
+<p>Persistence is <span class="math inline">\(\hat\alpha_1 + \hat\beta_1\)</span> = 0.97: high but below 1, unlike the explosive fit for Del.Tbill.</p>
+<p><strong>Advantages of log differences.</strong></p>
+<ol type="1">
+<li><strong>They remove the level effect.</strong> A log difference is approximately a percentage change. A 1-point move means much more at a 2% rate than at 15%. On the log scale changes are comparable across decades, so volatility depends mainly on past shocks, which is exactly what GARCH assumes.</li>
+<li><strong>Stationary variance.</strong> The GARCH persistence drops below 1, so the model has a finite unconditional variance and forecasts revert to a long-run level.</li>
+<li><strong>Positivity.</strong> Forecasts transformed back with exp() can never give a negative interest rate.</li>
+</ol>
+<p>The AIC values for the two responses cannot be compared, because they are on different scales. The comparison has to rest on the diagnostics and the stability of the fitted variance.</p>
+</section>
+</section>
+<section id="part-b-black-monday-19-october-1987" class="level3">
+<h3 class="anchored" data-anchor-id="part-b-black-monday-19-october-1987">Part B: Black Monday (19 October 1987)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(SP500, <span class="at">package =</span> <span class="st">"Ecdat"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>returnBlMon <span class="ot">&lt;-</span> SP500<span class="sc">$</span>r500[<span class="dv">1805</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> SP500<span class="sc">$</span>r500[(<span class="dv">1804</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="dv">253</span> <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span><span class="dv">1804</span>]</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>results  <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">data =</span> x, <span class="at">cond.dist =</span> <span class="st">"std"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>dfhat    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(results<span class="sc">@</span>fit<span class="sc">$</span>par[<span class="dv">6</span>])</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>forecast <span class="ot">&lt;-</span> <span class="fu">predict</span>(results, <span class="at">n.ahead =</span> <span class="dv">1</span>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>results<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Estimate   Std. Error  t value     Pr(&gt;|t|)
+mu     1.306113e-03 3.808426e-04 3.429535 6.046160e-04
+ar1    8.267252e-02 4.143027e-02 1.995462 4.599257e-02
+omega  1.082893e-05 8.635697e-06 1.253973 2.098518e-01
+alpha1 4.568420e-02 3.308734e-02 1.380715 1.673665e-01
+beta1  8.544624e-01 9.782237e-02 8.734836 0.000000e+00
+shape  4.106972e+00 9.338203e-01 4.398033 1.092365e-05</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>forecast</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>  meanForecast  meanError standardDeviation
+1 -0.003155442 0.01705332        0.01705332</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(x, returnBlMon), <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Trading day"</span>, <span class="at">ylab =</span> <span class="st">"Return"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">length</span>(x) <span class="sc">+</span> <span class="dv">1</span>, returnBlMon, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-blackmonday-returns" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-blackmonday-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-arch-garch-lab_files/figure-html/fig-blackmonday-returns-1.png" class="img-fluid figure-img" width="864">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-blackmonday-returns-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Daily S&amp;P 500 returns for the two years before Black Monday, with Black Monday as the final point.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>(a) Conditional probability.</strong> <code>fGarch</code>’s <code>"std"</code> distribution is a <span class="math inline">\(t\)</span> rescaled to have variance 1, so the return has standard deviation equal to <code>standardDeviation</code>. To use the ordinary <span class="math inline">\(t\)</span> CDF, rescale by <span class="math inline">\(\sqrt{(\nu - 2)/\nu}\)</span>:</p>
+<p><span class="math display">\[
+P(R \le -0.228 \mid \mathcal{F}_{t-1}) = F_{t_\nu}\!\left(\frac{-0.228 - \hat\mu_t}{\hat\sigma_t \sqrt{(\hat\nu - 2)/\hat\nu}}\right)
+\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>mu_f <span class="ot">&lt;-</span> forecast<span class="sc">$</span>meanForecast</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>sd_f <span class="ot">&lt;-</span> forecast<span class="sc">$</span>standardDeviation</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>p_manual <span class="ot">&lt;-</span> <span class="fu">pt</span>((returnBlMon <span class="sc">-</span> mu_f) <span class="sc">/</span> (sd_f <span class="sc">*</span> <span class="fu">sqrt</span>((dfhat <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">/</span> dfhat)), <span class="at">df =</span> dfhat)</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>p_fgarch <span class="ot">&lt;-</span> <span class="fu">pstd</span>(returnBlMon, <span class="at">mean =</span> mu_f, <span class="at">sd =</span> sd_f, <span class="at">nu =</span> dfhat)   <span class="co"># same thing via fGarch</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>p_normal <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(returnBlMon, <span class="at">mean =</span> mu_f, <span class="at">sd =</span> sd_f)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">manual =</span> p_manual, <span class="at">pstd =</span> p_fgarch, <span class="at">normal =</span> p_normal)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>      manual         pstd       normal 
+2.105911e-05 2.105911e-05 5.340863e-40 </code></pre>
+</div>
+</div>
+<p>With <span class="math inline">\(\hat\mu_t\)</span> = -0.0032, <span class="math inline">\(\hat\sigma_t\)</span> = 0.0171 and <span class="math inline">\(\hat\nu\)</span> = 4.11, the conditional probability is <strong>2.11e-05</strong>. That is about once every 188 years of trading days. Black Monday was 13.2 conditional standard deviations below the forecast mean.</p>
+<p>Two observations. First, the GARCH model had already raised the forecast volatility to 1.7 times the two-year sample standard deviation, because the preceding week (including a -5.4% fall on the Friday) was turbulent. Second, the heavy tails matter enormously: under a normal distribution with the same mean and standard deviation the probability would be 5.3e-40, i.e.&nbsp;effectively impossible.</p>
+<p><strong>(b) Standardised residuals.</strong></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">residuals</span>(results, <span class="at">standardize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"Standardised residuals"</span>, <span class="at">ylab =</span> <span class="st">"z"</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(z, <span class="at">main =</span> <span class="st">"ACF of z"</span>)</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(z<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"ACF of z^2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-blackmonday-stdres" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-blackmonday-stdres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="04-arch-garch-lab_files/figure-html/fig-blackmonday-stdres-1.png" class="img-fluid figure-img" width="960">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-blackmonday-stdres-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Standardised residuals from the AR(1)/GARCH(1,1)-t model and the ACFs of the residuals and their squares.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The standardised residuals look like homoskedastic noise, ranging from -4.96 to 2.72. No ACF lags fall outside the bounds for either <span class="math inline">\(z\)</span> or <span class="math inline">\(z^2\)</span> (Ljung-Box p = 0.923 and 0.888). <strong>The AR(1)/GARCH(1,1) model fits the two years before Black Monday adequately.</strong> A model that fits well in sample still gave Black Monday a tiny probability: good diagnostics do not protect against rare events outside the data’s experience.</p>
+<p><strong>(c) AR(1)/ARCH(1).</strong></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>arch1_bm <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">data =</span> x, <span class="at">cond.dist =</span> <span class="st">"std"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>z_a <span class="ot">&lt;-</span> <span class="fu">residuals</span>(arch1_bm, <span class="at">standardize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>arch1_bm<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           Estimate   Std. Error   t value     Pr(&gt;|t|)
+mu     1.272617e-03 3.808327e-04 3.3416681 8.327658e-04
+ar1    7.977954e-02 4.162864e-02 1.9164578 5.530685e-02
+omega  9.668024e-05 1.507882e-05 6.4116595 1.439440e-10
+alpha1 4.835235e-02 5.446729e-02 0.8877319 3.746850e-01
+shape  3.958102e+00 8.106401e-01 4.8826880 1.046494e-06</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ar1_bm <span class="ot">&lt;-</span> <span class="fu">arima</span>(x, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>r_ar   <span class="ot">&lt;-</span> <span class="fu">residuals</span>(ar1_bm)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>ar1_bm</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+arima(x = x, order = c(1, 0, 0))
+
+Coefficients:
+         ar1  intercept
+      0.1275      8e-04
+s.e.  0.0455      5e-04
+
+sigma^2 estimated as 9.451e-05:  log likelihood = 1626.52,  aic = -3247.03</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>bm_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"AR(1)/GARCH(1,1), t"</span>, <span class="st">"AR(1)/ARCH(1), t"</span>, <span class="st">"AR(1), normal"</span>),</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">aic</span>(results), <span class="fu">aic</span>(arch1_bm), <span class="fu">AIC</span>(ar1_bm)),</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">BIC =</span> <span class="fu">c</span>(<span class="fu">bic</span>(results), <span class="fu">bic</span>(arch1_bm), <span class="fu">BIC</span>(ar1_bm)),</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (resid)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">lb</span>(z), <span class="fu">lb</span>(z_a), <span class="fu">lb</span>(r_ar, <span class="at">fitdf =</span> <span class="dv">1</span>)),</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (resid²)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">lb</span>(z<span class="sc">^</span><span class="dv">2</span>), <span class="fu">lb</span>(z_a<span class="sc">^</span><span class="dv">2</span>), <span class="fu">lb</span>(r_ar<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(bm_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-blackmonday-compare" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-blackmonday-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: Model comparison for the two years before Black Monday. AIC and BIC are on the same scale (−2 log L + penalty); fGarch’s values have been multiplied by n.
+</figcaption>
+<div aria-describedby="tbl-blackmonday-compare-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 29%">
+<col style="width: 14%">
+<col style="width: 14%">
+<col style="width: 19%">
+<col style="width: 20%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Model</th>
+<th style="text-align: right;">AIC</th>
+<th style="text-align: right;">BIC</th>
+<th style="text-align: right;">LB p (resid)</th>
+<th style="text-align: right;">LB p (resid²)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">AR(1)/GARCH(1,1), t</td>
+<td style="text-align: right;">-3298.428</td>
+<td style="text-align: right;">-3273.069</td>
+<td style="text-align: right;">0.923</td>
+<td style="text-align: right;">0.888</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">AR(1)/ARCH(1), t</td>
+<td style="text-align: right;">-3298.121</td>
+<td style="text-align: right;">-3276.988</td>
+<td style="text-align: right;">0.867</td>
+<td style="text-align: right;">0.266</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">AR(1), normal</td>
+<td style="text-align: right;">-3247.031</td>
+<td style="text-align: right;">-3234.351</td>
+<td style="text-align: right;">0.876</td>
+<td style="text-align: right;">0.142</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>By AIC the ARCH(1) model is essentially tied with GARCH(1,1) (difference 0.31), and BIC, which penalises the extra parameter more, slightly prefers ARCH(1). Its standardised residuals pass both Ljung-Box tests. So by the usual criteria <strong>AR(1)/ARCH(1)-t is an adequate fit.</strong> However, its <span class="math inline">\(\hat\alpha_1\)</span> (0.048, p = 0.375) is not significant. Most of the work is done by the heavy-tailed <span class="math inline">\(t\)</span> distribution rather than the variance equation. In the GARCH(1,1) fit <span class="math inline">\(\hat\beta_1\)</span> = 0.85 is highly significant, so volatility persistence is real; ARCH(1) simply cannot represent it. I would still prefer GARCH(1,1) for forecasting volatility, even though both pass the diagnostics.</p>
+<p><strong>(d) AR(1) with Gaussian errors.</strong> The AR(1) model’s AIC is 51 points worse than GARCH. Its residuals are uncorrelated, and with this short calm window the Ljung-Box test on the squares (p = 0.142) does not detect clustering. But the normality assumption clearly fails: kurtosis 6.11 and Jarque-Bera p &lt; 0.001. <strong>The Gaussian AR(1) is not adequate.</strong> Under it, Black Monday’s probability would be about 2e-115, which shows how badly a constant-variance normal model understates tail risk.</p>
+</section>
+</section>
+<section id="implementation-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
+<p>To understand what <code>garchFit</code> is doing, I wrote the AR(1)/ARCH(1) Gaussian log-likelihood myself and maximised it with <code>optim</code>, using the Del.Tbill data from Part A.</p>
+<p>For <span class="math inline">\(t = 2, \dots, n\)</span>, with <span class="math inline">\(\varepsilon_t = (Y_t - m) - \phi (Y_{t-1} - m)\)</span> and <span class="math inline">\(\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2\)</span>:</p>
+<p><span class="math display">\[
+\ell(m, \phi, \omega, \alpha_1) = -\frac{1}{2}\sum_t \left[\log(2\pi) + \log\sigma_t^2 + \frac{\varepsilon_t^2}{\sigma_t^2}\right].
+\]</span></p>
+<p>I parametrise with the <strong>mean</strong> <span class="math inline">\(m\)</span> (not the intercept), and optimise over <span class="math inline">\(\log\omega\)</span> and <span class="math inline">\(\text{logit}(\alpha_1)\)</span>, so that <span class="math inline">\(\omega &gt; 0\)</span> and <span class="math inline">\(0 &lt; \alpha_1 &lt; 1\)</span> hold automatically. The recursion starts with <span class="math inline">\(\sigma_1^2\)</span> equal to the sample variance.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>arch1_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(theta, y) {</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> theta[<span class="dv">1</span>]; phi <span class="ot">&lt;-</span> theta[<span class="dv">2</span>]</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  omega <span class="ot">&lt;-</span> <span class="fu">exp</span>(theta[<span class="dv">3</span>]); alpha <span class="ot">&lt;-</span> <span class="fu">plogis</span>(theta[<span class="dv">4</span>])</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>  e[<span class="dv">1</span>] <span class="ot">&lt;-</span> y[<span class="dv">1</span>] <span class="sc">-</span> m</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>  e[<span class="sc">-</span><span class="dv">1</span>] <span class="ot">&lt;-</span> (y[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">-</span> m) <span class="sc">-</span> phi <span class="sc">*</span> (y[<span class="sc">-</span>n] <span class="sc">-</span> m)</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); s2[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">var</span>(y)</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) s2[t] <span class="ot">&lt;-</span> omega <span class="sc">+</span> alpha <span class="sc">*</span> e[t <span class="sc">-</span> <span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(e, <span class="dv">0</span>, <span class="fu">sqrt</span>(s2), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Del.Tbill)</span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>own <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="fu">mean</span>(y), <span class="fl">0.2</span>, <span class="fu">log</span>(<span class="fu">var</span>(y) <span class="sc">/</span> <span class="dv">2</span>), <span class="dv">0</span>), arch1_nll, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"BFGS"</span>)</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>own_est <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> own<span class="sc">$</span>par[<span class="dv">1</span>], <span class="at">ar1 =</span> own<span class="sc">$</span>par[<span class="dv">2</span>],</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>             <span class="at">omega =</span> <span class="fu">exp</span>(own<span class="sc">$</span>par[<span class="dv">3</span>]), <span class="at">alpha1 =</span> <span class="fu">plogis</span>(own<span class="sc">$</span>par[<span class="dv">4</span>]))</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>fg <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch.model.Tbill)</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>compare <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Own MLE"</span> <span class="ot">=</span> <span class="fu">c</span>(own_est, <span class="st">`</span><span class="at">-logL</span><span class="st">`</span> <span class="ot">=</span> own<span class="sc">$</span>value),</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fGarch"</span>  <span class="ot">=</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">unname</span>(fg[<span class="st">"mu"</span>] <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> fg[<span class="st">"ar1"</span>])), fg[<span class="fu">c</span>(<span class="st">"ar1"</span>, <span class="st">"omega"</span>, <span class="st">"alpha1"</span>)],</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>                <span class="st">`</span><span class="at">-logL</span><span class="st">`</span> <span class="ot">=</span> garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>llh))</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(compare, <span class="at">digits =</span> <span class="dv">4</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;"></th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">ar1</th>
+<th style="text-align: right;">omega</th>
+<th style="text-align: right;">alpha1</th>
+<th style="text-align: right;">-logL</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Own MLE</td>
+<td style="text-align: right;">0.1090</td>
+<td style="text-align: right;">0.2422</td>
+<td style="text-align: right;">0.3373</td>
+<td style="text-align: right;">0.8520</td>
+<td style="text-align: right;">223.7243</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fGarch</td>
+<td style="text-align: right;">0.1101</td>
+<td style="text-align: right;">0.2416</td>
+<td style="text-align: right;">0.3382</td>
+<td style="text-align: right;">0.8348</td>
+<td style="text-align: right;">223.7818</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>The two sets of estimates agree closely once <code>fGarch</code>’s intercept is converted to a mean. The small differences in <span class="math inline">\(\alpha_1\)</span> and the log-likelihood come from how the recursion is started: the first observations carry a little weight and the two implementations initialise <span class="math inline">\(\varepsilon_1\)</span> and <span class="math inline">\(\sigma_1^2\)</span> differently. This check is what showed me that <code>mu</code> in the <code>fGarch</code> output is an intercept.</p>
 </section>
 <section id="reflection" class="level2">
 <h2 class="anchored" data-anchor-id="reflection">Reflection</h2>
-<p><strong>What was most challenging:</strong></p>
-<p><strong>What I now understand:</strong></p>
+<p><strong>What was most challenging:</strong> Reading the <code>fGarch</code> output correctly. Three things caught me out: <code>mu</code> is the intercept rather than the mean, the AIC from <code>summary()</code> is divided by the sample size (so it cannot be compared with <code>arima()</code> until multiplied by <span class="math inline">\(n\)</span>), and <code>"std"</code> is a <span class="math inline">\(t\)</span> rescaled to unit variance, so the probability in Part B needs the <span class="math inline">\(\sqrt{(\nu-2)/\nu}\)</span> correction if computed with <code>pt()</code>. Understanding the different jobs of raw and standardised residuals also took time: significant autocorrelation in <code>res^2</code> is expected, while the same in <code>res_std^2</code> would mean the model has failed.</p>
+<p><strong>What I now understand:</strong> A GARCH model is a model for the <em>conditional</em> variance, and its value shows up in conditional statements, such as the probability of a crash given yesterday’s information. Transformations matter as much as model choice. On the raw T-bill changes, a GARCH(1,1) produced an explosive variance because volatility was tied to the level of rates; on log changes the same model gave stationary, sensible persistence. Choosing the right scale for the data fixed a problem that no extra GARCH term could. I also saw that the conditional distribution is not a detail: with the same mean and volatility forecast, the <span class="math inline">\(t\)</span> and normal assumptions gave Black Monday probabilities about 35 orders of magnitude apart.</p>
 <p><strong>Advantages and limitations of the methods:</strong></p>
-<p><strong>Links:</strong> related projects and journal entries.</p>
+<ul>
+<li><em>Advantages:</em> GARCH models capture volatility clustering with few parameters, give one-step-ahead volatility forecasts and conditional probabilities directly, and combine naturally with an ARMA mean. With <span class="math inline">\(t\)</span> errors they also allow for fat tails.</li>
+<li><em>Limitations:</em> Variance responds only to the size of past shocks, not to their sign or to the level of the series (the level effect in T-bill rates needed a transformation instead). The model is symmetric, so it cannot capture the leverage effect where falls raise volatility more than rises (GJR-GARCH or EGARCH would). Good in-sample diagnostics say nothing about events outside the sample’s experience: the Black Monday model passed every check yet still put the crash at roughly a once-in-two-centuries event. Model choice between ARCH and GARCH can also be ambiguous when AIC and BIC disagree, as in Part B (c).</li>
+</ul>
+<p><strong>Links:</strong> Project 2 (USD/ZAR volatility and VaR backtesting) extends this lab to daily exchange-rate returns, with my own GARCH likelihood, GJR-GARCH and rolling VaR backtests. See also the journal entry for the ARCH/GARCH week.</p>
 
 
 <!-- -->
@@ -822,41 +1603,406 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "ARCH and GARCH Lab"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 1: Time series foundations, ARIMA and volatility models"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>**Topics covered:** Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>*Summarise the main ideas of this session in your own words.*</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>**What was most challenging:**</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>**What I now understand:**</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>**Links:** related projects and journal entries.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb30" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "ARCH and GARCH Lab"</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 1: Time series foundations, ARIMA and volatility models"</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>**Topics covered:** Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>**Data:** `Tbrate` (quarterly US 91-day T-bill rate, 1950–1996) and `SP500` (daily S&amp;P 500 returns), both from the `Ecdat` package on CRAN. **Packages:** <span class="in">`Ecdat`</span>, <span class="in">`fGarch`</span>, <span class="in">`tseries`</span>, <span class="in">`knitr`</span>.</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Ecdat)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tseries)</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fGarch)</span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Helpers used throughout</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>lb  <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">lag =</span> <span class="dv">10</span>, <span class="at">fitdf =</span> <span class="dv">0</span>) <span class="fu">Box.test</span>(x, <span class="at">lag =</span> lag, <span class="at">type =</span> <span class="st">"Ljung-Box"</span>, <span class="at">fitdf =</span> fitdf)<span class="sc">$</span>p.value</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a>aic <span class="ot">&lt;-</span> <span class="cf">function</span>(fit) <span class="fu">unname</span>(fit<span class="sc">@</span>fit<span class="sc">$</span>ics[<span class="st">"AIC"</span>]) <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">@</span>data)  <span class="co"># fGarch reports AIC / n</span></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a>bic <span class="ot">&lt;-</span> <span class="cf">function</span>(fit) <span class="fu">unname</span>(fit<span class="sc">@</span>fit<span class="sc">$</span>ics[<span class="st">"BIC"</span>]) <span class="sc">*</span> <span class="fu">length</span>(fit<span class="sc">@</span>data)</span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a>f2  <span class="ot">&lt;-</span> <span class="cf">function</span>(x, <span class="at">d =</span> <span class="dv">2</span>) <span class="fu">formatC</span>(x, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> d)</span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a>fp  <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="fu">ifelse</span>(p <span class="sc">&lt;</span> <span class="fl">0.001</span>, <span class="st">"&lt; 0.001"</span>, <span class="fu">formatC</span>(p, <span class="at">format =</span> <span class="st">"f"</span>, <span class="at">digits =</span> <span class="dv">3</span>))</span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-31"><a href="#cb30-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-32"><a href="#cb30-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
+<span id="cb30-33"><a href="#cb30-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-34"><a href="#cb30-34" aria-hidden="true" tabindex="-1"></a>Financial and interest-rate series share a few **stylised facts**: the series itself (or its changes) shows little autocorrelation, but its *squares* or absolute values are strongly autocorrelated. This is **volatility clustering**: large moves follow large moves and calm follows calm. Returns are also heavier-tailed than a normal distribution.</span>
+<span id="cb30-35"><a href="#cb30-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-36"><a href="#cb30-36" aria-hidden="true" tabindex="-1"></a>An ARMA model only describes the conditional *mean*, and assumes a constant variance. ARCH and GARCH models add an equation for the conditional *variance*:</span>
+<span id="cb30-37"><a href="#cb30-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-38"><a href="#cb30-38" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-39"><a href="#cb30-39" aria-hidden="true" tabindex="-1"></a>\varepsilon_t = \sigma_t z_t, \qquad z_t \overset{iid}{\sim} (0,1)</span>
+<span id="cb30-40"><a href="#cb30-40" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-41"><a href="#cb30-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-42"><a href="#cb30-42" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**ARCH(1):** $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2$. Today's variance depends on yesterday's squared shock.</span>
+<span id="cb30-43"><a href="#cb30-43" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>**GARCH(1,1):** $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$. Adding the lagged variance gives long memory in volatility with only one extra parameter. Persistence is measured by $\alpha_1 + \beta_1$; the variance is covariance-stationary only if this is below 1.</span>
+<span id="cb30-44"><a href="#cb30-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-45"><a href="#cb30-45" aria-hidden="true" tabindex="-1"></a>In practice the two are combined: an ARMA model for the mean with GARCH errors, estimated jointly by maximum likelihood. The conditional distribution of $z_t$ can be normal or a standardised $t$ to allow fat tails.</span>
+<span id="cb30-46"><a href="#cb30-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-47"><a href="#cb30-47" aria-hidden="true" tabindex="-1"></a>**Diagnostics** work on two kinds of residuals. The *raw* residuals $\hat\varepsilon_t$ still contain the changing variance, so the ACF of $\hat\varepsilon_t^2$ shows whether ARCH effects are present. The *standardised* residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should be white noise with no remaining structure in their squares if the model is adequate. Ljung-Box tests on $\hat z_t$ and $\hat z_t^2$ formalise this.</span>
+<span id="cb30-48"><a href="#cb30-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-49"><a href="#cb30-49" aria-hidden="true" tabindex="-1"></a>A fitted GARCH model gives a **conditional forecast distribution** for the next observation, which lets us compute probabilities of extreme moves given yesterday's information. This is the basis of Value-at-Risk.</span>
+<span id="cb30-50"><a href="#cb30-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-51"><a href="#cb30-51" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
+<span id="cb30-52"><a href="#cb30-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-53"><a href="#cb30-53" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part A: Fitting GARCH models to the T-bill rate</span></span>
+<span id="cb30-54"><a href="#cb30-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-57"><a href="#cb30-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-58"><a href="#cb30-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: load-tbill</span></span>
+<span id="cb30-59"><a href="#cb30-59" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(Tbrate, <span class="at">package =</span> <span class="st">"Ecdat"</span>)</span>
+<span id="cb30-60"><a href="#cb30-60" aria-hidden="true" tabindex="-1"></a><span class="co"># r = the 91-day treasury bill rate, y = log of real GDP, pi = inflation rate</span></span>
+<span id="cb30-61"><a href="#cb30-61" aria-hidden="true" tabindex="-1"></a>Tbill     <span class="ot">&lt;-</span> Tbrate[, <span class="dv">1</span>]</span>
+<span id="cb30-62"><a href="#cb30-62" aria-hidden="true" tabindex="-1"></a>Del.Tbill <span class="ot">&lt;-</span> <span class="fu">diff</span>(Tbill)</span>
+<span id="cb30-63"><a href="#cb30-63" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-64"><a href="#cb30-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-65"><a href="#cb30-65" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Problem 1: Stationarity and heteroskedasticity</span></span>
+<span id="cb30-66"><a href="#cb30-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-69"><a href="#cb30-69" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-70"><a href="#cb30-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-tbill-plots</span></span>
+<span id="cb30-71"><a href="#cb30-71" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "T-bill rate (top) and its first difference (bottom): time series plots and ACFs."</span></span>
+<span id="cb30-72"><a href="#cb30-72" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb30-73"><a href="#cb30-73" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb30-74"><a href="#cb30-74" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>))</span>
+<span id="cb30-75"><a href="#cb30-75" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Tbill, <span class="at">main =</span> <span class="st">"Tbill"</span>, <span class="at">ylab =</span> <span class="st">"Rate (%)"</span>)</span>
+<span id="cb30-76"><a href="#cb30-76" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(Tbill, <span class="at">main =</span> <span class="st">"ACF of Tbill"</span>)</span>
+<span id="cb30-77"><a href="#cb30-77" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Del.Tbill, <span class="at">main =</span> <span class="st">"Del.Tbill"</span>, <span class="at">ylab =</span> <span class="st">"Change (% points)"</span>)</span>
+<span id="cb30-78"><a href="#cb30-78" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(Del.Tbill, <span class="at">main =</span> <span class="st">"ACF of Del.Tbill"</span>)</span>
+<span id="cb30-79"><a href="#cb30-79" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-80"><a href="#cb30-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-83"><a href="#cb30-83" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-84"><a href="#cb30-84" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-unit-root</span></span>
+<span id="cb30-85"><a href="#cb30-85" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "ADF (H0: unit root) and KPSS (H0: level stationary) tests."</span></span>
+<span id="cb30-86"><a href="#cb30-86" aria-hidden="true" tabindex="-1"></a>ur <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb30-87"><a href="#cb30-87" aria-hidden="true" tabindex="-1"></a>  a <span class="ot">&lt;-</span> <span class="fu">adf.test</span>(x); k <span class="ot">&lt;-</span> <span class="fu">kpss.test</span>(x)</span>
+<span id="cb30-88"><a href="#cb30-88" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">ADF =</span> <span class="fu">unname</span>(a<span class="sc">$</span>statistic), <span class="st">`</span><span class="at">ADF p</span><span class="st">`</span> <span class="ot">=</span> a<span class="sc">$</span>p.value,</span>
+<span id="cb30-89"><a href="#cb30-89" aria-hidden="true" tabindex="-1"></a>    <span class="at">KPSS =</span> <span class="fu">unname</span>(k<span class="sc">$</span>statistic), <span class="st">`</span><span class="at">KPSS p</span><span class="st">`</span> <span class="ot">=</span> k<span class="sc">$</span>p.value)</span>
+<span id="cb30-90"><a href="#cb30-90" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-91"><a href="#cb30-91" aria-hidden="true" tabindex="-1"></a>ur_tab <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">Tbill =</span> <span class="fu">ur</span>(Tbill), <span class="at">Del.Tbill =</span> <span class="fu">ur</span>(Del.Tbill))</span>
+<span id="cb30-92"><a href="#cb30-92" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(ur_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb30-93"><a href="#cb30-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-94"><a href="#cb30-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-95"><a href="#cb30-95" aria-hidden="true" tabindex="-1"></a><span class="in">`tseries`</span> interpolates p-values from a table, so it truncates them at 0.01 and 0.10. A reported 0.01 means "at most 0.01" and 0.10 means "at least 0.10".</span>
+<span id="cb30-96"><a href="#cb30-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-97"><a href="#cb30-97" aria-hidden="true" tabindex="-1"></a>**Which series is stationary?** Tbill is **not** stationary. The ADF test does not reject a unit root (p = <span class="in">`r f2(ur_tab["Tbill", "ADF p"], 3)`</span>), KPSS rejects stationarity (p ≤ 0.01), and the ACF decays very slowly (lag-1 autocorrelation <span class="in">`r f2(acf(Tbill, plot = FALSE)$acf[2])`</span>). The plot wanders with no fixed level: rates climb from under 1% in 1950 to around 15% in 1981 and then fall.</span>
+<span id="cb30-98"><a href="#cb30-98" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-99"><a href="#cb30-99" aria-hidden="true" tabindex="-1"></a>Del.Tbill **is** stationary in the mean. Both tests agree: ADF rejects the unit root (p ≤ 0.01) and KPSS does not reject stationarity (p ≥ 0.10). The ACF has one clear spike at lag 1 (<span class="in">`r f2(acf(Del.Tbill, plot = FALSE)$acf[2])`</span>) and then cuts off, which points to an AR(1) or MA(1) mean. The tests and the ACF only address the mean, though: the variance of Del.Tbill is clearly not constant.</span>
+<span id="cb30-100"><a href="#cb30-100" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-103"><a href="#cb30-103" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-104"><a href="#cb30-104" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-sd-by-period</span></span>
+<span id="cb30-105"><a href="#cb30-105" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Standard deviation of Del.Tbill by period."</span></span>
+<span id="cb30-106"><a href="#cb30-106" aria-hidden="true" tabindex="-1"></a>periods <span class="ot">&lt;-</span> <span class="fu">cut</span>(<span class="fu">time</span>(Del.Tbill), <span class="fu">c</span>(<span class="dv">1950</span>, <span class="dv">1960</span>, <span class="dv">1970</span>, <span class="dv">1979</span>, <span class="dv">1983</span>, <span class="dv">1990</span>, <span class="dv">1998</span>),</span>
+<span id="cb30-107"><a href="#cb30-107" aria-hidden="true" tabindex="-1"></a>               <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"1950s"</span>, <span class="st">"1960s"</span>, <span class="st">"1970s"</span>, <span class="st">"1979–83"</span>, <span class="st">"1983–90"</span>, <span class="st">"1990s"</span>))</span>
+<span id="cb30-108"><a href="#cb30-108" aria-hidden="true" tabindex="-1"></a>sd_tab <span class="ot">&lt;-</span> <span class="fu">tapply</span>(Del.Tbill, periods, sd)</span>
+<span id="cb30-109"><a href="#cb30-109" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">t</span>(sd_tab), <span class="at">digits =</span> <span class="dv">2</span>)</span>
+<span id="cb30-110"><a href="#cb30-110" aria-hidden="true" tabindex="-1"></a>lev_cor <span class="ot">&lt;-</span> <span class="fu">cor</span>(<span class="fu">abs</span>(Del.Tbill), Tbill[<span class="sc">-</span><span class="fu">length</span>(Tbill)])</span>
+<span id="cb30-111"><a href="#cb30-111" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-112"><a href="#cb30-112" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-113"><a href="#cb30-113" aria-hidden="true" tabindex="-1"></a>**Types of heteroskedasticity.** Two kinds are visible:</span>
+<span id="cb30-114"><a href="#cb30-114" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-115"><a href="#cb30-115" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Volatility clustering (conditional heteroskedasticity).** Big changes come in bursts. The ACF of the squared changes is strongly significant (Ljung-Box p <span class="in">`r fp(lb(Del.Tbill^2))`</span>), so a GARCH-type model is justified.</span>
+<span id="cb30-116"><a href="#cb30-116" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Level-dependent volatility.** The size of the changes grows with the level of the rate. The correlation between |Del.Tbill| and the previous quarter's rate is <span class="in">`r f2(lev_cor)`</span>. The 1979–83 period, when the Federal Reserve targeted money growth and rates were at their peak, has a standard deviation of <span class="in">`r f2(sd_tab["1979–83"])`</span>, roughly <span class="in">`r round(sd_tab["1979–83"] / sd_tab["1950s"])`</span> times the 1950s value. GARCH only lets variance depend on past shocks, not on the level, which matters in Problem 4.</span>
+<span id="cb30-117"><a href="#cb30-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-118"><a href="#cb30-118" aria-hidden="true" tabindex="-1"></a>Because Tbill is non-stationary, the model below is fitted to **Del.Tbill**.</span>
+<span id="cb30-119"><a href="#cb30-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-122"><a href="#cb30-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-123"><a href="#cb30-123" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fit-arch1-tbill</span></span>
+<span id="cb30-124"><a href="#cb30-124" aria-hidden="true" tabindex="-1"></a>garch.model.Tbill <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="at">formula =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb30-125"><a href="#cb30-125" aria-hidden="true" tabindex="-1"></a>                              <span class="at">data =</span> Del.Tbill, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-126"><a href="#cb30-126" aria-hidden="true" tabindex="-1"></a>garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span>
+<span id="cb30-127"><a href="#cb30-127" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-128"><a href="#cb30-128" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-129"><a href="#cb30-129" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Problem 2: The fitted model</span></span>
+<span id="cb30-130"><a href="#cb30-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-133"><a href="#cb30-133" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-134"><a href="#cb30-134" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: arch1-coefs</span></span>
+<span id="cb30-135"><a href="#cb30-135" aria-hidden="true" tabindex="-1"></a>cf <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch.model.Tbill)</span>
+<span id="cb30-136"><a href="#cb30-136" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>se.coef</span>
+<span id="cb30-137"><a href="#cb30-137" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-138"><a href="#cb30-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-139"><a href="#cb30-139" aria-hidden="true" tabindex="-1"></a>**(a) Model.** `arma(1,0) + garch(1,0)` is an **AR(1) mean with ARCH(1) errors**. In the notation of the R output, with $Y_t$ = Del.Tbill:</span>
+<span id="cb30-140"><a href="#cb30-140" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-141"><a href="#cb30-141" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-142"><a href="#cb30-142" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb30-143"><a href="#cb30-143" aria-hidden="true" tabindex="-1"></a>Y_t &amp;= \mu + \text{ar1}\, Y_{t-1} + \varepsilon_t, <span class="sc">\\</span></span>
+<span id="cb30-144"><a href="#cb30-144" aria-hidden="true" tabindex="-1"></a>\varepsilon_t &amp;= \sigma_t z_t, \qquad z_t \overset{iid}{\sim} N(0,1), <span class="sc">\\</span></span>
+<span id="cb30-145"><a href="#cb30-145" aria-hidden="true" tabindex="-1"></a>\sigma_t^2 &amp;= \omega + \text{alpha1}\, \varepsilon_{t-1}^2 .</span>
+<span id="cb30-146"><a href="#cb30-146" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb30-147"><a href="#cb30-147" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-148"><a href="#cb30-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-149"><a href="#cb30-149" aria-hidden="true" tabindex="-1"></a>In <span class="in">`fGarch`</span>, $\mu$ is the **intercept** of the AR equation, not the mean of the series. The implied mean is $\mu / (1 - \text{ar1})$ = <span class="in">`r f2(cf["mu"] / (1 - cf["ar1"]), 3)`</span>. I only realised this when my own likelihood (see the implementation section) gave a different "$\mu$" with the same likelihood.</span>
+<span id="cb30-150"><a href="#cb30-150" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-151"><a href="#cb30-151" aria-hidden="true" tabindex="-1"></a>**(b) Estimates.**</span>
+<span id="cb30-152"><a href="#cb30-152" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-153"><a href="#cb30-153" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Parameter <span class="pp">|</span> Estimate <span class="pp">|</span> Std. error <span class="pp">|</span> Interpretation <span class="pp">|</span></span>
+<span id="cb30-154"><a href="#cb30-154" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|---|</span></span>
+<span id="cb30-155"><a href="#cb30-155" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> mu <span class="pp">|</span> <span class="in">`r f2(cf["mu"], 4)`</span> <span class="pp">|</span> <span class="in">`r f2(se[1], 4)`</span> <span class="pp">|</span> Not significant: no drift in the rate changes <span class="pp">|</span></span>
+<span id="cb30-156"><a href="#cb30-156" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> ar1 <span class="pp">|</span> <span class="in">`r f2(cf["ar1"], 4)`</span> <span class="pp">|</span> <span class="in">`r f2(se[2], 4)`</span> <span class="pp">|</span> Moderate positive persistence in quarterly changes <span class="pp">|</span></span>
+<span id="cb30-157"><a href="#cb30-157" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> omega <span class="pp">|</span> <span class="in">`r f2(cf["omega"], 4)`</span> <span class="pp">|</span> <span class="in">`r f2(se[3], 4)`</span> <span class="pp">|</span> Baseline variance <span class="pp">|</span></span>
+<span id="cb30-158"><a href="#cb30-158" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> alpha1 <span class="pp">|</span> <span class="in">`r f2(cf["alpha1"], 4)`</span> <span class="pp">|</span> <span class="in">`r f2(se[4], 4)`</span> <span class="pp">|</span> A large shock strongly raises next quarter's variance <span class="pp">|</span></span>
+<span id="cb30-159"><a href="#cb30-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-160"><a href="#cb30-160" aria-hidden="true" tabindex="-1"></a>The unconditional variance is $\omega / (1 - \alpha_1)$ = <span class="in">`r f2(cf["omega"] / (1 - cf["alpha1"]))`</span>. Since $3\alpha_1^2$ = <span class="in">`r f2(3 * cf["alpha1"]^2)`</span> exceeds 1, this ARCH(1) implies an infinite fourth moment, i.e. very heavy unconditional tails.</span>
+<span id="cb30-161"><a href="#cb30-161" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-164"><a href="#cb30-164" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-165"><a href="#cb30-165" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-arch1-resid</span></span>
+<span id="cb30-166"><a href="#cb30-166" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Raw residuals (top row) and standardised residuals (bottom row) from the AR(1)/ARCH(1) model for Del.Tbill."</span></span>
+<span id="cb30-167"><a href="#cb30-167" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb30-168"><a href="#cb30-168" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb30-169"><a href="#cb30-169" aria-hidden="true" tabindex="-1"></a>res     <span class="ot">&lt;-</span> <span class="fu">residuals</span>(garch.model.Tbill)</span>
+<span id="cb30-170"><a href="#cb30-170" aria-hidden="true" tabindex="-1"></a>res_std <span class="ot">&lt;-</span> res <span class="sc">/</span> garch.model.Tbill<span class="sc">@</span>sigma.t</span>
+<span id="cb30-171"><a href="#cb30-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-172"><a href="#cb30-172" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>))</span>
+<span id="cb30-173"><a href="#cb30-173" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"res"</span>)</span>
+<span id="cb30-174"><a href="#cb30-174" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res, <span class="at">main =</span> <span class="st">"acf(res)"</span>)</span>
+<span id="cb30-175"><a href="#cb30-175" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"acf(res^2)"</span>)</span>
+<span id="cb30-176"><a href="#cb30-176" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(res_std, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"res_std"</span>)</span>
+<span id="cb30-177"><a href="#cb30-177" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res_std, <span class="at">main =</span> <span class="st">"acf(res_std)"</span>)</span>
+<span id="cb30-178"><a href="#cb30-178" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(res_std<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"acf(res_std^2)"</span>)</span>
+<span id="cb30-179"><a href="#cb30-179" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-180"><a href="#cb30-180" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-181"><a href="#cb30-181" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Problem 3: Residual diagnostics</span></span>
+<span id="cb30-182"><a href="#cb30-182" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-185"><a href="#cb30-185" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-186"><a href="#cb30-186" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-lb-arch1</span></span>
+<span id="cb30-187"><a href="#cb30-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Ljung-Box p-values (lag 10) for the AR(1)/ARCH(1) residuals."</span></span>
+<span id="cb30-188"><a href="#cb30-188" aria-hidden="true" tabindex="-1"></a>lb_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb30-189"><a href="#cb30-189" aria-hidden="true" tabindex="-1"></a>  <span class="at">Series =</span> <span class="fu">c</span>(<span class="st">"res"</span>, <span class="st">"res^2"</span>, <span class="st">"res_std"</span>, <span class="st">"res_std^2"</span>),</span>
+<span id="cb30-190"><a href="#cb30-190" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">Lag-1 ACF</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(<span class="fu">list</span>(res, res<span class="sc">^</span><span class="dv">2</span>, res_std, res_std<span class="sc">^</span><span class="dv">2</span>), <span class="cf">function</span>(x) <span class="fu">acf</span>(x, <span class="at">plot =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>acf[<span class="dv">2</span>]),</span>
+<span id="cb30-191"><a href="#cb30-191" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (lag 10)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">sapply</span>(<span class="fu">list</span>(res, res<span class="sc">^</span><span class="dv">2</span>, res_std, res_std<span class="sc">^</span><span class="dv">2</span>), lb),</span>
+<span id="cb30-192"><a href="#cb30-192" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-193"><a href="#cb30-193" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(lb_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb30-194"><a href="#cb30-194" aria-hidden="true" tabindex="-1"></a>big <span class="ot">&lt;-</span> <span class="fu">which</span>(<span class="fu">abs</span>(res_std) <span class="sc">&gt;</span> <span class="dv">3</span>)</span>
+<span id="cb30-195"><a href="#cb30-195" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-196"><a href="#cb30-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-197"><a href="#cb30-197" aria-hidden="true" tabindex="-1"></a>**(a) `acf(res)`** plots the sample autocorrelations of the raw residuals $\hat\varepsilon_t = Y_t - \hat\mu - \widehat{\text{ar1}}\, Y_{t-1}$. It checks the **mean equation**. Almost all lags lie within the bounds; lag 2 is borderline (<span class="in">`r f2(acf(res, plot = FALSE)$acf[3])`</span>) and the Ljung-Box p-value is <span class="in">`r fp(lb(res))`</span>. The AR(1) mean is adequate, though only just at the 10% level.</span>
+<span id="cb30-198"><a href="#cb30-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-199"><a href="#cb30-199" aria-hidden="true" tabindex="-1"></a>**(b) `acf(res^2)`** plots the autocorrelations of the squared raw residuals. These are still strongly autocorrelated (lag 4 is `r f2(acf(res^2, plot = FALSE)$acf[5])`; Ljung-Box p `r fp(lb(res^2))`). This is **not a sign of poor fit**. The raw residuals are $\sigma_t z_t$, so they still carry the time-varying variance by construction. The plot tells us that GARCH effects are present in the series, which is the reason for modelling the variance.</span>
+<span id="cb30-200"><a href="#cb30-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-201"><a href="#cb30-201" aria-hidden="true" tabindex="-1"></a>**(c) `acf(res_std^2)`** plots the autocorrelations of the squared standardised residuals $\hat z_t^2 = (\hat\varepsilon_t / \hat\sigma_t)^2$. If the variance equation has captured the clustering, these should be white noise. They nearly are: the largest spike is lag 4 (<span class="in">`r f2(acf(res_std^2, plot = FALSE)$acf[5])`</span>) and the Ljung-Box p-value is <span class="in">`r fp(lb(res_std^2))`</span>. ARCH(1) removes most of the volatility clustering. The lag-4 spike in quarterly data hints at more persistence than one lag of ARCH can capture.</span>
+<span id="cb30-202"><a href="#cb30-202" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-203"><a href="#cb30-203" aria-hidden="true" tabindex="-1"></a>**(d) `garch.model.Tbill@sigma.t`** holds the **fitted conditional standard deviations** $\hat\sigma_t = \sqrt{\hat\omega + \hat\alpha_1 \hat\varepsilon_{t-1}^2}$, one per quarter. They range from <span class="in">`r f2(min(garch.model.Tbill@sigma.t))`</span> to <span class="in">`r f2(max(garch.model.Tbill@sigma.t))`</span>. Dividing the residuals by them gives the standardised residuals.</span>
+<span id="cb30-204"><a href="#cb30-204" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-205"><a href="#cb30-205" aria-hidden="true" tabindex="-1"></a>**(e) `plot(res_std)`.** Compared with the raw residuals, the bursts of large values around 1980 have been flattened, so standardising has done its job. Two things stand out:</span>
+<span id="cb30-206"><a href="#cb30-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-207"><a href="#cb30-207" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>A few large standardised residuals remain (<span class="in">`r paste0(floor(time(Del.Tbill)[big]), " Q", cycle(Del.Tbill)[big], " (", f2(res_std[big]), ")", collapse = ", ")`</span>). They happen in calm periods, where ARCH(1) predicted a small $\sigma_t$ because the previous shock was small. A moderate move then looks extreme. ARCH(1) forgets too quickly.</span>
+<span id="cb30-208"><a href="#cb30-208" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>The tails are heavier than normal (kurtosis <span class="in">`r f2(mean((res_std - mean(res_std))^4) / var(res_std)^2)`</span>, Shapiro-Wilk p <span class="in">`r fp(shapiro.test(res_std)$p.value)`</span>). A $t$ conditional distribution would be more realistic.</span>
+<span id="cb30-209"><a href="#cb30-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-212"><a href="#cb30-212" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-213"><a href="#cb30-213" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fit-garch11-tbill</span></span>
+<span id="cb30-214"><a href="#cb30-214" aria-hidden="true" tabindex="-1"></a>garch11.Tbill <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">data =</span> Del.Tbill, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-215"><a href="#cb30-215" aria-hidden="true" tabindex="-1"></a>g11 <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch11.Tbill)</span>
+<span id="cb30-216"><a href="#cb30-216" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-217"><a href="#cb30-217" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-218"><a href="#cb30-218" aria-hidden="true" tabindex="-1"></a>As a check I also fitted an AR(1)/GARCH(1,1). It is clearly better by AIC (<span class="in">`r f2(aic(garch11.Tbill), 1)`</span> vs <span class="in">`r f2(aic(garch.model.Tbill), 1)`</span>), but $\hat\alpha_1 + \hat\beta_1$ = <span class="in">`r f2(g11["alpha1"] + g11["beta1"])`</span> &gt; 1, so the implied variance is explosive. That is the level effect from Problem 1 showing through: as rates rose, the variance kept rising, and a GARCH model can only express this as non-stationary volatility.</span>
+<span id="cb30-219"><a href="#cb30-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-220"><a href="#cb30-220" aria-hidden="true" tabindex="-1"></a><span class="fu">#### Problem 4: Differences of log rates</span></span>
+<span id="cb30-221"><a href="#cb30-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-224"><a href="#cb30-224" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-225"><a href="#cb30-225" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-dlog-tbill</span></span>
+<span id="cb30-226"><a href="#cb30-226" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Differences of log T-bill rates: series and ACF of the squares."</span></span>
+<span id="cb30-227"><a href="#cb30-227" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.5</span></span>
+<span id="cb30-228"><a href="#cb30-228" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb30-229"><a href="#cb30-229" aria-hidden="true" tabindex="-1"></a>del.log.tbill <span class="ot">&lt;-</span> <span class="fu">diff</span>(<span class="fu">log</span>(Tbill))</span>
+<span id="cb30-230"><a href="#cb30-230" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb30-231"><a href="#cb30-231" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(del.log.tbill, <span class="at">main =</span> <span class="st">"diff(log(Tbill))"</span>, <span class="at">ylab =</span> <span class="st">"Log change"</span>)</span>
+<span id="cb30-232"><a href="#cb30-232" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(del.log.tbill<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"ACF of squared log changes"</span>)</span>
+<span id="cb30-233"><a href="#cb30-233" aria-hidden="true" tabindex="-1"></a>sd_log <span class="ot">&lt;-</span> <span class="fu">tapply</span>(del.log.tbill, periods, sd)</span>
+<span id="cb30-234"><a href="#cb30-234" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-235"><a href="#cb30-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-236"><a href="#cb30-236" aria-hidden="true" tabindex="-1"></a>The log changes are stationary (ADF p ≤ 0.01; KPSS p = <span class="in">`r f2(kpss.test(del.log.tbill)$p.value, 3)`</span>, not rejected at 5%). The level effect has largely gone: the correlation of |change| with the lagged level falls from <span class="in">`r f2(lev_cor)`</span> to <span class="in">`r f2(cor(abs(del.log.tbill), Tbill[-length(Tbill)]))`</span>, and the 1979–83 standard deviation (<span class="in">`r f2(sd_log["1979–83"])`</span>) is now in line with other decades (<span class="in">`r f2(min(sd_log))`</span>–<span class="in">`r f2(max(sd_log))`</span>). Volatility clustering remains (Ljung-Box on squares p <span class="in">`r fp(lb(del.log.tbill^2))`</span>), so a GARCH model is still needed.</span>
+<span id="cb30-237"><a href="#cb30-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-240"><a href="#cb30-240" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-241"><a href="#cb30-241" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-dlog-models</span></span>
+<span id="cb30-242"><a href="#cb30-242" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Candidate ARMA/GARCH models for diff(log(Tbill)). Ljung-Box p-values at lag 10 on standardised residuals (z) and their squares (z²)."</span></span>
+<span id="cb30-243"><a href="#cb30-243" aria-hidden="true" tabindex="-1"></a>specs <span class="ot">&lt;-</span> <span class="fu">list</span>(</span>
+<span id="cb30-244"><a href="#cb30-244" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/ARCH(1), normal"</span>   <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb30-245"><a href="#cb30-245" aria-hidden="true" tabindex="-1"></a>  <span class="st">"GARCH(1,1), normal"</span>      <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">0</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb30-246"><a href="#cb30-246" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/GARCH(1,1), normal"</span> <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"norm"</span>),</span>
+<span id="cb30-247"><a href="#cb30-247" aria-hidden="true" tabindex="-1"></a>  <span class="st">"AR(1)/GARCH(1,1), t"</span>     <span class="ot">=</span> <span class="fu">list</span>(<span class="at">f =</span> <span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">d =</span> <span class="st">"std"</span>))</span>
+<span id="cb30-248"><a href="#cb30-248" aria-hidden="true" tabindex="-1"></a>dlog_fits <span class="ot">&lt;-</span> <span class="fu">lapply</span>(specs, <span class="cf">function</span>(s) <span class="fu">garchFit</span>(s<span class="sc">$</span>f, <span class="at">data =</span> del.log.tbill, <span class="at">cond.dist =</span> s<span class="sc">$</span>d, <span class="at">trace =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb30-249"><a href="#cb30-249" aria-hidden="true" tabindex="-1"></a>dlog_tab <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(dlog_fits, <span class="cf">function</span>(g) {</span>
+<span id="cb30-250"><a href="#cb30-250" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">residuals</span>(g, <span class="at">standardize =</span> <span class="cn">TRUE</span>); cf <span class="ot">&lt;-</span> <span class="fu">coef</span>(g)</span>
+<span id="cb30-251"><a href="#cb30-251" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">AIC =</span> <span class="fu">aic</span>(g), <span class="at">BIC =</span> <span class="fu">bic</span>(g),</span>
+<span id="cb30-252"><a href="#cb30-252" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">alpha1 + beta1</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">unname</span>(cf[<span class="st">"alpha1"</span>] <span class="sc">+</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(cf[<span class="st">"beta1"</span>]), <span class="dv">0</span>, cf[<span class="st">"beta1"</span>])),</span>
+<span id="cb30-253"><a href="#cb30-253" aria-hidden="true" tabindex="-1"></a>    <span class="st">`</span><span class="at">LB p (z)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lb</span>(z), <span class="st">`</span><span class="at">LB p (z²)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">lb</span>(z<span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb30-254"><a href="#cb30-254" aria-hidden="true" tabindex="-1"></a>}))</span>
+<span id="cb30-255"><a href="#cb30-255" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(dlog_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb30-256"><a href="#cb30-256" aria-hidden="true" tabindex="-1"></a>best <span class="ot">&lt;-</span> dlog_fits[[<span class="st">"AR(1)/GARCH(1,1), t"</span>]]</span>
+<span id="cb30-257"><a href="#cb30-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-258"><a href="#cb30-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-259"><a href="#cb30-259" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Dropping the AR term leaves autocorrelation in the standardised residuals (p = <span class="in">`r fp(dlog_tab[2, "LB p (z)"])`</span>), so the AR(1) mean is needed.</span>
+<span id="cb30-260"><a href="#cb30-260" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>AR(1)/ARCH(1) leaves some clustering in the squares (p = <span class="in">`r fp(dlog_tab[1, "LB p (z²)"])`</span>) and has a much worse AIC.</span>
+<span id="cb30-261"><a href="#cb30-261" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>AR(1)/GARCH(1,1) passes both residual tests. Switching to a $t$ distribution lowers AIC further, and the estimated degrees of freedom (<span class="in">`r f2(coef(best)["shape"])`</span>) confirm heavy tails.</span>
+<span id="cb30-262"><a href="#cb30-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-263"><a href="#cb30-263" aria-hidden="true" tabindex="-1"></a>**Chosen model: AR(1)/GARCH(1,1) with $t$ errors.**</span>
+<span id="cb30-264"><a href="#cb30-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-267"><a href="#cb30-267" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-268"><a href="#cb30-268" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: best-dlog-coefs</span></span>
+<span id="cb30-269"><a href="#cb30-269" aria-hidden="true" tabindex="-1"></a>best<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span>
+<span id="cb30-270"><a href="#cb30-270" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-271"><a href="#cb30-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-272"><a href="#cb30-272" aria-hidden="true" tabindex="-1"></a>Persistence is $\hat\alpha_1 + \hat\beta_1$ = <span class="in">`r f2(coef(best)["alpha1"] + coef(best)["beta1"])`</span>: high but below 1, unlike the explosive fit for Del.Tbill.</span>
+<span id="cb30-273"><a href="#cb30-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-274"><a href="#cb30-274" aria-hidden="true" tabindex="-1"></a>**Advantages of log differences.**</span>
+<span id="cb30-275"><a href="#cb30-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-276"><a href="#cb30-276" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**They remove the level effect.** A log difference is approximately a percentage change. A 1-point move means much more at a 2% rate than at 15%. On the log scale changes are comparable across decades, so volatility depends mainly on past shocks, which is exactly what GARCH assumes.</span>
+<span id="cb30-277"><a href="#cb30-277" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Stationary variance.** The GARCH persistence drops below 1, so the model has a finite unconditional variance and forecasts revert to a long-run level.</span>
+<span id="cb30-278"><a href="#cb30-278" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Positivity.** Forecasts transformed back with exp() can never give a negative interest rate.</span>
+<span id="cb30-279"><a href="#cb30-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-280"><a href="#cb30-280" aria-hidden="true" tabindex="-1"></a>The AIC values for the two responses cannot be compared, because they are on different scales. The comparison has to rest on the diagnostics and the stability of the fitted variance.</span>
+<span id="cb30-281"><a href="#cb30-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-282"><a href="#cb30-282" aria-hidden="true" tabindex="-1"></a><span class="fu">### Part B: Black Monday (19 October 1987)</span></span>
+<span id="cb30-283"><a href="#cb30-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-286"><a href="#cb30-286" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-287"><a href="#cb30-287" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fit-blackmonday</span></span>
+<span id="cb30-288"><a href="#cb30-288" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(SP500, <span class="at">package =</span> <span class="st">"Ecdat"</span>)</span>
+<span id="cb30-289"><a href="#cb30-289" aria-hidden="true" tabindex="-1"></a>returnBlMon <span class="ot">&lt;-</span> SP500<span class="sc">$</span>r500[<span class="dv">1805</span>]</span>
+<span id="cb30-290"><a href="#cb30-290" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> SP500<span class="sc">$</span>r500[(<span class="dv">1804</span> <span class="sc">-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="dv">253</span> <span class="sc">+</span> <span class="dv">1</span>)<span class="sc">:</span><span class="dv">1804</span>]</span>
+<span id="cb30-291"><a href="#cb30-291" aria-hidden="true" tabindex="-1"></a>results  <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">data =</span> x, <span class="at">cond.dist =</span> <span class="st">"std"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-292"><a href="#cb30-292" aria-hidden="true" tabindex="-1"></a>dfhat    <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(results<span class="sc">@</span>fit<span class="sc">$</span>par[<span class="dv">6</span>])</span>
+<span id="cb30-293"><a href="#cb30-293" aria-hidden="true" tabindex="-1"></a>forecast <span class="ot">&lt;-</span> <span class="fu">predict</span>(results, <span class="at">n.ahead =</span> <span class="dv">1</span>)</span>
+<span id="cb30-294"><a href="#cb30-294" aria-hidden="true" tabindex="-1"></a>results<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span>
+<span id="cb30-295"><a href="#cb30-295" aria-hidden="true" tabindex="-1"></a>forecast</span>
+<span id="cb30-296"><a href="#cb30-296" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-297"><a href="#cb30-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-300"><a href="#cb30-300" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-301"><a href="#cb30-301" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-blackmonday-returns</span></span>
+<span id="cb30-302"><a href="#cb30-302" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Daily S&amp;P 500 returns for the two years before Black Monday, with Black Monday as the final point."</span></span>
+<span id="cb30-303"><a href="#cb30-303" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.5</span></span>
+<span id="cb30-304"><a href="#cb30-304" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 9</span></span>
+<span id="cb30-305"><a href="#cb30-305" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">c</span>(x, returnBlMon), <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">xlab =</span> <span class="st">"Trading day"</span>, <span class="at">ylab =</span> <span class="st">"Return"</span>)</span>
+<span id="cb30-306"><a href="#cb30-306" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(<span class="fu">length</span>(x) <span class="sc">+</span> <span class="dv">1</span>, returnBlMon, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">pch =</span> <span class="dv">19</span>)</span>
+<span id="cb30-307"><a href="#cb30-307" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-308"><a href="#cb30-308" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-309"><a href="#cb30-309" aria-hidden="true" tabindex="-1"></a>**(a) Conditional probability.** <span class="in">`fGarch`</span>'s <span class="in">`"std"`</span> distribution is a $t$ rescaled to have variance 1, so the return has standard deviation equal to <span class="in">`standardDeviation`</span>. To use the ordinary $t$ CDF, rescale by $\sqrt{(\nu - 2)/\nu}$:</span>
+<span id="cb30-310"><a href="#cb30-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-311"><a href="#cb30-311" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-312"><a href="#cb30-312" aria-hidden="true" tabindex="-1"></a>P(R \le -0.228 \mid \mathcal{F}_{t-1}) = F_{t_\nu}<span class="sc">\!</span>\left(\frac{-0.228 - \hat\mu_t}{\hat\sigma_t \sqrt{(\hat\nu - 2)/\hat\nu}}\right)</span>
+<span id="cb30-313"><a href="#cb30-313" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-314"><a href="#cb30-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-317"><a href="#cb30-317" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-318"><a href="#cb30-318" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: blackmonday-prob</span></span>
+<span id="cb30-319"><a href="#cb30-319" aria-hidden="true" tabindex="-1"></a>mu_f <span class="ot">&lt;-</span> forecast<span class="sc">$</span>meanForecast</span>
+<span id="cb30-320"><a href="#cb30-320" aria-hidden="true" tabindex="-1"></a>sd_f <span class="ot">&lt;-</span> forecast<span class="sc">$</span>standardDeviation</span>
+<span id="cb30-321"><a href="#cb30-321" aria-hidden="true" tabindex="-1"></a>p_manual <span class="ot">&lt;-</span> <span class="fu">pt</span>((returnBlMon <span class="sc">-</span> mu_f) <span class="sc">/</span> (sd_f <span class="sc">*</span> <span class="fu">sqrt</span>((dfhat <span class="sc">-</span> <span class="dv">2</span>) <span class="sc">/</span> dfhat)), <span class="at">df =</span> dfhat)</span>
+<span id="cb30-322"><a href="#cb30-322" aria-hidden="true" tabindex="-1"></a>p_fgarch <span class="ot">&lt;-</span> <span class="fu">pstd</span>(returnBlMon, <span class="at">mean =</span> mu_f, <span class="at">sd =</span> sd_f, <span class="at">nu =</span> dfhat)   <span class="co"># same thing via fGarch</span></span>
+<span id="cb30-323"><a href="#cb30-323" aria-hidden="true" tabindex="-1"></a>p_normal <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(returnBlMon, <span class="at">mean =</span> mu_f, <span class="at">sd =</span> sd_f)</span>
+<span id="cb30-324"><a href="#cb30-324" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">manual =</span> p_manual, <span class="at">pstd =</span> p_fgarch, <span class="at">normal =</span> p_normal)</span>
+<span id="cb30-325"><a href="#cb30-325" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-326"><a href="#cb30-326" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-327"><a href="#cb30-327" aria-hidden="true" tabindex="-1"></a>With $\hat\mu_t$ = <span class="in">`r f2(mu_f, 4)`</span>, $\hat\sigma_t$ = <span class="in">`r f2(sd_f, 4)`</span> and $\hat\nu$ = <span class="in">`r f2(dfhat)`</span>, the conditional probability is **`r formatC(p_manual, format = "e", digits = 2)`**. That is about once every <span class="in">`r format(round(1 / p_manual / 253), big.mark = ",")`</span> years of trading days. Black Monday was <span class="in">`r f2(abs((returnBlMon - mu_f) / sd_f), 1)`</span> conditional standard deviations below the forecast mean.</span>
+<span id="cb30-328"><a href="#cb30-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-329"><a href="#cb30-329" aria-hidden="true" tabindex="-1"></a>Two observations. First, the GARCH model had already raised the forecast volatility to <span class="in">`r f2(sd_f / sd(x), 1)`</span> times the two-year sample standard deviation, because the preceding week (including a <span class="in">`r f2(100 * min(x), 1)`</span>% fall on the Friday) was turbulent. Second, the heavy tails matter enormously: under a normal distribution with the same mean and standard deviation the probability would be <span class="in">`r formatC(p_normal, format = "e", digits = 1)`</span>, i.e. effectively impossible.</span>
+<span id="cb30-330"><a href="#cb30-330" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-331"><a href="#cb30-331" aria-hidden="true" tabindex="-1"></a>**(b) Standardised residuals.**</span>
+<span id="cb30-332"><a href="#cb30-332" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-335"><a href="#cb30-335" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-336"><a href="#cb30-336" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-blackmonday-stdres</span></span>
+<span id="cb30-337"><a href="#cb30-337" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Standardised residuals from the AR(1)/GARCH(1,1)-t model and the ACFs of the residuals and their squares."</span></span>
+<span id="cb30-338"><a href="#cb30-338" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.5</span></span>
+<span id="cb30-339"><a href="#cb30-339" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 10</span></span>
+<span id="cb30-340"><a href="#cb30-340" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">residuals</span>(results, <span class="at">standardize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-341"><a href="#cb30-341" aria-hidden="true" tabindex="-1"></a><span class="fu">par</span>(<span class="at">mfrow =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>))</span>
+<span id="cb30-342"><a href="#cb30-342" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(z, <span class="at">type =</span> <span class="st">"l"</span>, <span class="at">main =</span> <span class="st">"Standardised residuals"</span>, <span class="at">ylab =</span> <span class="st">"z"</span>)</span>
+<span id="cb30-343"><a href="#cb30-343" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(z, <span class="at">main =</span> <span class="st">"ACF of z"</span>)</span>
+<span id="cb30-344"><a href="#cb30-344" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(z<span class="sc">^</span><span class="dv">2</span>, <span class="at">main =</span> <span class="st">"ACF of z^2"</span>)</span>
+<span id="cb30-345"><a href="#cb30-345" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-346"><a href="#cb30-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-347"><a href="#cb30-347" aria-hidden="true" tabindex="-1"></a>The standardised residuals look like homoskedastic noise, ranging from <span class="in">`r f2(min(z))`</span> to <span class="in">`r f2(max(z))`</span>. No ACF lags fall outside the bounds for either $z$ or $z^2$ (Ljung-Box p = <span class="in">`r fp(lb(z))`</span> and <span class="in">`r fp(lb(z^2))`</span>). **The AR(1)/GARCH(1,1) model fits the two years before Black Monday adequately.** A model that fits well in sample still gave Black Monday a tiny probability: good diagnostics do not protect against rare events outside the data's experience.</span>
+<span id="cb30-348"><a href="#cb30-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-349"><a href="#cb30-349" aria-hidden="true" tabindex="-1"></a>**(c) AR(1)/ARCH(1).**</span>
+<span id="cb30-350"><a href="#cb30-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-353"><a href="#cb30-353" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-354"><a href="#cb30-354" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fit-blackmonday-arch1</span></span>
+<span id="cb30-355"><a href="#cb30-355" aria-hidden="true" tabindex="-1"></a>arch1_bm <span class="ot">&lt;-</span> <span class="fu">garchFit</span>(<span class="sc">~</span> <span class="fu">arma</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fu">garch</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">data =</span> x, <span class="at">cond.dist =</span> <span class="st">"std"</span>, <span class="at">trace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-356"><a href="#cb30-356" aria-hidden="true" tabindex="-1"></a>z_a <span class="ot">&lt;-</span> <span class="fu">residuals</span>(arch1_bm, <span class="at">standardize =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb30-357"><a href="#cb30-357" aria-hidden="true" tabindex="-1"></a>arch1_bm<span class="sc">@</span>fit<span class="sc">$</span>matcoef</span>
+<span id="cb30-358"><a href="#cb30-358" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-359"><a href="#cb30-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-362"><a href="#cb30-362" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-363"><a href="#cb30-363" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fit-blackmonday-ar1</span></span>
+<span id="cb30-364"><a href="#cb30-364" aria-hidden="true" tabindex="-1"></a>ar1_bm <span class="ot">&lt;-</span> <span class="fu">arima</span>(x, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>))</span>
+<span id="cb30-365"><a href="#cb30-365" aria-hidden="true" tabindex="-1"></a>r_ar   <span class="ot">&lt;-</span> <span class="fu">residuals</span>(ar1_bm)</span>
+<span id="cb30-366"><a href="#cb30-366" aria-hidden="true" tabindex="-1"></a>ar1_bm</span>
+<span id="cb30-367"><a href="#cb30-367" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-368"><a href="#cb30-368" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-371"><a href="#cb30-371" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-372"><a href="#cb30-372" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-blackmonday-compare</span></span>
+<span id="cb30-373"><a href="#cb30-373" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Model comparison for the two years before Black Monday. AIC and BIC are on the same scale (−2 log L + penalty); fGarch's values have been multiplied by n."</span></span>
+<span id="cb30-374"><a href="#cb30-374" aria-hidden="true" tabindex="-1"></a>bm_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb30-375"><a href="#cb30-375" aria-hidden="true" tabindex="-1"></a>  <span class="at">Model =</span> <span class="fu">c</span>(<span class="st">"AR(1)/GARCH(1,1), t"</span>, <span class="st">"AR(1)/ARCH(1), t"</span>, <span class="st">"AR(1), normal"</span>),</span>
+<span id="cb30-376"><a href="#cb30-376" aria-hidden="true" tabindex="-1"></a>  <span class="at">AIC =</span> <span class="fu">c</span>(<span class="fu">aic</span>(results), <span class="fu">aic</span>(arch1_bm), <span class="fu">AIC</span>(ar1_bm)),</span>
+<span id="cb30-377"><a href="#cb30-377" aria-hidden="true" tabindex="-1"></a>  <span class="at">BIC =</span> <span class="fu">c</span>(<span class="fu">bic</span>(results), <span class="fu">bic</span>(arch1_bm), <span class="fu">BIC</span>(ar1_bm)),</span>
+<span id="cb30-378"><a href="#cb30-378" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (resid)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">lb</span>(z), <span class="fu">lb</span>(z_a), <span class="fu">lb</span>(r_ar, <span class="at">fitdf =</span> <span class="dv">1</span>)),</span>
+<span id="cb30-379"><a href="#cb30-379" aria-hidden="true" tabindex="-1"></a>  <span class="st">`</span><span class="at">LB p (resid²)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="fu">lb</span>(z<span class="sc">^</span><span class="dv">2</span>), <span class="fu">lb</span>(z_a<span class="sc">^</span><span class="dv">2</span>), <span class="fu">lb</span>(r_ar<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb30-380"><a href="#cb30-380" aria-hidden="true" tabindex="-1"></a>  <span class="at">check.names =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb30-381"><a href="#cb30-381" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(bm_tab, <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb30-382"><a href="#cb30-382" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-383"><a href="#cb30-383" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-384"><a href="#cb30-384" aria-hidden="true" tabindex="-1"></a>By AIC the ARCH(1) model is essentially tied with GARCH(1,1) (difference <span class="in">`r f2(aic(arch1_bm) - aic(results))`</span>), and BIC, which penalises the extra parameter more, slightly prefers ARCH(1). Its standardised residuals pass both Ljung-Box tests. So by the usual criteria **AR(1)/ARCH(1)-t is an adequate fit.** However, its $\hat\alpha_1$ (<span class="in">`r f2(coef(arch1_bm)["alpha1"], 3)`</span>, p = <span class="in">`r fp(arch1_bm@fit$matcoef["alpha1", 4])`</span>) is not significant. Most of the work is done by the heavy-tailed $t$ distribution rather than the variance equation. In the GARCH(1,1) fit $\hat\beta_1$ = <span class="in">`r f2(coef(results)["beta1"])`</span> is highly significant, so volatility persistence is real; ARCH(1) simply cannot represent it. I would still prefer GARCH(1,1) for forecasting volatility, even though both pass the diagnostics.</span>
+<span id="cb30-385"><a href="#cb30-385" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-386"><a href="#cb30-386" aria-hidden="true" tabindex="-1"></a>**(d) AR(1) with Gaussian errors.** The AR(1) model's AIC is `r f2(AIC(ar1_bm) - aic(results), 0)` points worse than GARCH. Its residuals are uncorrelated, and with this short calm window the Ljung-Box test on the squares (p = `r fp(lb(r_ar^2))`) does not detect clustering. But the normality assumption clearly fails: kurtosis `r f2(mean((r_ar - mean(r_ar))^4) / var(r_ar)^2)` and Jarque-Bera p `r fp(jarque.bera.test(r_ar)$p.value)`. **The Gaussian AR(1) is not adequate.** Under it, Black Monday's probability would be about <span class="in">`r formatC(pnorm(returnBlMon, predict(ar1_bm, 1)$pred, predict(ar1_bm, 1)$se), format = "e", digits = 0)`</span>, which shows how badly a constant-variance normal model understates tail risk.</span>
+<span id="cb30-387"><a href="#cb30-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-388"><a href="#cb30-388" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
+<span id="cb30-389"><a href="#cb30-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-390"><a href="#cb30-390" aria-hidden="true" tabindex="-1"></a>To understand what <span class="in">`garchFit`</span> is doing, I wrote the AR(1)/ARCH(1) Gaussian log-likelihood myself and maximised it with <span class="in">`optim`</span>, using the Del.Tbill data from Part A.</span>
+<span id="cb30-391"><a href="#cb30-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-392"><a href="#cb30-392" aria-hidden="true" tabindex="-1"></a>For $t = 2, \dots, n$, with $\varepsilon_t = (Y_t - m) - \phi (Y_{t-1} - m)$ and $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2$:</span>
+<span id="cb30-393"><a href="#cb30-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-394"><a href="#cb30-394" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-395"><a href="#cb30-395" aria-hidden="true" tabindex="-1"></a>\ell(m, \phi, \omega, \alpha_1) = -\frac{1}{2}\sum_t \left<span class="co">[</span><span class="ot">\log(2\pi) + \log\sigma_t^2 + \frac{\varepsilon_t^2}{\sigma_t^2}\right</span><span class="co">]</span>.</span>
+<span id="cb30-396"><a href="#cb30-396" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb30-397"><a href="#cb30-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-398"><a href="#cb30-398" aria-hidden="true" tabindex="-1"></a>I parametrise with the **mean** $m$ (not the intercept), and optimise over $\log\omega$ and $\text{logit}(\alpha_1)$, so that $\omega &gt; 0$ and $0 &lt; \alpha_1 &lt; 1$ hold automatically. The recursion starts with $\sigma_1^2$ equal to the sample variance.</span>
+<span id="cb30-399"><a href="#cb30-399" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-402"><a href="#cb30-402" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb30-403"><a href="#cb30-403" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: own-arch1-mle</span></span>
+<span id="cb30-404"><a href="#cb30-404" aria-hidden="true" tabindex="-1"></a>arch1_nll <span class="ot">&lt;-</span> <span class="cf">function</span>(theta, y) {</span>
+<span id="cb30-405"><a href="#cb30-405" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> theta[<span class="dv">1</span>]; phi <span class="ot">&lt;-</span> theta[<span class="dv">2</span>]</span>
+<span id="cb30-406"><a href="#cb30-406" aria-hidden="true" tabindex="-1"></a>  omega <span class="ot">&lt;-</span> <span class="fu">exp</span>(theta[<span class="dv">3</span>]); alpha <span class="ot">&lt;-</span> <span class="fu">plogis</span>(theta[<span class="dv">4</span>])</span>
+<span id="cb30-407"><a href="#cb30-407" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(y)</span>
+<span id="cb30-408"><a href="#cb30-408" aria-hidden="true" tabindex="-1"></a>  e <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb30-409"><a href="#cb30-409" aria-hidden="true" tabindex="-1"></a>  e[<span class="dv">1</span>] <span class="ot">&lt;-</span> y[<span class="dv">1</span>] <span class="sc">-</span> m</span>
+<span id="cb30-410"><a href="#cb30-410" aria-hidden="true" tabindex="-1"></a>  e[<span class="sc">-</span><span class="dv">1</span>] <span class="ot">&lt;-</span> (y[<span class="sc">-</span><span class="dv">1</span>] <span class="sc">-</span> m) <span class="sc">-</span> phi <span class="sc">*</span> (y[<span class="sc">-</span>n] <span class="sc">-</span> m)</span>
+<span id="cb30-411"><a href="#cb30-411" aria-hidden="true" tabindex="-1"></a>  s2 <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n); s2[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">var</span>(y)</span>
+<span id="cb30-412"><a href="#cb30-412" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) s2[t] <span class="ot">&lt;-</span> omega <span class="sc">+</span> alpha <span class="sc">*</span> e[t <span class="sc">-</span> <span class="dv">1</span>]<span class="sc">^</span><span class="dv">2</span></span>
+<span id="cb30-413"><a href="#cb30-413" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span><span class="fu">sum</span>(<span class="fu">dnorm</span>(e, <span class="dv">0</span>, <span class="fu">sqrt</span>(s2), <span class="at">log =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb30-414"><a href="#cb30-414" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-415"><a href="#cb30-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-416"><a href="#cb30-416" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(Del.Tbill)</span>
+<span id="cb30-417"><a href="#cb30-417" aria-hidden="true" tabindex="-1"></a>own <span class="ot">&lt;-</span> <span class="fu">optim</span>(<span class="fu">c</span>(<span class="fu">mean</span>(y), <span class="fl">0.2</span>, <span class="fu">log</span>(<span class="fu">var</span>(y) <span class="sc">/</span> <span class="dv">2</span>), <span class="dv">0</span>), arch1_nll, <span class="at">y =</span> y, <span class="at">method =</span> <span class="st">"BFGS"</span>)</span>
+<span id="cb30-418"><a href="#cb30-418" aria-hidden="true" tabindex="-1"></a>own_est <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">mean =</span> own<span class="sc">$</span>par[<span class="dv">1</span>], <span class="at">ar1 =</span> own<span class="sc">$</span>par[<span class="dv">2</span>],</span>
+<span id="cb30-419"><a href="#cb30-419" aria-hidden="true" tabindex="-1"></a>             <span class="at">omega =</span> <span class="fu">exp</span>(own<span class="sc">$</span>par[<span class="dv">3</span>]), <span class="at">alpha1 =</span> <span class="fu">plogis</span>(own<span class="sc">$</span>par[<span class="dv">4</span>]))</span>
+<span id="cb30-420"><a href="#cb30-420" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-421"><a href="#cb30-421" aria-hidden="true" tabindex="-1"></a>fg <span class="ot">&lt;-</span> <span class="fu">coef</span>(garch.model.Tbill)</span>
+<span id="cb30-422"><a href="#cb30-422" aria-hidden="true" tabindex="-1"></a>compare <span class="ot">&lt;-</span> <span class="fu">rbind</span>(</span>
+<span id="cb30-423"><a href="#cb30-423" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Own MLE"</span> <span class="ot">=</span> <span class="fu">c</span>(own_est, <span class="st">`</span><span class="at">-logL</span><span class="st">`</span> <span class="ot">=</span> own<span class="sc">$</span>value),</span>
+<span id="cb30-424"><a href="#cb30-424" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fGarch"</span>  <span class="ot">=</span> <span class="fu">c</span>(<span class="at">mean =</span> <span class="fu">unname</span>(fg[<span class="st">"mu"</span>] <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> fg[<span class="st">"ar1"</span>])), fg[<span class="fu">c</span>(<span class="st">"ar1"</span>, <span class="st">"omega"</span>, <span class="st">"alpha1"</span>)],</span>
+<span id="cb30-425"><a href="#cb30-425" aria-hidden="true" tabindex="-1"></a>                <span class="st">`</span><span class="at">-logL</span><span class="st">`</span> <span class="ot">=</span> garch.model.Tbill<span class="sc">@</span>fit<span class="sc">$</span>llh))</span>
+<span id="cb30-426"><a href="#cb30-426" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(compare, <span class="at">digits =</span> <span class="dv">4</span>)</span>
+<span id="cb30-427"><a href="#cb30-427" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb30-428"><a href="#cb30-428" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-429"><a href="#cb30-429" aria-hidden="true" tabindex="-1"></a>The two sets of estimates agree closely once <span class="in">`fGarch`</span>'s intercept is converted to a mean. The small differences in $\alpha_1$ and the log-likelihood come from how the recursion is started: the first observations carry a little weight and the two implementations initialise $\varepsilon_1$ and $\sigma_1^2$ differently. This check is what showed me that <span class="in">`mu`</span> in the <span class="in">`fGarch`</span> output is an intercept.</span>
+<span id="cb30-430"><a href="#cb30-430" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-431"><a href="#cb30-431" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
+<span id="cb30-432"><a href="#cb30-432" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-433"><a href="#cb30-433" aria-hidden="true" tabindex="-1"></a>**What was most challenging:** Reading the <span class="in">`fGarch`</span> output correctly. Three things caught me out: <span class="in">`mu`</span> is the intercept rather than the mean, the AIC from <span class="in">`summary()`</span> is divided by the sample size (so it cannot be compared with <span class="in">`arima()`</span> until multiplied by $n$), and <span class="in">`"std"`</span> is a $t$ rescaled to unit variance, so the probability in Part B needs the $\sqrt{(\nu-2)/\nu}$ correction if computed with <span class="in">`pt()`</span>. Understanding the different jobs of raw and standardised residuals also took time: significant autocorrelation in <span class="in">`res^2`</span> is expected, while the same in <span class="in">`res_std^2`</span> would mean the model has failed.</span>
+<span id="cb30-434"><a href="#cb30-434" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-435"><a href="#cb30-435" aria-hidden="true" tabindex="-1"></a>**What I now understand:** A GARCH model is a model for the *conditional* variance, and its value shows up in conditional statements, such as the probability of a crash given yesterday's information. Transformations matter as much as model choice. On the raw T-bill changes, a GARCH(1,1) produced an explosive variance because volatility was tied to the level of rates; on log changes the same model gave stationary, sensible persistence. Choosing the right scale for the data fixed a problem that no extra GARCH term could. I also saw that the conditional distribution is not a detail: with the same mean and volatility forecast, the $t$ and normal assumptions gave Black Monday probabilities about 35 orders of magnitude apart.</span>
+<span id="cb30-436"><a href="#cb30-436" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-437"><a href="#cb30-437" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
+<span id="cb30-438"><a href="#cb30-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-439"><a href="#cb30-439" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Advantages:* GARCH models capture volatility clustering with few parameters, give one-step-ahead volatility forecasts and conditional probabilities directly, and combine naturally with an ARMA mean. With $t$ errors they also allow for fat tails.</span>
+<span id="cb30-440"><a href="#cb30-440" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Limitations:* Variance responds only to the size of past shocks, not to their sign or to the level of the series (the level effect in T-bill rates needed a transformation instead). The model is symmetric, so it cannot capture the leverage effect where falls raise volatility more than rises (GJR-GARCH or EGARCH would). Good in-sample diagnostics say nothing about events outside the sample's experience: the Black Monday model passed every check yet still put the crash at roughly a once-in-two-centuries event. Model choice between ARCH and GARCH can also be ambiguous when AIC and BIC disagree, as in Part B (c).</span>
+<span id="cb30-441"><a href="#cb30-441" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-442"><a href="#cb30-442" aria-hidden="true" tabindex="-1"></a>**Links:** Project 2 (USD/ZAR volatility and VaR backtesting) extends this lab to daily exchange-rate returns, with my own GARCH likelihood, GJR-GARCH and rolling VaR backtests. See also the journal entry for the ARCH/GARCH week.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
