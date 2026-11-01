@@ -104,6 +104,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -301,7 +330,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#overview-of-the-key-concepts" id="toc-overview-of-the-key-concepts" class="nav-link active" data-scroll-target="#overview-of-the-key-concepts">Overview of the key concepts</a></li>
-  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a></li>
+  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a>
+  <ul class="collapse">
+  <li><a href="#dates-and-aggregation" id="toc-dates-and-aggregation" class="nav-link" data-scroll-target="#dates-and-aggregation">Dates and aggregation</a></li>
+  <li><a href="#inspecting-a-ts-object" id="toc-inspecting-a-ts-object" class="nav-link" data-scroll-target="#inspecting-a-ts-object">Inspecting a <code>ts</code> object</a></li>
+  <li><a href="#subsetting-with-window" id="toc-subsetting-with-window" class="nav-link" data-scroll-target="#subsetting-with-window">Subsetting with <code>window()</code></a></li>
+  <li><a href="#lags-and-differences" id="toc-lags-and-differences" class="nav-link" data-scroll-target="#lags-and-differences">Lags and differences</a></li>
+  <li><a href="#combining-series-ts.union-and-ts.intersect" id="toc-combining-series-ts.union-and-ts.intersect" class="nav-link" data-scroll-target="#combining-series-ts.union-and-ts.intersect">Combining series: <code>ts.union()</code> and <code>ts.intersect()</code></a></li>
+  <li><a href="#missing-values" id="toc-missing-values" class="nav-link" data-scroll-target="#missing-values">Missing values</a></li>
+  <li><a href="#time-plot-and-classical-decomposition" id="toc-time-plot-and-classical-decomposition" class="nav-link" data-scroll-target="#time-plot-and-classical-decomposition">Time plot and classical decomposition</a></li>
+  <li><a href="#reading-the-data-into-a-tsibble" id="toc-reading-the-data-into-a-tsibble" class="nav-link" data-scroll-target="#reading-the-data-into-a-tsibble">Reading the data into a <code>tsibble</code></a></li>
+  <li><a href="#exploratory-analysis-with-feasts" id="toc-exploratory-analysis-with-feasts" class="nav-link" data-scroll-target="#exploratory-analysis-with-feasts">Exploratory analysis with <code>feasts</code></a></li>
+  <li><a href="#diagnostics-with-timetk" id="toc-diagnostics-with-timetk" class="nav-link" data-scroll-target="#diagnostics-with-timetk">Diagnostics with <code>timetk</code></a></li>
+  <li><a href="#question-7-what-is-wrong-with-each-call" id="toc-question-7-what-is-wrong-with-each-call" class="nav-link" data-scroll-target="#question-7-what-is-wrong-with-each-call">Question 7: What is wrong with each call?</a></li>
+  </ul></li>
   <li><a href="#implementation-in-r" id="toc-implementation-in-r" class="nav-link" data-scroll-target="#implementation-in-r">Implementation in R</a></li>
   <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
   </ul>
@@ -336,34 +378,852 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <i class="callout-icon"></i>
 </div>
 <div class="callout-body-container">
-<p><strong>Topics covered:</strong> Introduction to time series: the nature of time series data, the forecasting problem, and exploring a series.</p>
+<p><strong>Topics covered:</strong> Handling time series in R: <code>ts</code> objects, dates and aggregation, subsetting, lags and differences, combining series, missing values, time plots and decomposition, and the tidy toolkit (<code>tsibble</code>, <code>feasts</code>, <code>timetk</code>).</p>
+<p><strong>Data:</strong> <code>sales_data.csv</code>, daily sales for several stores (columns <code>date</code>, <code>store_id</code>, <code>sales</code>), stored in the repository’s <code>data/</code> folder. <strong>Packages:</strong> <code>tidyverse</code>, <code>tsibble</code>, <code>feasts</code>, <code>timetk</code>, <code>knitr</code>, <code>here</code>.</p>
 </div>
 </div>
 </div>
-<section id="overview-of-the-key-concepts" class="level2">
-<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
-<p><em>Summarise the main ideas of this session in your own words.</em></p>
-</section>
-<section id="worked-exercises" class="level2">
-<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
-<p><em>Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.</em></p>
-</section>
-<section id="implementation-in-r" class="level2">
-<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
-<p><em>Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.</em></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)   <span class="co"># dplyr, ggplot2, readr, lubridate</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tsibble)     <span class="co"># tidy time series class: index + key</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(feasts)      <span class="co"># features and statistics for tsibbles</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(timetk)      <span class="co"># tidy plotting and diagnostics for tibbles</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"sales_data.csv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="overview-of-the-key-concepts" class="level2">
+<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
+<p>A time series is a set of observations indexed by time, where the order matters and neighbouring values are usually related. Before any modelling, the data have to be stored in a form that R recognises as a time series, so that it knows the spacing of the observations and where each one falls in the seasonal cycle.</p>
+<p><strong>The <code>ts</code> class.</strong> A <code>ts</code> object is a numeric vector with three extra attributes: <code>start</code>, <code>end</code> and <code>frequency</code>. The frequency is the number of observations per cycle (12 for monthly data with a yearly cycle, 4 for quarterly, 52 for weekly). <code>start = c(2021, 1)</code> means period 1 of 2021, so for monthly data January 2021. Periods are numbered from 1, and the second element of <code>start</code> can never exceed the frequency. Once these attributes are set, functions such as <code>window()</code>, <code>lag()</code>, <code>diff()</code>, <code>cycle()</code> and <code>decompose()</code> all know how the data are spaced.</p>
+<p><strong>Aggregation.</strong> Data are often collected at a finer resolution than we want to model. Daily sales can be summed to monthly totals or averaged to weekly means. The choice of resolution decides which patterns are visible: daily data show a weekly cycle and a yearly cycle, while monthly totals hide the weekly cycle completely.</p>
+<p><strong>Lags and differences.</strong> The lag operator shifts a series in time, <span class="math inline">\(BY_t = Y_{t-1}\)</span>. Differencing removes structure: the first difference <span class="math inline">\(\nabla Y_t = Y_t - Y_{t-1}\)</span> removes a linear trend, and the seasonal difference <span class="math inline">\(\nabla_{12} Y_t = Y_t - Y_{t-12}\)</span> removes a stable 12-month pattern. These are the building blocks of ARIMA and SARIMA models later in the section.</p>
+<p><strong>Decomposition.</strong> An additive decomposition writes the series as</p>
+<p><span class="math display">\[
+Y_t = T_t + S_t + R_t,
+\]</span></p>
+<p>a trend-cycle <span class="math inline">\(T_t\)</span>, a seasonal component <span class="math inline">\(S_t\)</span> that repeats every <span class="math inline">\(m\)</span> periods and sums to zero over a cycle, and a remainder <span class="math inline">\(R_t\)</span>. Classical decomposition estimates the trend with a centred moving average, then averages the detrended values for each season. STL does the same job with local regression (loess), lets the seasonal pattern change slowly over time, and is more robust to outliers.</p>
+<p><strong>The tidy toolkit.</strong> A <code>tsibble</code> is a data frame with an explicit <strong>index</strong> (the time variable) and <strong>key</strong> (which series each row belongs to), so many series can live in one table. It also distinguishes <em>implicit</em> gaps (missing rows) from <em>explicit</em> missing values (rows containing <code>NA</code>). <code>feasts</code> provides seasonal plots, ACFs, STL and feature extraction on tsibbles, and <code>timetk</code> produces similar diagnostics directly from an ordinary tibble.</p>
+</section>
+<section id="worked-exercises" class="level2">
+<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
+<section id="dates-and-aggregation" class="level3">
+<h3 class="anchored" data-anchor-id="dates-and-aggregation">Dates and aggregation</h3>
+<p>The raw data are daily. I keep store S001, convert <code>date</code> to a <code>Date</code>, and aggregate to monthly totals and weekly means with <code>format()</code>. The start of the <code>ts</code> object is read from the first date rather than typed in by hand.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(data_file)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(df<span class="sc">$</span>date)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, store_id <span class="sc">==</span> <span class="st">"S001"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>month <span class="ot">&lt;-</span> <span class="fu">format</span>(df<span class="sc">$</span>date, <span class="st">"%Y-%m"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>week  <span class="ot">&lt;-</span> <span class="fu">format</span>(df<span class="sc">$</span>date, <span class="st">"%Y-%U"</span>)   <span class="co"># %U = week of the year</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>agg_month <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(sales <span class="sc">~</span> month, <span class="at">data =</span> df, <span class="at">FUN =</span> sum)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>agg_week  <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(sales <span class="sc">~</span> week,  <span class="at">data =</span> df, <span class="at">FUN =</span> mean)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>first <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">paste0</span>(agg_month<span class="sc">$</span>month[<span class="dv">1</span>], <span class="st">"-01"</span>))</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>sales_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(agg_month<span class="sc">$</span>sales,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>               <span class="at">start =</span> <span class="fu">c</span>(<span class="fu">as.integer</span>(<span class="fu">format</span>(first, <span class="st">"%Y"</span>)), <span class="fu">as.integer</span>(<span class="fu">format</span>(first, <span class="st">"%m"</span>))),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>               <span class="at">frequency =</span> <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(agg_month), <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Month"</span>, <span class="st">"Total sales"</span>), <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-agg-month" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-agg-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: First six monthly sales totals, store S001.
+</figcaption>
+<div aria-describedby="tbl-agg-month-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Month</th>
+<th style="text-align: right;">Total sales</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">2021-01</td>
+<td style="text-align: right;">3160.4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2021-02</td>
+<td style="text-align: right;">3122.5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2021-03</td>
+<td style="text-align: right;">3899.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2021-04</td>
+<td style="text-align: right;">4186.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">2021-05</td>
+<td style="text-align: right;">4687.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2021-06</td>
+<td style="text-align: right;">4777.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="inspecting-a-ts-object" class="level3">
+<h3 class="anchored" data-anchor-id="inspecting-a-ts-object">Inspecting a <code>ts</code> object</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">frequency</span>(sales_ts)   <span class="co"># observations per cycle</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 12</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">start</span>(sales_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2021    1</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">end</span>(sales_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 2023   12</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cycle</span>(sales_ts)       <span class="co"># position of each observation in the yearly cycle</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec
+2021   1   2   3   4   5   6   7   8   9  10  11  12
+2022   1   2   3   4   5   6   7   8   9  10  11  12
+2023   1   2   3   4   5   6   7   8   9  10  11  12</code></pre>
+</div>
+</div>
+<p><code>time()</code> returns decimal years (January 2022 is 2022.000, February is 2022.083). These can be converted back to a year and month:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">time</span>(sales_ts)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>years  <span class="ot">&lt;-</span> <span class="fu">floor</span>(t)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>months <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">12</span> <span class="sc">*</span> (t <span class="sc">-</span> years)) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(<span class="fu">data.frame</span>(<span class="at">Decimal =</span> <span class="fu">as.numeric</span>(t), <span class="at">Year =</span> years, <span class="at">Month =</span> months), <span class="dv">12</span>),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-time" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Decimal time converted back to year and month (first year).
+</figcaption>
+<div aria-describedby="tbl-time-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Decimal</th>
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Month</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">2021.000</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">1</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.083</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021.167</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.250</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021.333</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">5</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.417</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">6</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021.500</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">7</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.583</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021.667</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.750</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2021.833</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">11</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2021.917</td>
+<td style="text-align: right;">2021</td>
+<td style="text-align: right;">12</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="subsetting-with-window" class="level3">
+<h3 class="anchored" data-anchor-id="subsetting-with-window">Subsetting with <code>window()</code></h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">window</span>(sales_ts, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">7</span>), <span class="at">end =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">12</span>))   <span class="co"># second half of 2023</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         Jul     Aug     Sep     Oct     Nov     Dec
+2023 5996.13 5806.09 5034.01 5172.38 4937.70 4957.90</code></pre>
+</div>
+</div>
+</section>
+<section id="lags-and-differences" class="level3">
+<h3 class="anchored" data-anchor-id="lags-and-differences">Lags and differences</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>lagged_ts        <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">lag</span>(sales_ts, <span class="at">k =</span> <span class="sc">-</span><span class="dv">1</span>)   <span class="co"># shifts the time index, not the values</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>diff_ts          <span class="ot">&lt;-</span> <span class="fu">diff</span>(sales_ts)                 <span class="co"># first difference</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>seasonal_diff_ts <span class="ot">&lt;-</span> <span class="fu">diff</span>(sales_ts, <span class="at">lag =</span> <span class="dv">12</span>)       <span class="co"># seasonal difference</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">cbind</span>(<span class="at">sales =</span> sales_ts, <span class="at">lag1 =</span> lagged_ts, <span class="at">diff1 =</span> diff_ts), <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           sales    lag1  diff1
+Jan 2021 3160.42      NA     NA
+Feb 2021 3122.53 3160.42 -37.89
+Mar 2021 3899.81 3122.53 777.28
+Apr 2021 4186.90 3899.81 287.09
+May 2021 4687.30 4186.90 500.40
+Jun 2021 4777.31 4687.30  90.01</code></pre>
+</div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><code>stats::lag()</code> needs its package prefix: once the tidyverse is loaded, <code>dplyr::lag()</code> masks it, and the two behave differently. <code>dplyr::lag()</code> shifts the <em>values</em> of a vector and pads with <code>NA</code>, while <code>stats::lag()</code> keeps the values and shifts the <em>time attribute</em> of a <code>ts</code>. With <code>k = -1</code>, each value is moved one period later, so lining it up with the original (as in <code>cbind</code> above) gives <span class="math inline">\(Y_{t-1}\)</span> next to <span class="math inline">\(Y_t\)</span>.</p>
+</div>
+</div>
+<p>The first difference loses one observation and the seasonal difference loses a full year (12 observations), which matters when the series is short.</p>
+</section>
+<section id="combining-series-ts.union-and-ts.intersect" class="level3">
+<h3 class="anchored" data-anchor-id="combining-series-ts.union-and-ts.intersect">Combining series: <code>ts.union()</code> and <code>ts.intersect()</code></h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ts_a <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,  <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ts_b <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="dv">11</span><span class="sc">:</span><span class="dv">18</span>, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">4</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.union</span>(ts_a, ts_b)       <span class="co"># full range, gaps filled with NA</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         ts_a ts_b
+Jan 2023    1   NA
+Feb 2023    2   NA
+Mar 2023    3   NA
+Apr 2023    4   11
+May 2023    5   12
+Jun 2023    6   13
+Jul 2023    7   14
+Aug 2023    8   15
+Sep 2023    9   16
+Oct 2023   10   17
+Nov 2023   NA   18</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.intersect</span>(ts_a, ts_b)   <span class="co"># overlapping months only</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>         ts_a ts_b
+Apr 2023    4   11
+May 2023    5   12
+Jun 2023    6   13
+Jul 2023    7   14
+Aug 2023    8   15
+Sep 2023    9   16
+Oct 2023   10   17</code></pre>
+</div>
+</div>
+</section>
+<section id="missing-values" class="level3">
+<h3 class="anchored" data-anchor-id="missing-values">Missing values</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">anyNA</span>(sales_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] FALSE</code></pre>
+</div>
+</div>
+</section>
+<section id="time-plot-and-classical-decomposition" class="level3">
+<h3 class="anchored" data-anchor-id="time-plot-and-classical-decomposition">Time plot and classical decomposition</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.ts</span>(sales_ts, <span class="at">xlab =</span> <span class="st">"Year"</span>, <span class="at">ylab =</span> <span class="st">"Total sales"</span>,</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"darkred"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">type =</span> <span class="st">"o"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-timeplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-timeplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-timeplot-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-timeplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Monthly sales, store S001.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">decompose</span>(sales_ts))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-decompose" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-decompose-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-decompose-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Classical additive decomposition of monthly sales, store S001.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="reading-the-data-into-a-tsibble" class="level3">
+<h3 class="anchored" data-anchor-id="reading-the-data-into-a-tsibble">Reading the data into a <code>tsibble</code></h3>
+<p>The tsibble is built at the native daily resolution with <code>store_id</code> as the key, so each (date, store) pair is unique. Gaps are checked and made explicit <em>before</em> aggregating, so that later operations cannot silently misalign.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  data_file,</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="fu">cols</span>(</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">date     =</span> <span class="fu">col_date</span>(<span class="at">format =</span> <span class="st">"%Y-%m-%d"</span>),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">store_id =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">sales    =</span> <span class="fu">col_double</span>()</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="ot">&lt;-</span> raw <span class="sc">|&gt;</span> <span class="fu">as_tsibble</span>(<span class="at">index =</span> date, <span class="at">key =</span> store_id)</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="sc">|&gt;</span> <span class="fu">count_gaps</span>()                         <span class="co"># implicit gaps (missing rows)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 4
+# ℹ 4 variables: store_id &lt;chr&gt;, .from &lt;date&gt;, .to &lt;date&gt;, .n &lt;int&gt;</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span> <span class="fu">fill_gaps</span>(<span class="at">.full =</span> <span class="cn">TRUE</span>) <span class="co"># make them explicit NAs</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>sales_monthly <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">index_by</span>(<span class="at">month =</span> <span class="sc">~</span> <span class="fu">yearmonth</span>(.)) <span class="sc">|&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sales =</span> <span class="fu">sum</span>(sales, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
+<section id="exploratory-analysis-with-feasts" class="level3">
+<h3 class="anchored" data-anchor-id="exploratory-analysis-with-feasts">Exploratory analysis with <code>feasts</code></h3>
+<p>STL and the ACF cannot handle <code>NA</code>s, so missing days are filled with each store’s mean. This is a crude fix that flattens any local pattern on those days, but it is adequate for exploration.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by_key</span>() <span class="sc">|&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sales =</span> <span class="fu">replace_na</span>(sales, <span class="fu">mean</span>(sales, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">autoplot</span>(sales)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-feasts-daily" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-feasts-daily-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-feasts-daily-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-feasts-daily-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Daily sales by store.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Daily data have two plausible cycles, weekly and yearly, so <code>period</code> has to be stated explicitly:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">gg_season</span>(sales, <span class="at">period =</span> <span class="st">"year"</span>, <span class="at">labels =</span> <span class="st">"both"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-season-year" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-season-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-season-year-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-season-year-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Seasonal plot, yearly period: each line is one year.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">gg_season</span>(sales, <span class="at">period =</span> <span class="st">"week"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-season-week" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-season-week-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-season-week-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-season-week-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Seasonal plot, weekly period: each line is one week.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The subseries plot uses the monthly totals, which removes the weekly cycle from view and makes the month-to-month pattern easier to compare across years.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>sales_monthly <span class="sc">|&gt;</span> <span class="fu">gg_subseries</span>(sales)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-subseries" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-subseries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-subseries-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-subseries-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Monthly subseries plot: the blue lines are the monthly means.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">ACF</span>(sales) <span class="sc">|&gt;</span> <span class="fu">autoplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-acf" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-acf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-acf-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-acf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Sample ACF of daily sales by store.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">model</span>(<span class="fu">STL</span>(sales <span class="sc">~</span> <span class="fu">trend</span>() <span class="sc">+</span> <span class="fu">season</span>(<span class="at">period =</span> <span class="st">"year"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">components</span>() <span class="sc">|&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-stl" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-stl-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stl-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: STL decomposition of daily sales with a yearly seasonal period.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">features</span>(sales, feat_stl) <span class="sc">|&gt;</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(store_id, trend_strength, <span class="fu">starts_with</span>(<span class="st">"seasonal_strength"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-stl-features" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-stl-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: STL features by store. Strengths close to 1 mean a strong trend or seasonal pattern.
+</figcaption>
+<div aria-describedby="tbl-stl-features-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">store_id</th>
+<th style="text-align: right;">trend_strength</th>
+<th style="text-align: right;">seasonal_strength_week</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">S001</td>
+<td style="text-align: right;">0.904</td>
+<td style="text-align: right;">0.492</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">S002</td>
+<td style="text-align: right;">0.855</td>
+<td style="text-align: right;">0.497</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">S003</td>
+<td style="text-align: right;">0.942</td>
+<td style="text-align: right;">0.528</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="diagnostics-with-timetk" class="level3">
+<h3 class="anchored" data-anchor-id="diagnostics-with-timetk">Diagnostics with <code>timetk</code></h3>
+<p><code>timetk</code> works on an ordinary tibble with a <code>Date</code> column, so no tsibble conversion is needed. I use store S001 for the plots.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> raw <span class="sc">|&gt;</span> <span class="fu">filter</span>(store_id <span class="sc">==</span> <span class="st">"S001"</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span> <span class="fu">plot_time_series</span>(date, sales, <span class="at">.interactive =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-timetk-series" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-timetk-series-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-timetk-series-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-timetk-series-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Daily sales, store S001, with a loess smoother.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tk_summary_diagnostics</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(n.obs, start, end, scale, diff.median) <span class="sc">|&gt;</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-timetk-summary" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-timetk-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Time index diagnostics, store S001.
+</figcaption>
+<div aria-describedby="tbl-timetk-summary-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">n.obs</th>
+<th style="text-align: left;">start</th>
+<th style="text-align: left;">end</th>
+<th style="text-align: left;">scale</th>
+<th style="text-align: right;">diff.median</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1095</td>
+<td style="text-align: left;">2021-01-01</td>
+<td style="text-align: left;">2023-12-31</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: right;">86400</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Daily data have no sub-day resolution, so <code>second</code>, <code>minute</code> and <code>hour</code> are left out of the feature set.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_seasonal_diagnostics</span>(</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    date, sales,</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">.feature_set =</span> <span class="fu">c</span>(<span class="st">"wday.lbl"</span>, <span class="st">"week"</span>, <span class="st">"month.lbl"</span>, <span class="st">"quarter"</span>, <span class="st">"year"</span>),</span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">.interactive =</span> <span class="cn">FALSE</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-timetk-seasonal" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-timetk-seasonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-timetk-seasonal-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-timetk-seasonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Seasonal diagnostics, store S001: distribution of daily sales by weekday, week, month, quarter and year.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span> <span class="fu">plot_acf_diagnostics</span>(date, sales, <span class="at">.interactive =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-timetk-acf" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-timetk-acf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="01-ts-intro_files/figure-html/fig-timetk-acf-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-timetk-acf-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: ACF and PACF of daily sales, store S001.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="question-7-what-is-wrong-with-each-call" class="level3">
+<h3 class="anchored" data-anchor-id="question-7-what-is-wrong-with-each-call">Question 7: What is wrong with each call?</h3>
+<p><strong>Q1. <code>ts(x, start = c(2023, 13), frequency = 12)</code></strong> Monthly data have only 12 periods per year, so the second element of <code>start</code> cannot exceed 12. “Period 13 of 2023” does not exist; it should roll over to January 2024. Fix: <code>ts(x, start = c(2024, 1), frequency = 12)</code>.</p>
+<p><strong>Q2. <code>ts(x, start = 2023, frequency = 12)</code></strong> For sub-annual data (<code>frequency &gt; 1</code>), <code>start</code> should give both the year and the period within the year. A single number is ambiguous. Fix: <code>ts(x, start = c(2023, 1), frequency = 12)</code>.</p>
+<p><strong>Q3. <code>ts(x, start = c(2023, 0), frequency = 12)</code></strong> Periods are numbered from 1, so period 0 does not exist; January is period 1. Fix: <code>ts(x, start = c(2023, 1), frequency = 12)</code>.</p>
+<p><strong>Q4. <code>ts(x, start = c(2023, 2), frequency = 4)</code></strong> “Period 2” depends on the frequency: with <code>frequency = 4</code> it means Q2, not February. If the data are monthly, the frequency must match their real spacing. Fix: <code>ts(x, start = c(2023, 2), frequency = 12)</code>.</p>
+<p><strong>Q5. <code>ts(x, start = c(2023, 1), frequency = 12.5)</code></strong> The frequency counts observations per cycle, so it should be a whole number. Most methods built on <code>ts</code> objects (seasonal differencing, <code>decompose()</code>, seasonal ARIMA) need an integer frequency. Fix: <code>ts(x, start = c(2023, 1), frequency = 12)</code>.</p>
+<p><strong>Q6. <code>ts(x, start = c(2023, 1), frequency = 12, deltat = 1/12)</code></strong> <code>frequency</code> and <code>deltat</code> describe the same thing from two directions (<code>deltat = 1/frequency</code>), so giving both is redundant. Fix: give only one, e.g.&nbsp;<code>ts(x, start = c(2023, 1), frequency = 12)</code>.</p>
+<p><strong>Q7. <code>ts(x, start = c(2023, 1), frequency = 365)</code></strong> <code>frequency = 365</code> declares daily data. If <code>x</code> holds monthly values, every value is placed at the wrong point in the yearly cycle. Fix: <code>ts(x, start = c(2023, 1), frequency = 12)</code>.</p>
+<p><strong>Q8. <code>window(x, start = c(2023, 13))</code></strong> <code>window()</code> can only extract periods that exist inside the series’ range, and month 13 does not exist. Fix: start at a valid point inside the series, e.g.&nbsp;<code>window(x, start = c(2024, 1))</code>.</p>
+<p><strong>Q9. <code>decompose(ts(x, frequency = 1))</code></strong> With <code>frequency = 1</code> there is no seasonal cycle, so there is no seasonal component to estimate. <code>decompose()</code> also needs at least two complete cycles. Fix: use the series’ real seasonal frequency, e.g.&nbsp;<code>decompose(ts(x, frequency = 12))</code>.</p>
+</section>
+</section>
+<section id="implementation-in-r" class="level2">
+<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
+<p>To understand what <code>decompose()</code> is doing, I wrote the classical additive decomposition from first principles and checked it against the built-in function on the monthly S001 series.</p>
+<ol type="1">
+<li><strong>Trend.</strong> With an even period <span class="math inline">\(m = 12\)</span>, a plain 12-term moving average is not centred on a month. A <span class="math inline">\(2 \times 12\)</span> moving average fixes this: it is a 13-term weighted average with weights <span class="math inline">\(\tfrac{1}{24}\)</span> on the two end months and <span class="math inline">\(\tfrac{1}{12}\)</span> on the 11 in between, <span class="math display">\[
+\hat T_t = \frac{1}{12}\left(\tfrac{1}{2}Y_{t-6} + Y_{t-5} + \dots + Y_{t+5} + \tfrac{1}{2}Y_{t+6}\right).
+\]</span> The first and last six months have no trend estimate.</li>
+<li><strong>Seasonal component.</strong> Detrend, <span class="math inline">\(Y_t - \hat T_t\)</span>, average the detrended values for each calendar month, then centre the 12 averages so they sum to zero.</li>
+<li><strong>Remainder.</strong> <span class="math inline">\(\hat R_t = Y_t - \hat T_t - \hat S_t\)</span>.</li>
+</ol>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>my_decompose <span class="ot">&lt;-</span> <span class="cf">function</span>(y) {</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">frequency</span>(y)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  w <span class="ot">&lt;-</span> <span class="cf">if</span> (m <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fu">rep</span>(<span class="dv">1</span>, m <span class="sc">-</span> <span class="dv">1</span>), <span class="fl">0.5</span>) <span class="sc">/</span> m <span class="cf">else</span> <span class="fu">rep</span>(<span class="dv">1</span>, m) <span class="sc">/</span> m</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  trend <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(y, w, <span class="at">sides =</span> <span class="dv">2</span>)</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  detrended <span class="ot">&lt;-</span> y <span class="sc">-</span> trend</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  s_means <span class="ot">&lt;-</span> <span class="fu">tapply</span>(detrended, <span class="fu">cycle</span>(y), mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  s_means <span class="ot">&lt;-</span> s_means <span class="sc">-</span> <span class="fu">mean</span>(s_means)            <span class="co"># seasonal effects sum to zero</span></span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  seasonal <span class="ot">&lt;-</span> <span class="fu">ts</span>(s_means[<span class="fu">cycle</span>(y)], <span class="at">start =</span> <span class="fu">start</span>(y), <span class="at">frequency =</span> m)</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">trend =</span> trend, <span class="at">seasonal =</span> seasonal, <span class="at">random =</span> y <span class="sc">-</span> trend <span class="sc">-</span> seasonal,</span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>       <span class="at">figure =</span> s_means)</span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a>mine  <span class="ot">&lt;-</span> <span class="fu">my_decompose</span>(sales_ts)</span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a>built <span class="ot">&lt;-</span> <span class="fu">decompose</span>(sales_ts)</span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-18"><a href="#cb39-18" aria-hidden="true" tabindex="-1"></a>max_diff <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb39-19"><a href="#cb39-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">Trend     =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>trend    <span class="sc">-</span> built<span class="sc">$</span>trend),    <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb39-20"><a href="#cb39-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">Seasonal  =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>seasonal <span class="sc">-</span> built<span class="sc">$</span>seasonal), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb39-21"><a href="#cb39-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">Remainder =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>random   <span class="sc">-</span> built<span class="sc">$</span>random),   <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb39-22"><a href="#cb39-22" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-23"><a href="#cb39-23" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Component =</span> <span class="fu">names</span>(max_diff), <span class="st">`</span><span class="at">Max absolute difference</span><span class="st">`</span> <span class="ot">=</span> max_diff,</span>
+<span id="cb39-24"><a href="#cb39-24" aria-hidden="true" tabindex="-1"></a>                 <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">digits =</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Component</th>
+<th style="text-align: right;">Max absolute difference</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Trend</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Seasonal</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Remainder</td>
+<td style="text-align: right;">0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Month =</span> month.abb, <span class="at">Effect =</span> <span class="fu">as.numeric</span>(mine<span class="sc">$</span>figure)), <span class="at">digits =</span> <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-seasonal-figure" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-seasonal-figure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: Estimated seasonal effects by month (own implementation).
+</figcaption>
+<div aria-describedby="tbl-seasonal-figure-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Month</th>
+<th style="text-align: right;">Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Jan</td>
+<td style="text-align: right;">-590.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Feb</td>
+<td style="text-align: right;">-797.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Mar</td>
+<td style="text-align: right;">-26.8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Apr</td>
+<td style="text-align: right;">255.1</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">May</td>
+<td style="text-align: right;">611.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Jun</td>
+<td style="text-align: right;">658.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Jul</td>
+<td style="text-align: right;">702.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Aug</td>
+<td style="text-align: right;">511.4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Sep</td>
+<td style="text-align: right;">-89.1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Oct</td>
+<td style="text-align: right;">-255.9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Nov</td>
+<td style="text-align: right;">-425.3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Dec</td>
+<td style="text-align: right;">-553.3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The differences are zero up to rounding, so <code>decompose()</code> is exactly the moving-average-then-seasonal-means procedure above. Writing it out made the method’s weaknesses concrete. The seasonal pattern is forced to be identical every year, the trend is missing at both ends (exactly where a forecaster needs it most), and one unusual month affects both the moving average and its month’s seasonal mean. STL addresses all three.</p>
+</section>
 <section id="reflection" class="level2">
 <h2 class="anchored" data-anchor-id="reflection">Reflection</h2>
-<p><strong>What was most challenging:</strong></p>
-<p><strong>What I now understand:</strong></p>
+<p><strong>What was most challenging:</strong> Keeping track of the different ways R represents time. A <code>ts</code> object stores time as decimal years with a frequency attribute, a <code>Date</code> column stores calendar dates, and a <code>tsibble</code> uses an index and key. Each has its own rules: <code>start</code> periods are numbered from 1, frequency must match the real spacing of the data, and daily data need the seasonal period stated explicitly because there is more than one cycle. The <code>lag()</code> clash was the most confusing. <code>stats::lag()</code> shifts the time attribute while <code>dplyr::lag()</code> shifts the values, and which one runs depends on which packages are loaded.</p>
+<p><strong>What I now understand:</strong> Getting the structure of a time series right is part of the analysis, not a preliminary step. The frequency decides what <code>cycle()</code>, seasonal differencing and decomposition do, so a wrong frequency produces output that looks plausible but is meaningless (as in Question 7). Aggregation is a modelling choice too: summing to monthly removes the weekly cycle entirely. The difference between implicit gaps and explicit <code>NA</code>s in a tsibble explained why filling gaps has to happen before aggregating.</p>
 <p><strong>Advantages and limitations of the methods:</strong></p>
-<p><strong>Links:</strong> related projects and journal entries.</p>
+<ul>
+<li><em>Advantages:</em> Base <code>ts</code> objects are simple and are what most classical functions (<code>arima</code>, <code>decompose</code>, <code>HoltWinters</code>) expect. The tidy tools handle many series at once through the key, deal with irregular dates and gaps explicitly, and make seasonal plots for multiple periods easy.</li>
+<li><em>Limitations:</em> A <code>ts</code> object supports only one regular frequency, so it cannot represent daily data with both weekly and yearly cycles. Classical decomposition assumes a fixed seasonal pattern and loses the trend at the ends of the series. Filling missing days with a store mean is convenient for exploration but would bias any model fitted afterwards.</li>
+</ul>
+<p><strong>Links:</strong> Project 1 (ARIMA and SARIMA on tourism nights sold) builds on these tools, starting from a monthly <code>ts</code> object, a time plot, a seasonal subseries plot and an STL decomposition before differencing. See also the Week 1 journal entry.</p>
 
 
 <!-- -->
@@ -822,41 +1682,395 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "TS Intro"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 1: Time series foundations, ARIMA and volatility models"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>**Topics covered:** Introduction to time series: the nature of time series data, the forecasting problem, and exploring a series.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>*Summarise the main ideas of this session in your own words.*</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>**What was most challenging:**</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>**What I now understand:**</span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>**Links:** related projects and journal entries.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb41" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "TS Intro"</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 1: Time series foundations, ARIMA and volatility models"</span></span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>**Topics covered:** Handling time series in R: <span class="in">`ts`</span> objects, dates and aggregation, subsetting, lags and differences, combining series, missing values, time plots and decomposition, and the tidy toolkit (<span class="in">`tsibble`</span>, <span class="in">`feasts`</span>, <span class="in">`timetk`</span>).</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>**Data:** `sales_data.csv`, daily sales for several stores (columns `date`, `store_id`, `sales`), stored in the repository's `data/` folder. **Packages:** <span class="in">`tidyverse`</span>, <span class="in">`tsibble`</span>, <span class="in">`feasts`</span>, <span class="in">`timetk`</span>, <span class="in">`knitr`</span>, <span class="in">`here`</span>.</span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb41-14"><a href="#cb41-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-17"><a href="#cb41-17" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-18"><a href="#cb41-18" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb41-19"><a href="#cb41-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)   <span class="co"># dplyr, ggplot2, readr, lubridate</span></span>
+<span id="cb41-20"><a href="#cb41-20" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tsibble)     <span class="co"># tidy time series class: index + key</span></span>
+<span id="cb41-21"><a href="#cb41-21" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(feasts)      <span class="co"># features and statistics for tsibbles</span></span>
+<span id="cb41-22"><a href="#cb41-22" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(timetk)      <span class="co"># tidy plotting and diagnostics for tibbles</span></span>
+<span id="cb41-23"><a href="#cb41-23" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb41-24"><a href="#cb41-24" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>))</span>
+<span id="cb41-25"><a href="#cb41-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-26"><a href="#cb41-26" aria-hidden="true" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"sales_data.csv"</span>)</span>
+<span id="cb41-27"><a href="#cb41-27" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-28"><a href="#cb41-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-29"><a href="#cb41-29" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
+<span id="cb41-30"><a href="#cb41-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-31"><a href="#cb41-31" aria-hidden="true" tabindex="-1"></a>A time series is a set of observations indexed by time, where the order matters and neighbouring values are usually related. Before any modelling, the data have to be stored in a form that R recognises as a time series, so that it knows the spacing of the observations and where each one falls in the seasonal cycle.</span>
+<span id="cb41-32"><a href="#cb41-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-33"><a href="#cb41-33" aria-hidden="true" tabindex="-1"></a>**The `ts` class.** A <span class="in">`ts`</span> object is a numeric vector with three extra attributes: <span class="in">`start`</span>, <span class="in">`end`</span> and <span class="in">`frequency`</span>. The frequency is the number of observations per cycle (12 for monthly data with a yearly cycle, 4 for quarterly, 52 for weekly). <span class="in">`start = c(2021, 1)`</span> means period 1 of 2021, so for monthly data January 2021. Periods are numbered from 1, and the second element of <span class="in">`start`</span> can never exceed the frequency. Once these attributes are set, functions such as <span class="in">`window()`</span>, <span class="in">`lag()`</span>, <span class="in">`diff()`</span>, <span class="in">`cycle()`</span> and <span class="in">`decompose()`</span> all know how the data are spaced.</span>
+<span id="cb41-34"><a href="#cb41-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-35"><a href="#cb41-35" aria-hidden="true" tabindex="-1"></a>**Aggregation.** Data are often collected at a finer resolution than we want to model. Daily sales can be summed to monthly totals or averaged to weekly means. The choice of resolution decides which patterns are visible: daily data show a weekly cycle and a yearly cycle, while monthly totals hide the weekly cycle completely.</span>
+<span id="cb41-36"><a href="#cb41-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-37"><a href="#cb41-37" aria-hidden="true" tabindex="-1"></a>**Lags and differences.** The lag operator shifts a series in time, $BY_t = Y_{t-1}$. Differencing removes structure: the first difference $\nabla Y_t = Y_t - Y_{t-1}$ removes a linear trend, and the seasonal difference $\nabla_{12} Y_t = Y_t - Y_{t-12}$ removes a stable 12-month pattern. These are the building blocks of ARIMA and SARIMA models later in the section.</span>
+<span id="cb41-38"><a href="#cb41-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-39"><a href="#cb41-39" aria-hidden="true" tabindex="-1"></a>**Decomposition.** An additive decomposition writes the series as</span>
+<span id="cb41-40"><a href="#cb41-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-41"><a href="#cb41-41" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-42"><a href="#cb41-42" aria-hidden="true" tabindex="-1"></a>Y_t = T_t + S_t + R_t,</span>
+<span id="cb41-43"><a href="#cb41-43" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-44"><a href="#cb41-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-45"><a href="#cb41-45" aria-hidden="true" tabindex="-1"></a>a trend-cycle $T_t$, a seasonal component $S_t$ that repeats every $m$ periods and sums to zero over a cycle, and a remainder $R_t$. Classical decomposition estimates the trend with a centred moving average, then averages the detrended values for each season. STL does the same job with local regression (loess), lets the seasonal pattern change slowly over time, and is more robust to outliers.</span>
+<span id="cb41-46"><a href="#cb41-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-47"><a href="#cb41-47" aria-hidden="true" tabindex="-1"></a>**The tidy toolkit.** A `tsibble` is a data frame with an explicit **index** (the time variable) and **key** (which series each row belongs to), so many series can live in one table. It also distinguishes *implicit* gaps (missing rows) from *explicit* missing values (rows containing <span class="in">`NA`</span>). <span class="in">`feasts`</span> provides seasonal plots, ACFs, STL and feature extraction on tsibbles, and <span class="in">`timetk`</span> produces similar diagnostics directly from an ordinary tibble.</span>
+<span id="cb41-48"><a href="#cb41-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-49"><a href="#cb41-49" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
+<span id="cb41-50"><a href="#cb41-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-51"><a href="#cb41-51" aria-hidden="true" tabindex="-1"></a><span class="fu">### Dates and aggregation</span></span>
+<span id="cb41-52"><a href="#cb41-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-53"><a href="#cb41-53" aria-hidden="true" tabindex="-1"></a>The raw data are daily. I keep store S001, convert <span class="in">`date`</span> to a <span class="in">`Date`</span>, and aggregate to monthly totals and weekly means with <span class="in">`format()`</span>. The start of the <span class="in">`ts`</span> object is read from the first date rather than typed in by hand.</span>
+<span id="cb41-54"><a href="#cb41-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-57"><a href="#cb41-57" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-58"><a href="#cb41-58" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: aggregate</span></span>
+<span id="cb41-59"><a href="#cb41-59" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(data_file)</span>
+<span id="cb41-60"><a href="#cb41-60" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>date <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(df<span class="sc">$</span>date)</span>
+<span id="cb41-61"><a href="#cb41-61" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">subset</span>(df, store_id <span class="sc">==</span> <span class="st">"S001"</span>)</span>
+<span id="cb41-62"><a href="#cb41-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-63"><a href="#cb41-63" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>month <span class="ot">&lt;-</span> <span class="fu">format</span>(df<span class="sc">$</span>date, <span class="st">"%Y-%m"</span>)</span>
+<span id="cb41-64"><a href="#cb41-64" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>week  <span class="ot">&lt;-</span> <span class="fu">format</span>(df<span class="sc">$</span>date, <span class="st">"%Y-%U"</span>)   <span class="co"># %U = week of the year</span></span>
+<span id="cb41-65"><a href="#cb41-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-66"><a href="#cb41-66" aria-hidden="true" tabindex="-1"></a>agg_month <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(sales <span class="sc">~</span> month, <span class="at">data =</span> df, <span class="at">FUN =</span> sum)</span>
+<span id="cb41-67"><a href="#cb41-67" aria-hidden="true" tabindex="-1"></a>agg_week  <span class="ot">&lt;-</span> <span class="fu">aggregate</span>(sales <span class="sc">~</span> week,  <span class="at">data =</span> df, <span class="at">FUN =</span> mean)</span>
+<span id="cb41-68"><a href="#cb41-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-69"><a href="#cb41-69" aria-hidden="true" tabindex="-1"></a>first <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">paste0</span>(agg_month<span class="sc">$</span>month[<span class="dv">1</span>], <span class="st">"-01"</span>))</span>
+<span id="cb41-70"><a href="#cb41-70" aria-hidden="true" tabindex="-1"></a>sales_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(agg_month<span class="sc">$</span>sales,</span>
+<span id="cb41-71"><a href="#cb41-71" aria-hidden="true" tabindex="-1"></a>               <span class="at">start =</span> <span class="fu">c</span>(<span class="fu">as.integer</span>(<span class="fu">format</span>(first, <span class="st">"%Y"</span>)), <span class="fu">as.integer</span>(<span class="fu">format</span>(first, <span class="st">"%m"</span>))),</span>
+<span id="cb41-72"><a href="#cb41-72" aria-hidden="true" tabindex="-1"></a>               <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb41-73"><a href="#cb41-73" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-74"><a href="#cb41-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-77"><a href="#cb41-77" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-78"><a href="#cb41-78" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-agg-month</span></span>
+<span id="cb41-79"><a href="#cb41-79" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "First six monthly sales totals, store S001."</span></span>
+<span id="cb41-80"><a href="#cb41-80" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(agg_month), <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Month"</span>, <span class="st">"Total sales"</span>), <span class="at">digits =</span> <span class="dv">1</span>)</span>
+<span id="cb41-81"><a href="#cb41-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-82"><a href="#cb41-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-83"><a href="#cb41-83" aria-hidden="true" tabindex="-1"></a><span class="fu">### Inspecting a `ts` object</span></span>
+<span id="cb41-84"><a href="#cb41-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-87"><a href="#cb41-87" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-88"><a href="#cb41-88" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: ts-attributes</span></span>
+<span id="cb41-89"><a href="#cb41-89" aria-hidden="true" tabindex="-1"></a><span class="fu">frequency</span>(sales_ts)   <span class="co"># observations per cycle</span></span>
+<span id="cb41-90"><a href="#cb41-90" aria-hidden="true" tabindex="-1"></a><span class="fu">start</span>(sales_ts)</span>
+<span id="cb41-91"><a href="#cb41-91" aria-hidden="true" tabindex="-1"></a><span class="fu">end</span>(sales_ts)</span>
+<span id="cb41-92"><a href="#cb41-92" aria-hidden="true" tabindex="-1"></a><span class="fu">cycle</span>(sales_ts)       <span class="co"># position of each observation in the yearly cycle</span></span>
+<span id="cb41-93"><a href="#cb41-93" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-94"><a href="#cb41-94" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-95"><a href="#cb41-95" aria-hidden="true" tabindex="-1"></a><span class="in">`time()`</span> returns decimal years (January 2022 is 2022.000, February is 2022.083). These can be converted back to a year and month:</span>
+<span id="cb41-96"><a href="#cb41-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-99"><a href="#cb41-99" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-100"><a href="#cb41-100" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-time</span></span>
+<span id="cb41-101"><a href="#cb41-101" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Decimal time converted back to year and month (first year)."</span></span>
+<span id="cb41-102"><a href="#cb41-102" aria-hidden="true" tabindex="-1"></a>t <span class="ot">&lt;-</span> <span class="fu">time</span>(sales_ts)</span>
+<span id="cb41-103"><a href="#cb41-103" aria-hidden="true" tabindex="-1"></a>years  <span class="ot">&lt;-</span> <span class="fu">floor</span>(t)</span>
+<span id="cb41-104"><a href="#cb41-104" aria-hidden="true" tabindex="-1"></a>months <span class="ot">&lt;-</span> <span class="fu">round</span>(<span class="dv">12</span> <span class="sc">*</span> (t <span class="sc">-</span> years)) <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb41-105"><a href="#cb41-105" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(<span class="fu">data.frame</span>(<span class="at">Decimal =</span> <span class="fu">as.numeric</span>(t), <span class="at">Year =</span> years, <span class="at">Month =</span> months), <span class="dv">12</span>),</span>
+<span id="cb41-106"><a href="#cb41-106" aria-hidden="true" tabindex="-1"></a>      <span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb41-107"><a href="#cb41-107" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-108"><a href="#cb41-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-109"><a href="#cb41-109" aria-hidden="true" tabindex="-1"></a><span class="fu">### Subsetting with `window()`</span></span>
+<span id="cb41-110"><a href="#cb41-110" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-113"><a href="#cb41-113" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-114"><a href="#cb41-114" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: window</span></span>
+<span id="cb41-115"><a href="#cb41-115" aria-hidden="true" tabindex="-1"></a><span class="fu">window</span>(sales_ts, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">7</span>), <span class="at">end =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">12</span>))   <span class="co"># second half of 2023</span></span>
+<span id="cb41-116"><a href="#cb41-116" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-117"><a href="#cb41-117" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-118"><a href="#cb41-118" aria-hidden="true" tabindex="-1"></a><span class="fu">### Lags and differences</span></span>
+<span id="cb41-119"><a href="#cb41-119" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-122"><a href="#cb41-122" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-123"><a href="#cb41-123" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: lags-differences</span></span>
+<span id="cb41-124"><a href="#cb41-124" aria-hidden="true" tabindex="-1"></a>lagged_ts        <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">lag</span>(sales_ts, <span class="at">k =</span> <span class="sc">-</span><span class="dv">1</span>)   <span class="co"># shifts the time index, not the values</span></span>
+<span id="cb41-125"><a href="#cb41-125" aria-hidden="true" tabindex="-1"></a>diff_ts          <span class="ot">&lt;-</span> <span class="fu">diff</span>(sales_ts)                 <span class="co"># first difference</span></span>
+<span id="cb41-126"><a href="#cb41-126" aria-hidden="true" tabindex="-1"></a>seasonal_diff_ts <span class="ot">&lt;-</span> <span class="fu">diff</span>(sales_ts, <span class="at">lag =</span> <span class="dv">12</span>)       <span class="co"># seasonal difference</span></span>
+<span id="cb41-127"><a href="#cb41-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-128"><a href="#cb41-128" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">cbind</span>(<span class="at">sales =</span> sales_ts, <span class="at">lag1 =</span> lagged_ts, <span class="at">diff1 =</span> diff_ts), <span class="dv">6</span>)</span>
+<span id="cb41-129"><a href="#cb41-129" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-130"><a href="#cb41-130" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-131"><a href="#cb41-131" aria-hidden="true" tabindex="-1"></a>::: {.callout-caution}</span>
+<span id="cb41-132"><a href="#cb41-132" aria-hidden="true" tabindex="-1"></a><span class="in">`stats::lag()`</span> needs its package prefix: once the tidyverse is loaded, <span class="in">`dplyr::lag()`</span> masks it, and the two behave differently. <span class="in">`dplyr::lag()`</span> shifts the *values* of a vector and pads with `NA`, while `stats::lag()` keeps the values and shifts the *time attribute* of a <span class="in">`ts`</span>. With <span class="in">`k = -1`</span>, each value is moved one period later, so lining it up with the original (as in <span class="in">`cbind`</span> above) gives $Y_{t-1}$ next to $Y_t$.</span>
+<span id="cb41-133"><a href="#cb41-133" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb41-134"><a href="#cb41-134" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-135"><a href="#cb41-135" aria-hidden="true" tabindex="-1"></a>The first difference loses one observation and the seasonal difference loses a full year (12 observations), which matters when the series is short.</span>
+<span id="cb41-136"><a href="#cb41-136" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-137"><a href="#cb41-137" aria-hidden="true" tabindex="-1"></a><span class="fu">### Combining series: `ts.union()` and `ts.intersect()`</span></span>
+<span id="cb41-138"><a href="#cb41-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-141"><a href="#cb41-141" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-142"><a href="#cb41-142" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: combine</span></span>
+<span id="cb41-143"><a href="#cb41-143" aria-hidden="true" tabindex="-1"></a>ts_a <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>,  <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb41-144"><a href="#cb41-144" aria-hidden="true" tabindex="-1"></a>ts_b <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="dv">11</span><span class="sc">:</span><span class="dv">18</span>, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">2023</span>, <span class="dv">4</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb41-145"><a href="#cb41-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-146"><a href="#cb41-146" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.union</span>(ts_a, ts_b)       <span class="co"># full range, gaps filled with NA</span></span>
+<span id="cb41-147"><a href="#cb41-147" aria-hidden="true" tabindex="-1"></a><span class="fu">ts.intersect</span>(ts_a, ts_b)   <span class="co"># overlapping months only</span></span>
+<span id="cb41-148"><a href="#cb41-148" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-149"><a href="#cb41-149" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-150"><a href="#cb41-150" aria-hidden="true" tabindex="-1"></a><span class="fu">### Missing values</span></span>
+<span id="cb41-151"><a href="#cb41-151" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-154"><a href="#cb41-154" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-155"><a href="#cb41-155" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: missing</span></span>
+<span id="cb41-156"><a href="#cb41-156" aria-hidden="true" tabindex="-1"></a><span class="fu">anyNA</span>(sales_ts)</span>
+<span id="cb41-157"><a href="#cb41-157" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-158"><a href="#cb41-158" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-159"><a href="#cb41-159" aria-hidden="true" tabindex="-1"></a><span class="fu">### Time plot and classical decomposition</span></span>
+<span id="cb41-160"><a href="#cb41-160" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-163"><a href="#cb41-163" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-164"><a href="#cb41-164" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-timeplot</span></span>
+<span id="cb41-165"><a href="#cb41-165" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monthly sales, store S001."</span></span>
+<span id="cb41-166"><a href="#cb41-166" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb41-167"><a href="#cb41-167" aria-hidden="true" tabindex="-1"></a><span class="fu">plot.ts</span>(sales_ts, <span class="at">xlab =</span> <span class="st">"Year"</span>, <span class="at">ylab =</span> <span class="st">"Total sales"</span>,</span>
+<span id="cb41-168"><a href="#cb41-168" aria-hidden="true" tabindex="-1"></a>        <span class="at">col =</span> <span class="st">"darkred"</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">type =</span> <span class="st">"o"</span>, <span class="at">pch =</span> <span class="dv">16</span>)</span>
+<span id="cb41-169"><a href="#cb41-169" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-170"><a href="#cb41-170" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-173"><a href="#cb41-173" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-174"><a href="#cb41-174" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-decompose</span></span>
+<span id="cb41-175"><a href="#cb41-175" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Classical additive decomposition of monthly sales, store S001."</span></span>
+<span id="cb41-176"><a href="#cb41-176" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb41-177"><a href="#cb41-177" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">decompose</span>(sales_ts))</span>
+<span id="cb41-178"><a href="#cb41-178" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-179"><a href="#cb41-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-180"><a href="#cb41-180" aria-hidden="true" tabindex="-1"></a><span class="fu">### Reading the data into a `tsibble`</span></span>
+<span id="cb41-181"><a href="#cb41-181" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-182"><a href="#cb41-182" aria-hidden="true" tabindex="-1"></a>The tsibble is built at the native daily resolution with <span class="in">`store_id`</span> as the key, so each (date, store) pair is unique. Gaps are checked and made explicit *before* aggregating, so that later operations cannot silently misalign.</span>
+<span id="cb41-183"><a href="#cb41-183" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-186"><a href="#cb41-186" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-187"><a href="#cb41-187" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tsibble</span></span>
+<span id="cb41-188"><a href="#cb41-188" aria-hidden="true" tabindex="-1"></a>raw <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(</span>
+<span id="cb41-189"><a href="#cb41-189" aria-hidden="true" tabindex="-1"></a>  data_file,</span>
+<span id="cb41-190"><a href="#cb41-190" aria-hidden="true" tabindex="-1"></a>  <span class="at">col_types =</span> <span class="fu">cols</span>(</span>
+<span id="cb41-191"><a href="#cb41-191" aria-hidden="true" tabindex="-1"></a>    <span class="at">date     =</span> <span class="fu">col_date</span>(<span class="at">format =</span> <span class="st">"%Y-%m-%d"</span>),</span>
+<span id="cb41-192"><a href="#cb41-192" aria-hidden="true" tabindex="-1"></a>    <span class="at">store_id =</span> <span class="fu">col_character</span>(),</span>
+<span id="cb41-193"><a href="#cb41-193" aria-hidden="true" tabindex="-1"></a>    <span class="at">sales    =</span> <span class="fu">col_double</span>()</span>
+<span id="cb41-194"><a href="#cb41-194" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-195"><a href="#cb41-195" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-196"><a href="#cb41-196" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-197"><a href="#cb41-197" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="ot">&lt;-</span> raw <span class="sc">|&gt;</span> <span class="fu">as_tsibble</span>(<span class="at">index =</span> date, <span class="at">key =</span> store_id)</span>
+<span id="cb41-198"><a href="#cb41-198" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-199"><a href="#cb41-199" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="sc">|&gt;</span> <span class="fu">count_gaps</span>()                         <span class="co"># implicit gaps (missing rows)</span></span>
+<span id="cb41-200"><a href="#cb41-200" aria-hidden="true" tabindex="-1"></a>sales_tsbl <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span> <span class="fu">fill_gaps</span>(<span class="at">.full =</span> <span class="cn">TRUE</span>) <span class="co"># make them explicit NAs</span></span>
+<span id="cb41-201"><a href="#cb41-201" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-202"><a href="#cb41-202" aria-hidden="true" tabindex="-1"></a>sales_monthly <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span></span>
+<span id="cb41-203"><a href="#cb41-203" aria-hidden="true" tabindex="-1"></a>  <span class="fu">index_by</span>(<span class="at">month =</span> <span class="sc">~</span> <span class="fu">yearmonth</span>(.)) <span class="sc">|&gt;</span></span>
+<span id="cb41-204"><a href="#cb41-204" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sales =</span> <span class="fu">sum</span>(sales, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb41-205"><a href="#cb41-205" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-206"><a href="#cb41-206" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-207"><a href="#cb41-207" aria-hidden="true" tabindex="-1"></a><span class="fu">### Exploratory analysis with `feasts`</span></span>
+<span id="cb41-208"><a href="#cb41-208" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-209"><a href="#cb41-209" aria-hidden="true" tabindex="-1"></a>STL and the ACF cannot handle <span class="in">`NA`</span>s, so missing days are filled with each store's mean. This is a crude fix that flattens any local pattern on those days, but it is adequate for exploration.</span>
+<span id="cb41-210"><a href="#cb41-210" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-213"><a href="#cb41-213" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-214"><a href="#cb41-214" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-feasts-daily</span></span>
+<span id="cb41-215"><a href="#cb41-215" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Daily sales by store."</span></span>
+<span id="cb41-216"><a href="#cb41-216" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb41-217"><a href="#cb41-217" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="ot">&lt;-</span> sales_tsbl <span class="sc">|&gt;</span></span>
+<span id="cb41-218"><a href="#cb41-218" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by_key</span>() <span class="sc">|&gt;</span></span>
+<span id="cb41-219"><a href="#cb41-219" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sales =</span> <span class="fu">replace_na</span>(sales, <span class="fu">mean</span>(sales, <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb41-220"><a href="#cb41-220" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb41-221"><a href="#cb41-221" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-222"><a href="#cb41-222" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">autoplot</span>(sales)</span>
+<span id="cb41-223"><a href="#cb41-223" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-224"><a href="#cb41-224" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-225"><a href="#cb41-225" aria-hidden="true" tabindex="-1"></a>Daily data have two plausible cycles, weekly and yearly, so <span class="in">`period`</span> has to be stated explicitly:</span>
+<span id="cb41-226"><a href="#cb41-226" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-229"><a href="#cb41-229" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-230"><a href="#cb41-230" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-season-year</span></span>
+<span id="cb41-231"><a href="#cb41-231" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Seasonal plot, yearly period: each line is one year."</span></span>
+<span id="cb41-232"><a href="#cb41-232" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb41-233"><a href="#cb41-233" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">gg_season</span>(sales, <span class="at">period =</span> <span class="st">"year"</span>, <span class="at">labels =</span> <span class="st">"both"</span>)</span>
+<span id="cb41-234"><a href="#cb41-234" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-235"><a href="#cb41-235" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-238"><a href="#cb41-238" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-239"><a href="#cb41-239" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-season-week</span></span>
+<span id="cb41-240"><a href="#cb41-240" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Seasonal plot, weekly period: each line is one week."</span></span>
+<span id="cb41-241"><a href="#cb41-241" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb41-242"><a href="#cb41-242" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">gg_season</span>(sales, <span class="at">period =</span> <span class="st">"week"</span>)</span>
+<span id="cb41-243"><a href="#cb41-243" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-244"><a href="#cb41-244" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-245"><a href="#cb41-245" aria-hidden="true" tabindex="-1"></a>The subseries plot uses the monthly totals, which removes the weekly cycle from view and makes the month-to-month pattern easier to compare across years.</span>
+<span id="cb41-246"><a href="#cb41-246" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-249"><a href="#cb41-249" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-250"><a href="#cb41-250" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-subseries</span></span>
+<span id="cb41-251"><a href="#cb41-251" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monthly subseries plot: the blue lines are the monthly means."</span></span>
+<span id="cb41-252"><a href="#cb41-252" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb41-253"><a href="#cb41-253" aria-hidden="true" tabindex="-1"></a>sales_monthly <span class="sc">|&gt;</span> <span class="fu">gg_subseries</span>(sales)</span>
+<span id="cb41-254"><a href="#cb41-254" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-255"><a href="#cb41-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-258"><a href="#cb41-258" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-259"><a href="#cb41-259" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-acf</span></span>
+<span id="cb41-260"><a href="#cb41-260" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Sample ACF of daily sales by store."</span></span>
+<span id="cb41-261"><a href="#cb41-261" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb41-262"><a href="#cb41-262" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span> <span class="fu">ACF</span>(sales) <span class="sc">|&gt;</span> <span class="fu">autoplot</span>()</span>
+<span id="cb41-263"><a href="#cb41-263" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-264"><a href="#cb41-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-267"><a href="#cb41-267" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-268"><a href="#cb41-268" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-stl</span></span>
+<span id="cb41-269"><a href="#cb41-269" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "STL decomposition of daily sales with a yearly seasonal period."</span></span>
+<span id="cb41-270"><a href="#cb41-270" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 6</span></span>
+<span id="cb41-271"><a href="#cb41-271" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span></span>
+<span id="cb41-272"><a href="#cb41-272" aria-hidden="true" tabindex="-1"></a>  <span class="fu">model</span>(<span class="fu">STL</span>(sales <span class="sc">~</span> <span class="fu">trend</span>() <span class="sc">+</span> <span class="fu">season</span>(<span class="at">period =</span> <span class="st">"year"</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb41-273"><a href="#cb41-273" aria-hidden="true" tabindex="-1"></a>  <span class="fu">components</span>() <span class="sc">|&gt;</span></span>
+<span id="cb41-274"><a href="#cb41-274" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>()</span>
+<span id="cb41-275"><a href="#cb41-275" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-276"><a href="#cb41-276" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-279"><a href="#cb41-279" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-280"><a href="#cb41-280" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-stl-features</span></span>
+<span id="cb41-281"><a href="#cb41-281" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "STL features by store. Strengths close to 1 mean a strong trend or seasonal pattern."</span></span>
+<span id="cb41-282"><a href="#cb41-282" aria-hidden="true" tabindex="-1"></a>sales_filled <span class="sc">|&gt;</span></span>
+<span id="cb41-283"><a href="#cb41-283" aria-hidden="true" tabindex="-1"></a>  <span class="fu">features</span>(sales, feat_stl) <span class="sc">|&gt;</span></span>
+<span id="cb41-284"><a href="#cb41-284" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(store_id, trend_strength, <span class="fu">starts_with</span>(<span class="st">"seasonal_strength"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb41-285"><a href="#cb41-285" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>(<span class="at">digits =</span> <span class="dv">3</span>)</span>
+<span id="cb41-286"><a href="#cb41-286" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-287"><a href="#cb41-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-288"><a href="#cb41-288" aria-hidden="true" tabindex="-1"></a><span class="fu">### Diagnostics with `timetk`</span></span>
+<span id="cb41-289"><a href="#cb41-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-290"><a href="#cb41-290" aria-hidden="true" tabindex="-1"></a><span class="in">`timetk`</span> works on an ordinary tibble with a <span class="in">`Date`</span> column, so no tsibble conversion is needed. I use store S001 for the plots.</span>
+<span id="cb41-291"><a href="#cb41-291" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-294"><a href="#cb41-294" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-295"><a href="#cb41-295" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-timetk-series</span></span>
+<span id="cb41-296"><a href="#cb41-296" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Daily sales, store S001, with a loess smoother."</span></span>
+<span id="cb41-297"><a href="#cb41-297" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.6</span></span>
+<span id="cb41-298"><a href="#cb41-298" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> raw <span class="sc">|&gt;</span> <span class="fu">filter</span>(store_id <span class="sc">==</span> <span class="st">"S001"</span>)</span>
+<span id="cb41-299"><a href="#cb41-299" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span> <span class="fu">plot_time_series</span>(date, sales, <span class="at">.interactive =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb41-300"><a href="#cb41-300" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-301"><a href="#cb41-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-304"><a href="#cb41-304" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-305"><a href="#cb41-305" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-timetk-summary</span></span>
+<span id="cb41-306"><a href="#cb41-306" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Time index diagnostics, store S001."</span></span>
+<span id="cb41-307"><a href="#cb41-307" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span></span>
+<span id="cb41-308"><a href="#cb41-308" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tk_summary_diagnostics</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb41-309"><a href="#cb41-309" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(n.obs, start, end, scale, diff.median) <span class="sc">|&gt;</span></span>
+<span id="cb41-310"><a href="#cb41-310" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span>
+<span id="cb41-311"><a href="#cb41-311" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-312"><a href="#cb41-312" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-313"><a href="#cb41-313" aria-hidden="true" tabindex="-1"></a>Daily data have no sub-day resolution, so <span class="in">`second`</span>, <span class="in">`minute`</span> and <span class="in">`hour`</span> are left out of the feature set.</span>
+<span id="cb41-314"><a href="#cb41-314" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-317"><a href="#cb41-317" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-318"><a href="#cb41-318" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-timetk-seasonal</span></span>
+<span id="cb41-319"><a href="#cb41-319" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Seasonal diagnostics, store S001: distribution of daily sales by weekday, week, month, quarter and year."</span></span>
+<span id="cb41-320"><a href="#cb41-320" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 8</span></span>
+<span id="cb41-321"><a href="#cb41-321" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span></span>
+<span id="cb41-322"><a href="#cb41-322" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_seasonal_diagnostics</span>(</span>
+<span id="cb41-323"><a href="#cb41-323" aria-hidden="true" tabindex="-1"></a>    date, sales,</span>
+<span id="cb41-324"><a href="#cb41-324" aria-hidden="true" tabindex="-1"></a>    <span class="at">.feature_set =</span> <span class="fu">c</span>(<span class="st">"wday.lbl"</span>, <span class="st">"week"</span>, <span class="st">"month.lbl"</span>, <span class="st">"quarter"</span>, <span class="st">"year"</span>),</span>
+<span id="cb41-325"><a href="#cb41-325" aria-hidden="true" tabindex="-1"></a>    <span class="at">.interactive =</span> <span class="cn">FALSE</span></span>
+<span id="cb41-326"><a href="#cb41-326" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb41-327"><a href="#cb41-327" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-328"><a href="#cb41-328" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-331"><a href="#cb41-331" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-332"><a href="#cb41-332" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-timetk-acf</span></span>
+<span id="cb41-333"><a href="#cb41-333" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "ACF and PACF of daily sales, store S001."</span></span>
+<span id="cb41-334"><a href="#cb41-334" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb41-335"><a href="#cb41-335" aria-hidden="true" tabindex="-1"></a>s1 <span class="sc">|&gt;</span> <span class="fu">plot_acf_diagnostics</span>(date, sales, <span class="at">.interactive =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb41-336"><a href="#cb41-336" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-337"><a href="#cb41-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-338"><a href="#cb41-338" aria-hidden="true" tabindex="-1"></a><span class="fu">### Question 7: What is wrong with each call?</span></span>
+<span id="cb41-339"><a href="#cb41-339" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-340"><a href="#cb41-340" aria-hidden="true" tabindex="-1"></a>**Q1. `ts(x, start = c(2023, 13), frequency = 12)`**</span>
+<span id="cb41-341"><a href="#cb41-341" aria-hidden="true" tabindex="-1"></a>Monthly data have only 12 periods per year, so the second element of <span class="in">`start`</span> cannot exceed 12. "Period 13 of 2023" does not exist; it should roll over to January 2024.</span>
+<span id="cb41-342"><a href="#cb41-342" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2024, 1), frequency = 12)`</span>.</span>
+<span id="cb41-343"><a href="#cb41-343" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-344"><a href="#cb41-344" aria-hidden="true" tabindex="-1"></a>**Q2. `ts(x, start = 2023, frequency = 12)`**</span>
+<span id="cb41-345"><a href="#cb41-345" aria-hidden="true" tabindex="-1"></a>For sub-annual data (<span class="in">`frequency &gt; 1`</span>), <span class="in">`start`</span> should give both the year and the period within the year. A single number is ambiguous.</span>
+<span id="cb41-346"><a href="#cb41-346" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2023, 1), frequency = 12)`</span>.</span>
+<span id="cb41-347"><a href="#cb41-347" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-348"><a href="#cb41-348" aria-hidden="true" tabindex="-1"></a>**Q3. `ts(x, start = c(2023, 0), frequency = 12)`**</span>
+<span id="cb41-349"><a href="#cb41-349" aria-hidden="true" tabindex="-1"></a>Periods are numbered from 1, so period 0 does not exist; January is period 1.</span>
+<span id="cb41-350"><a href="#cb41-350" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2023, 1), frequency = 12)`</span>.</span>
+<span id="cb41-351"><a href="#cb41-351" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-352"><a href="#cb41-352" aria-hidden="true" tabindex="-1"></a>**Q4. `ts(x, start = c(2023, 2), frequency = 4)`**</span>
+<span id="cb41-353"><a href="#cb41-353" aria-hidden="true" tabindex="-1"></a>"Period 2" depends on the frequency: with <span class="in">`frequency = 4`</span> it means Q2, not February. If the data are monthly, the frequency must match their real spacing.</span>
+<span id="cb41-354"><a href="#cb41-354" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2023, 2), frequency = 12)`</span>.</span>
+<span id="cb41-355"><a href="#cb41-355" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-356"><a href="#cb41-356" aria-hidden="true" tabindex="-1"></a>**Q5. `ts(x, start = c(2023, 1), frequency = 12.5)`**</span>
+<span id="cb41-357"><a href="#cb41-357" aria-hidden="true" tabindex="-1"></a>The frequency counts observations per cycle, so it should be a whole number. Most methods built on <span class="in">`ts`</span> objects (seasonal differencing, <span class="in">`decompose()`</span>, seasonal ARIMA) need an integer frequency.</span>
+<span id="cb41-358"><a href="#cb41-358" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2023, 1), frequency = 12)`</span>.</span>
+<span id="cb41-359"><a href="#cb41-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-360"><a href="#cb41-360" aria-hidden="true" tabindex="-1"></a>**Q6. `ts(x, start = c(2023, 1), frequency = 12, deltat = 1/12)`**</span>
+<span id="cb41-361"><a href="#cb41-361" aria-hidden="true" tabindex="-1"></a><span class="in">`frequency`</span> and <span class="in">`deltat`</span> describe the same thing from two directions (<span class="in">`deltat = 1/frequency`</span>), so giving both is redundant.</span>
+<span id="cb41-362"><a href="#cb41-362" aria-hidden="true" tabindex="-1"></a>Fix: give only one, e.g. <span class="in">`ts(x, start = c(2023, 1), frequency = 12)`</span>.</span>
+<span id="cb41-363"><a href="#cb41-363" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-364"><a href="#cb41-364" aria-hidden="true" tabindex="-1"></a>**Q7. `ts(x, start = c(2023, 1), frequency = 365)`**</span>
+<span id="cb41-365"><a href="#cb41-365" aria-hidden="true" tabindex="-1"></a><span class="in">`frequency = 365`</span> declares daily data. If <span class="in">`x`</span> holds monthly values, every value is placed at the wrong point in the yearly cycle.</span>
+<span id="cb41-366"><a href="#cb41-366" aria-hidden="true" tabindex="-1"></a>Fix: <span class="in">`ts(x, start = c(2023, 1), frequency = 12)`</span>.</span>
+<span id="cb41-367"><a href="#cb41-367" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-368"><a href="#cb41-368" aria-hidden="true" tabindex="-1"></a>**Q8. `window(x, start = c(2023, 13))`**</span>
+<span id="cb41-369"><a href="#cb41-369" aria-hidden="true" tabindex="-1"></a><span class="in">`window()`</span> can only extract periods that exist inside the series' range, and month 13 does not exist.</span>
+<span id="cb41-370"><a href="#cb41-370" aria-hidden="true" tabindex="-1"></a>Fix: start at a valid point inside the series, e.g. <span class="in">`window(x, start = c(2024, 1))`</span>.</span>
+<span id="cb41-371"><a href="#cb41-371" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-372"><a href="#cb41-372" aria-hidden="true" tabindex="-1"></a>**Q9. `decompose(ts(x, frequency = 1))`**</span>
+<span id="cb41-373"><a href="#cb41-373" aria-hidden="true" tabindex="-1"></a>With <span class="in">`frequency = 1`</span> there is no seasonal cycle, so there is no seasonal component to estimate. <span class="in">`decompose()`</span> also needs at least two complete cycles.</span>
+<span id="cb41-374"><a href="#cb41-374" aria-hidden="true" tabindex="-1"></a>Fix: use the series' real seasonal frequency, e.g. <span class="in">`decompose(ts(x, frequency = 12))`</span>.</span>
+<span id="cb41-375"><a href="#cb41-375" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-376"><a href="#cb41-376" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
+<span id="cb41-377"><a href="#cb41-377" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-378"><a href="#cb41-378" aria-hidden="true" tabindex="-1"></a>To understand what <span class="in">`decompose()`</span> is doing, I wrote the classical additive decomposition from first principles and checked it against the built-in function on the monthly S001 series.</span>
+<span id="cb41-379"><a href="#cb41-379" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-380"><a href="#cb41-380" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>**Trend.** With an even period $m = 12$, a plain 12-term moving average is not centred on a month. A $2 \times 12$ moving average fixes this: it is a 13-term weighted average with weights $\tfrac{1}{24}$ on the two end months and $\tfrac{1}{12}$ on the 11 in between,</span>
+<span id="cb41-381"><a href="#cb41-381" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-382"><a href="#cb41-382" aria-hidden="true" tabindex="-1"></a>\hat T_t = \frac{1}{12}\left(\tfrac{1}{2}Y_{t-6} + Y_{t-5} + \dots + Y_{t+5} + \tfrac{1}{2}Y_{t+6}\right).</span>
+<span id="cb41-383"><a href="#cb41-383" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb41-384"><a href="#cb41-384" aria-hidden="true" tabindex="-1"></a>The first and last six months have no trend estimate.</span>
+<span id="cb41-385"><a href="#cb41-385" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>**Seasonal component.** Detrend, $Y_t - \hat T_t$, average the detrended values for each calendar month, then centre the 12 averages so they sum to zero.</span>
+<span id="cb41-386"><a href="#cb41-386" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>**Remainder.** $\hat R_t = Y_t - \hat T_t - \hat S_t$.</span>
+<span id="cb41-387"><a href="#cb41-387" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-390"><a href="#cb41-390" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-391"><a href="#cb41-391" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: own-decompose</span></span>
+<span id="cb41-392"><a href="#cb41-392" aria-hidden="true" tabindex="-1"></a>my_decompose <span class="ot">&lt;-</span> <span class="cf">function</span>(y) {</span>
+<span id="cb41-393"><a href="#cb41-393" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">frequency</span>(y)</span>
+<span id="cb41-394"><a href="#cb41-394" aria-hidden="true" tabindex="-1"></a>  w <span class="ot">&lt;-</span> <span class="cf">if</span> (m <span class="sc">%%</span> <span class="dv">2</span> <span class="sc">==</span> <span class="dv">0</span>) <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fu">rep</span>(<span class="dv">1</span>, m <span class="sc">-</span> <span class="dv">1</span>), <span class="fl">0.5</span>) <span class="sc">/</span> m <span class="cf">else</span> <span class="fu">rep</span>(<span class="dv">1</span>, m) <span class="sc">/</span> m</span>
+<span id="cb41-395"><a href="#cb41-395" aria-hidden="true" tabindex="-1"></a>  trend <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">filter</span>(y, w, <span class="at">sides =</span> <span class="dv">2</span>)</span>
+<span id="cb41-396"><a href="#cb41-396" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-397"><a href="#cb41-397" aria-hidden="true" tabindex="-1"></a>  detrended <span class="ot">&lt;-</span> y <span class="sc">-</span> trend</span>
+<span id="cb41-398"><a href="#cb41-398" aria-hidden="true" tabindex="-1"></a>  s_means <span class="ot">&lt;-</span> <span class="fu">tapply</span>(detrended, <span class="fu">cycle</span>(y), mean, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-399"><a href="#cb41-399" aria-hidden="true" tabindex="-1"></a>  s_means <span class="ot">&lt;-</span> s_means <span class="sc">-</span> <span class="fu">mean</span>(s_means)            <span class="co"># seasonal effects sum to zero</span></span>
+<span id="cb41-400"><a href="#cb41-400" aria-hidden="true" tabindex="-1"></a>  seasonal <span class="ot">&lt;-</span> <span class="fu">ts</span>(s_means[<span class="fu">cycle</span>(y)], <span class="at">start =</span> <span class="fu">start</span>(y), <span class="at">frequency =</span> m)</span>
+<span id="cb41-401"><a href="#cb41-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-402"><a href="#cb41-402" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">trend =</span> trend, <span class="at">seasonal =</span> seasonal, <span class="at">random =</span> y <span class="sc">-</span> trend <span class="sc">-</span> seasonal,</span>
+<span id="cb41-403"><a href="#cb41-403" aria-hidden="true" tabindex="-1"></a>       <span class="at">figure =</span> s_means)</span>
+<span id="cb41-404"><a href="#cb41-404" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb41-405"><a href="#cb41-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-406"><a href="#cb41-406" aria-hidden="true" tabindex="-1"></a>mine  <span class="ot">&lt;-</span> <span class="fu">my_decompose</span>(sales_ts)</span>
+<span id="cb41-407"><a href="#cb41-407" aria-hidden="true" tabindex="-1"></a>built <span class="ot">&lt;-</span> <span class="fu">decompose</span>(sales_ts)</span>
+<span id="cb41-408"><a href="#cb41-408" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-409"><a href="#cb41-409" aria-hidden="true" tabindex="-1"></a>max_diff <span class="ot">&lt;-</span> <span class="fu">c</span>(</span>
+<span id="cb41-410"><a href="#cb41-410" aria-hidden="true" tabindex="-1"></a>  <span class="at">Trend     =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>trend    <span class="sc">-</span> built<span class="sc">$</span>trend),    <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb41-411"><a href="#cb41-411" aria-hidden="true" tabindex="-1"></a>  <span class="at">Seasonal  =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>seasonal <span class="sc">-</span> built<span class="sc">$</span>seasonal), <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb41-412"><a href="#cb41-412" aria-hidden="true" tabindex="-1"></a>  <span class="at">Remainder =</span> <span class="fu">max</span>(<span class="fu">abs</span>(mine<span class="sc">$</span>random   <span class="sc">-</span> built<span class="sc">$</span>random),   <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb41-413"><a href="#cb41-413" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb41-414"><a href="#cb41-414" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Component =</span> <span class="fu">names</span>(max_diff), <span class="st">`</span><span class="at">Max absolute difference</span><span class="st">`</span> <span class="ot">=</span> max_diff,</span>
+<span id="cb41-415"><a href="#cb41-415" aria-hidden="true" tabindex="-1"></a>                 <span class="at">check.names =</span> <span class="cn">FALSE</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>, <span class="at">digits =</span> <span class="dv">10</span>)</span>
+<span id="cb41-416"><a href="#cb41-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-417"><a href="#cb41-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-420"><a href="#cb41-420" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb41-421"><a href="#cb41-421" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-seasonal-figure</span></span>
+<span id="cb41-422"><a href="#cb41-422" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Estimated seasonal effects by month (own implementation)."</span></span>
+<span id="cb41-423"><a href="#cb41-423" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Month =</span> month.abb, <span class="at">Effect =</span> <span class="fu">as.numeric</span>(mine<span class="sc">$</span>figure)), <span class="at">digits =</span> <span class="dv">1</span>)</span>
+<span id="cb41-424"><a href="#cb41-424" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb41-425"><a href="#cb41-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-426"><a href="#cb41-426" aria-hidden="true" tabindex="-1"></a>The differences are zero up to rounding, so <span class="in">`decompose()`</span> is exactly the moving-average-then-seasonal-means procedure above. Writing it out made the method's weaknesses concrete. The seasonal pattern is forced to be identical every year, the trend is missing at both ends (exactly where a forecaster needs it most), and one unusual month affects both the moving average and its month's seasonal mean. STL addresses all three.</span>
+<span id="cb41-427"><a href="#cb41-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-428"><a href="#cb41-428" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
+<span id="cb41-429"><a href="#cb41-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-430"><a href="#cb41-430" aria-hidden="true" tabindex="-1"></a>**What was most challenging:** Keeping track of the different ways R represents time. A <span class="in">`ts`</span> object stores time as decimal years with a frequency attribute, a <span class="in">`Date`</span> column stores calendar dates, and a <span class="in">`tsibble`</span> uses an index and key. Each has its own rules: <span class="in">`start`</span> periods are numbered from 1, frequency must match the real spacing of the data, and daily data need the seasonal period stated explicitly because there is more than one cycle. The <span class="in">`lag()`</span> clash was the most confusing. <span class="in">`stats::lag()`</span> shifts the time attribute while <span class="in">`dplyr::lag()`</span> shifts the values, and which one runs depends on which packages are loaded.</span>
+<span id="cb41-431"><a href="#cb41-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-432"><a href="#cb41-432" aria-hidden="true" tabindex="-1"></a>**What I now understand:** Getting the structure of a time series right is part of the analysis, not a preliminary step. The frequency decides what <span class="in">`cycle()`</span>, seasonal differencing and decomposition do, so a wrong frequency produces output that looks plausible but is meaningless (as in Question 7). Aggregation is a modelling choice too: summing to monthly removes the weekly cycle entirely. The difference between implicit gaps and explicit <span class="in">`NA`</span>s in a tsibble explained why filling gaps has to happen before aggregating.</span>
+<span id="cb41-433"><a href="#cb41-433" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-434"><a href="#cb41-434" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
+<span id="cb41-435"><a href="#cb41-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-436"><a href="#cb41-436" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Advantages:* Base <span class="in">`ts`</span> objects are simple and are what most classical functions (<span class="in">`arima`</span>, <span class="in">`decompose`</span>, <span class="in">`HoltWinters`</span>) expect. The tidy tools handle many series at once through the key, deal with irregular dates and gaps explicitly, and make seasonal plots for multiple periods easy.</span>
+<span id="cb41-437"><a href="#cb41-437" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>*Limitations:* A <span class="in">`ts`</span> object supports only one regular frequency, so it cannot represent daily data with both weekly and yearly cycles. Classical decomposition assumes a fixed seasonal pattern and loses the trend at the ends of the series. Filling missing days with a store mean is convenient for exploration but would bias any model fitted afterwards.</span>
+<span id="cb41-438"><a href="#cb41-438" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-439"><a href="#cb41-439" aria-hidden="true" tabindex="-1"></a>**Links:** Project 1 (ARIMA and SARIMA on tourism nights sold) builds on these tools, starting from a monthly <span class="in">`ts`</span> object, a time plot, a seasonal subseries plot and an STL decomposition before differencing. See also the Week 1 journal entry.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
