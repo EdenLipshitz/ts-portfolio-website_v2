@@ -6,6 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Eden">
 
 <title>Time Series Analysis Part 1: Exercise 1 – Time Series Portfolio</title>
 <style>
@@ -104,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -299,11 +329,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
-  <ul>
-  <li><a href="#overview-of-the-key-concepts" id="toc-overview-of-the-key-concepts" class="nav-link active" data-scroll-target="#overview-of-the-key-concepts">Overview of the key concepts</a></li>
-  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a></li>
-  <li><a href="#implementation-in-r" id="toc-implementation-in-r" class="nav-link" data-scroll-target="#implementation-in-r">Implementation in R</a></li>
-  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  <ul class="collapse">
+  <li><a href="#question-1-the-forecasting-process-15" id="toc-question-1-the-forecasting-process-15" class="nav-link active" data-scroll-target="#question-1-the-forecasting-process-15">Question 1: The forecasting process (15)</a></li>
+  <li><a href="#question-2-expected-time-patterns-8" id="toc-question-2-expected-time-patterns-8" class="nav-link" data-scroll-target="#question-2-expected-time-patterns-8">Question 2: Expected time patterns (8)</a></li>
+  <li><a href="#question-3-matching-series-to-acfs-12" id="toc-question-3-matching-series-to-acfs-12" class="nav-link" data-scroll-target="#question-3-matching-series-to-acfs-12">Question 3: Matching series to ACFs (12)</a></li>
+  <li><a href="#question-4-electric-knives-moving-averages-15" id="toc-question-4-electric-knives-moving-averages-15" class="nav-link" data-scroll-target="#question-4-electric-knives-moving-averages-15">Question 4: Electric knives: moving averages (15)</a></li>
+  <li><a href="#question-5-souvenir-shop-sales-20" id="toc-question-5-souvenir-shop-sales-20" class="nav-link" data-scroll-target="#question-5-souvenir-shop-sales-20">Question 5: Souvenir shop sales (20)</a></li>
+  <li><a href="#question-6-ibm-daily-closing-prices-4" id="toc-question-6-ibm-daily-closing-prices-4" class="nav-link" data-scroll-target="#question-6-ibm-daily-closing-prices-4">Question 6: IBM daily closing prices (4)</a></li>
+  <li><a href="#question-7-strikes-in-the-usa-19511980-16" id="toc-question-7-strikes-in-the-usa-19511980-16" class="nav-link" data-scroll-target="#question-7-strikes-in-the-usa-19511980-16">Question 7: Strikes in the USA, 1951–1980 (16)</a></li>
+  <li><a href="#question-8-bituminous-coal-production-10" id="toc-question-8-bituminous-coal-production-10" class="nav-link" data-scroll-target="#question-8-bituminous-coal-production-10">Question 8: Bituminous coal production (10)</a></li>
   </ul>
 </nav>
     </div>
@@ -313,13 +347,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
 <div class="quarto-title-block"><div><h1 class="title">Time Series Analysis Part 1: Exercise 1</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">Section 1: Time series foundations, ARIMA and volatility models</p>
+<p class="subtitle lead">The forecasting process, time patterns, ACFs, moving averages, log-linear trends and ARIMA</p>
 </div>
 
 
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Eden </p>
+          </div>
+  </div>
     
   
     
@@ -330,34 +370,896 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="overview-of-the-key-concepts" class="level2">
-<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
-<p><em>Summarise the main ideas of this session in your own words.</em></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>Data and setup
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>All data come from <code>TSA_Part1_DataSets.xlsx</code> (course data sets), stored in the repository’s <code>data/</code> folder. Sheets are read by position because the “souvenir” sheet name has a trailing space. Code is folded by default; click <strong>Show code</strong> to expand any chunk.</p>
+</div>
+</div>
+</div>
+<section id="question-1-the-forecasting-process-15" class="level2">
+<h2 class="anchored" data-anchor-id="question-1-the-forecasting-process-15">Question 1: The forecasting process (15)</h2>
+<p><em>Context: producing sales forecasts for several products of a large biscuit manufacturer.</em></p>
+<p><strong>1. Problem definition.</strong> The aim is to forecast future sales for the company’s range of biscuits so that it can make strategic and operational decisions about how, when and where to sell and produce. This means pinning down exactly what is forecast: which products (individual biscuit lines or product families), at what level (national, regional or by retailer), in what units, how far ahead and how often (e.g.&nbsp;weekly forecasts for production scheduling, monthly forecasts a year ahead for ingredient purchasing and budgeting). This is done by talking to the people who will use the forecasts (production, procurement, sales and marketing, finance).</p>
+<p><strong>2. Data collection.</strong> For each product, collect a record of how many units were sold each period (e.g.&nbsp;monthly), building up a historical time series that can be used to forecast future sales. Also collect information on factors that help explain sales: prices, promotions, advertising campaigns, product launches and competitor activity, along with calendar effects such as public holidays, school holidays and weekends. Knowledge from the sales team about one-off events (stock-outs, factory shutdowns, a large once-off order) is also recorded so the data can be interpreted correctly.</p>
+<p><strong>3. Data analysis.</strong> This is the exploratory stage, done before any model is fitted. Plot each series and look for trend, seasonality (e.g.&nbsp;peaks before Christmas and Easter), cycles, outliers and structural breaks; check whether a transformation (e.g.&nbsp;logs) or differencing is needed; examine the ACF/PACF; and look at how sales relate to drivers such as promotions, in order to understand consumer demand at different times of the year. The arrow back from model selection shows the process is iterative: what is learnt when fitting a model can send us back to look at the data again.</p>
+<p><strong>4. Model selection and fitting.</strong> Based on the patterns found in the data analysis (and the ACF and PACF, which show the autocorrelation structure), choose candidate models, e.g.&nbsp;exponential smoothing (such as Holt–Winters for trending, seasonal products), ARIMA/seasonal ARIMA, state space models, or regression models with promotion and price effects, and estimate their parameters on the historical data.</p>
+<p><strong>5. Model validation.</strong> Assess how accurate each model’s forecasts are. Split the data so that a hold-out (test) set is kept back, and compare forecasts with the actual values using metrics such as RMSE, MAE and MAPE, using validation approaches such as rolling-origin (time series cross-validation) or sliding windows. Residuals should also be checked to make sure they look like white noise. The best-performing model is chosen.</p>
+<p><strong>6. Forecasting model deployment.</strong> Put the forecasts into practical use, since the whole point of forecasting is to support decisions. The chosen model is built into the company’s planning systems and produces forecasts (with prediction intervals) on a regular schedule, which are used for decisions such as production planning, which products to invest in or refine, and advertising strategies targeted at the products and times of year where sales are strongest.</p>
+<p><strong>7. Monitoring forecasting model performance.</strong> Continuously compare forecasts with actual sales as they come in and track the forecast errors over time, to detect bias or deterioration, for instance when consumer preferences change or a competitor changes strategy. This monitoring could be automated (e.g.&nbsp;an automated system or AI agent that is fed new data, updates the forecasts and flags when errors drift or market changes occur). When performance deteriorates, the model is re-estimated or the process returns to an earlier stage.</p>
 </section>
-<section id="worked-exercises" class="level2">
-<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
-<p><em>Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.</em></p>
+<section id="question-2-expected-time-patterns-8" class="level2">
+<h2 class="anchored" data-anchor-id="question-2-expected-time-patterns-8">Question 2: Expected time patterns (8)</h2>
+<p><strong>(a) Monthly sales of computer hard drives at a local store (10 years).</strong> Over the 10 years I would expect a <em>trend</em>: sales would initially increase steadily as computers became more common and people bought hard drives to keep their computers going for longer, but then trend downwards as technology develops and newer products (e.g.&nbsp;solid-state drives and cloud storage) replace them. There would also be <em>seasonality</em> within each year, e.g.&nbsp;at the beginning of the year when school and university go back, and around Black Friday and the festive season. (Because the data are monthly, within-month effects such as payday are not visible.)</p>
+<p><strong>(b) Hourly pulse rate of a person for one week.</strong> A strong <em>daily (24-hour) seasonal pattern</em>: pulse rate is elevated during the day while the person is moving around and active, and drops to a resting level while they sleep at night. If the person exercises every day, there will also be a regular daily spike in heart rate at that time. Little or no trend would be expected over a single week.</p>
+<p><strong>(c) Daily sales at a fast-food store for six months.</strong> A <em>weekly seasonal pattern</em>, with increased demand and sales over weekends (Friday nights to Sunday), plus increases around public holidays (and possibly month-end/payday). Six months is quite a short period, so long-term trends would be hard to see.</p>
+<p><strong>(d) Weekly electricity consumption for your local area (10 years).</strong> A strong <em>annual seasonal pattern</em>: in South Africa consumption is highest in winter (heating, longer nights) with a possible smaller summer peak from air-conditioning, and dips over the December holidays when businesses and industry shut down. There would also be a <em>trend</em> reflecting population growth and development, possibly offset in recent years by load-shedding, higher tariffs and rooftop solar.</p>
 </section>
-<section id="implementation-in-r" class="level2">
-<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
-<p><em>Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.</em></p>
+<section id="question-3-matching-series-to-acfs-12" class="level2">
+<h2 class="anchored" data-anchor-id="question-3-matching-series-to-acfs-12">Question 3: Matching series to ACFs (12)</h2>
+<p>The key idea is: a <strong>trend</strong> makes neighbouring values (even ones far apart) similar, so the ACF starts very high and decays <em>slowly</em> while staying positive; <strong>seasonality/cycles</strong> make the ACF <em>oscillate</em>, with peaks at lags equal to the period; and a series with <strong>neither</strong> has small autocorrelations that die out quickly.</p>
+<table class="table-striped table-hover caption-top table">
+<caption>Matching each series to its ACF</caption>
+<colgroup>
+<col style="width: 20%">
+<col style="width: 5%">
+<col style="width: 73%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Time series</th>
+<th style="text-align: center;">ACF</th>
+<th style="text-align: left;">Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1. Daily morning temperature of a cow</td>
+<td style="text-align: center;"><strong>B</strong></td>
+<td style="text-align: left;">No seasonality or strong trend, just a slight downward drift and irregular variation. The ACF has small-to-moderate positive values that die out without any regular oscillation, consistent with a weakly persistent, non-seasonal series.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">2. Accidental deaths in USA (monthly)</td>
+<td style="text-align: center;"><strong>A</strong></td>
+<td style="text-align: left;">Clear monthly seasonality with period 12 and no trend. ACF A has a large positive spike at lag 12 and strong negative values around lag 6 (half a seasonal cycle), the pattern of a period-12 seasonal series.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">3. International airline passengers</td>
+<td style="text-align: center;"><strong>D</strong></td>
+<td style="text-align: left;">Strong upward trend plus seasonality. The trend produces very large positive autocorrelations that decay slowly (ACF D starts near 0.9 and stays high); the seasonality shows as a small bump around lag 12.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">4. Annual mink trappings (Canada)</td>
+<td style="text-align: center;"><strong>C</strong></td>
+<td style="text-align: left;">An annual series with a regular population cycle of roughly 10 years. ACF C oscillates with peaks near lags 10 and 20 and troughs near lags 5 and 15, matching a ~10-year cycle.</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="question-4-electric-knives-moving-averages-15" class="level2">
+<h2 class="anchored" data-anchor-id="question-4-electric-knives-moving-averages-15">Question 4: Electric knives: moving averages (15)</h2>
 <div class="cell">
 <details class="code-fold">
-<summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>knives <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">1</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(knives) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Time"</span>, <span class="st">"Sales"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> knives<span class="sc">$</span>Sales</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>knives_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(y, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1991</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(knives_ts) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Month"</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-knives" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-knives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-knives-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-knives-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Monthly sales of electric knives, January 1991 – April 1992.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<section id="a-forecasts-for-may-1992-10" class="level3">
+<h3 class="anchored" data-anchor-id="a-forecasts-for-may-1992-10">(a) Forecasts for May 1992 (10)</h3>
+<p>A <span class="math inline">\(k\)</span>-month moving average forecast for the next month is the average of the last <span class="math inline">\(k\)</span> observations: <span class="math display">\[\hat{Y}_{t+1} = \frac{Y_t + Y_{t-1} + \cdots + Y_{t-k+1}}{k}.\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">11</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ma_fc <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">mean</span>(<span class="fu">tail</span>(y, k)))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>vals <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">paste</span>(<span class="fu">tail</span>(y, k), <span class="at">collapse =</span> <span class="st">", "</span>))</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">k =</span> ks, <span class="st">`</span><span class="at">Values averaged</span><span class="st">`</span> <span class="ot">=</span> vals,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                 <span class="st">`</span><span class="at">Forecast May 1992</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(ma_fc, <span class="dv">2</span>), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">align =</span> <span class="st">"clr"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-knives-ma" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-knives-ma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Moving average forecasts for May 1992.
+</figcaption>
+<div aria-describedby="tbl-knives-ma-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: center;">k</th>
+<th style="text-align: left;">Values averaged</th>
+<th style="text-align: right;">Forecast May 1992</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">3</td>
+<td style="text-align: left;">17, 26, 29</td>
+<td style="text-align: right;">24.00</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">5</td>
+<td style="text-align: left;">89, 82, 17, 26, 29</td>
+<td style="text-align: right;">48.60</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">7</td>
+<td style="text-align: left;">66, 80, 89, 82, 17, 26, 29</td>
+<td style="text-align: right;">55.57</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">9</td>
+<td style="text-align: left;">46, 30, 66, 80, 89, 82, 17, 26, 29</td>
+<td style="text-align: right;">51.67</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">11</td>
+<td style="text-align: left;">29, 90, 46, 30, 66, 80, 89, 82, 17, 26, 29</td>
+<td style="text-align: right;">53.09</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>For example, the 3-month MA forecast is <span class="math inline">\((17 + 26 + 29)/3 = 24\)</span> and the 5-month MA forecast is <span class="math inline">\((89 + 82 + 17 + 26 + 29)/5 = 48.6\)</span> (<a href="#tbl-knives-ma" class="quarto-xref">Table&nbsp;1</a>).</p>
 </section>
-<section id="reflection" class="level2">
-<h2 class="anchored" data-anchor-id="reflection">Reflection</h2>
-<p><strong>What was most challenging:</strong></p>
-<p><strong>What I now understand:</strong></p>
-<p><strong>Advantages and limitations of the methods:</strong></p>
-<p><strong>Links:</strong> related projects and journal entries.</p>
+<section id="b-choice-of-k-5" class="level3">
+<h3 class="anchored" data-anchor-id="b-choice-of-k-5">(b) Choice of <span class="math inline">\(k\)</span> (5)</h3>
+<p>To choose <span class="math inline">\(k\)</span> we compute the one-step-ahead forecasts each MA would have made historically and compare the errors. Because the 11-month MA can only forecast from December 1991 onwards, we report the errors both over <strong>all</strong> periods each MA can forecast and over the <strong>common</strong> period December 1991 – April 1992 (a fair like-for-like comparison).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ma_errors <span class="ot">&lt;-</span> <span class="cf">function</span>(k, from) {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  t_idx <span class="ot">&lt;-</span> from<span class="sc">:</span><span class="fu">length</span>(y)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  fc <span class="ot">&lt;-</span> <span class="fu">sapply</span>(t_idx, <span class="cf">function</span>(t) <span class="fu">mean</span>(y[(t <span class="sc">-</span> k)<span class="sc">:</span>(t <span class="sc">-</span> <span class="dv">1</span>)]))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  e  <span class="ot">&lt;-</span> y[t_idx] <span class="sc">-</span> fc</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">MAE =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(e)), <span class="at">MSE =</span> <span class="fu">mean</span>(e<span class="sc">^</span><span class="dv">2</span>), <span class="at">MAPE =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(e <span class="sc">/</span> y[t_idx])) <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>err_all    <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">ma_errors</span>(k, k <span class="sc">+</span> <span class="dv">1</span>)))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>err_common <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">ma_errors</span>(k, <span class="dv">12</span>)))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>err_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">k =</span> ks,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                      <span class="at">n_all =</span> <span class="fu">length</span>(y) <span class="sc">-</span> ks, <span class="fu">round</span>(err_all, <span class="dv">2</span>),</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">round</span>(err_common, <span class="dv">2</span>))</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(err_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"k"</span>, <span class="st">"n"</span>, <span class="st">"MAE (all)"</span>, <span class="st">"MSE (all)"</span>, <span class="st">"MAPE % (all)"</span>,</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"MAE (common)"</span>, <span class="st">"MSE (common)"</span>, <span class="st">"MAPE % (common)"</span>)</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(err_tab)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-knives-errors" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-knives-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: One-step-ahead forecast errors of each moving average.
+</figcaption>
+<div aria-describedby="tbl-knives-errors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 19%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">k</th>
+<th style="text-align: right;">n</th>
+<th style="text-align: right;">MAE (all)</th>
+<th style="text-align: right;">MSE (all)</th>
+<th style="text-align: right;">MAPE % (all)</th>
+<th style="text-align: right;">MAE (common)</th>
+<th style="text-align: right;">MSE (common)</th>
+<th style="text-align: right;">MAPE % (common)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">32.46</td>
+<td style="text-align: right;">1484.29</td>
+<td style="text-align: right;">85.32</td>
+<td style="text-align: right;">30.00</td>
+<td style="text-align: right;">1376.58</td>
+<td style="text-align: right;">123.08</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">30.05</td>
+<td style="text-align: right;">1031.17</td>
+<td style="text-align: right;">89.29</td>
+<td style="text-align: right;">33.88</td>
+<td style="text-align: right;">1279.61</td>
+<td style="text-align: right;">124.39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">24.14</td>
+<td style="text-align: right;">757.46</td>
+<td style="text-align: right;">80.12</td>
+<td style="text-align: right;">31.86</td>
+<td style="text-align: right;">1130.81</td>
+<td style="text-align: right;">115.84</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">27.00</td>
+<td style="text-align: right;">860.80</td>
+<td style="text-align: right;">88.22</td>
+<td style="text-align: right;">30.09</td>
+<td style="text-align: right;">1048.76</td>
+<td style="text-align: right;">113.07</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">34.84</td>
+<td style="text-align: right;">1313.79</td>
+<td style="text-align: right;">122.95</td>
+<td style="text-align: right;">34.84</td>
+<td style="text-align: right;">1313.79</td>
+<td style="text-align: right;">122.95</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>Using all available forecasts, the <strong>7-month</strong> moving average gives the smallest MSE and MAE; over the common five-month window the <strong>9-month</strong> MA has the smallest MSE, with <span class="math inline">\(k = 7\)</span> a close second (<a href="#tbl-knives-errors" class="quarto-xref">Table&nbsp;2</a>). Short windows (<span class="math inline">\(k=3, 5\)</span>) react too strongly to the large random month-to-month swings in this series, while <span class="math inline">\(k=11\)</span> averages over too much old data. Assuming the past pattern continues, management should use a <strong>moderately long moving average, <span class="math inline">\(k = 7\)</span> (or <span class="math inline">\(k = 9\)</span>)</strong>.</p>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Caution
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The error comparison is based on very few forecasts (only 5 in the common window), so the choice is not clear-cut; the series is very noisy and none of the MAs forecasts it particularly well.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="question-5-souvenir-shop-sales-20" class="level2">
+<h2 class="anchored" data-anchor-id="question-5-souvenir-shop-sales-20">Question 5: Souvenir shop sales (20)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>souv <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">2</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(souv)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"Month"</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>souv_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="fu">as.vector</span>(<span class="fu">as.matrix</span>(souv[, <span class="sc">-</span><span class="dv">1</span>])), <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1987</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="a-time-plot-and-description-4" class="level3">
+<h3 class="anchored" data-anchor-id="a-time-plot-and-description-4">(a) Time plot and description (4)</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Time plot</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Seasonal plot</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(souv_ts) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-souvenir" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-souvenir-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-souvenir-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-souvenir-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Monthly sales of the souvenir shop, January 1987 – December 1993.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggseasonplot</span>(souv_ts, <span class="at">year.labels =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-souvenir-season" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-souvenir-season-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-souvenir-season-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-souvenir-season-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Seasonal plot: each line is one year.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li><strong>Trend:</strong> sales increase strongly over time, consistent with the shop expanding its premises, products and staff. The growth accelerates in 1992–1993.</li>
+<li><strong>Seasonality:</strong> a very strong annual pattern. Sales build up through November and peak sharply every <strong>December</strong> (Christmas tourists), then drop back in January. A smaller secondary peak occurs each <strong>March</strong> from 1988 onward (the surf festival). There is no March peak in 1987 because the festival only started in 1988.</li>
+<li><strong>Changing variance:</strong> the size of the seasonal fluctuations grows with the level of the series (the December peaks become enormous), so the seasonality is multiplicative rather than additive.</li>
+<li><strong>Unusual features:</strong> sales in <strong>1990–1991 stalled</strong>: December 1990 (30114) was <em>below</em> December 1989 (34061), and January and March 1991 were lower than a year earlier, breaking the upward trend (possibly an economic downturn or poor tourist season). There are also some months that deviate from the usual seasonal shape, e.g.&nbsp;the unusually high March 1990 and the very sharp jump in December 1992 and 1993.</li>
+</ul>
+</section>
+<section id="b-why-take-logarithms-2" class="level3">
+<h3 class="anchored" data-anchor-id="b-why-take-logarithms-2">(b) Why take logarithms? (2)</h3>
+<p>The variance of the series increases with its level: the seasonal swings are proportional to the level (multiplicative seasonality). Most models (and linear regression) assume constant variance and additive components. Taking logarithms stabilises the variance and turns multiplicative effects into additive ones (<span class="math inline">\(\log(T \times S \times E) = \log T + \log S + \log E\)</span>), and turns exponential growth into a linear trend (<a href="#fig-souvenir-log" class="quarto-xref">Figure&nbsp;4</a>).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(<span class="fu">log</span>(souv_ts)) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"log(Sales)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-souvenir-log" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-souvenir-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-souvenir-log-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-souvenir-log-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Log of monthly sales; the seasonal swings are now roughly constant in size.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="c-annual-totals-logs-and-linear-regression-6" class="level3">
+<h3 class="anchored" data-anchor-id="c-annual-totals-logs-and-linear-regression-6">(c) Annual totals, logs and linear regression (6)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>annual <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="fu">as.numeric</span>(<span class="fu">names</span>(souv)[<span class="sc">-</span><span class="dv">1</span>]),</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Total =</span> <span class="fu">colSums</span>(souv[, <span class="sc">-</span><span class="dv">1</span>]))</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>annual<span class="sc">$</span>logTotal <span class="ot">&lt;-</span> <span class="fu">log</span>(annual<span class="sc">$</span>Total)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(annual, <span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Total sales"</span>, <span class="st">"log(Total sales)"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-souvenir-annual" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-souvenir-annual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Total annual sales and their logarithms.
+</figcaption>
+<div aria-describedby="tbl-souvenir-annual-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Total sales</th>
+<th style="text-align: right;">log(Total sales)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1987</td>
+<td style="text-align: right;">64636.10</td>
+<td style="text-align: right;">11.0765</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1988</td>
+<td style="text-align: right;">93986.04</td>
+<td style="text-align: right;">11.4509</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1989</td>
+<td style="text-align: right;">121808.00</td>
+<td style="text-align: right;">11.7102</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1990</td>
+<td style="text-align: right;">126059.87</td>
+<td style="text-align: right;">11.7445</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1991</td>
+<td style="text-align: right;">164644.51</td>
+<td style="text-align: right;">12.0115</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1992</td>
+<td style="text-align: right;">268717.73</td>
+<td style="text-align: right;">12.5014</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1993</td>
+<td style="text-align: right;">362657.07</td>
+<td style="text-align: right;">12.8012</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit_annual <span class="ot">&lt;-</span> <span class="fu">lm</span>(logTotal <span class="sc">~</span> Year, <span class="at">data =</span> annual)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_annual)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = logTotal ~ Year, data = annual)
+
+Residuals:
+    1987     1988     1989     1990     1991     1992     1993 
+-0.01119  0.09260  0.08131 -0.15496 -0.15852  0.06077  0.08998 
+
+Coefficients:
+              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) -526.56801   46.43933  -11.34 9.33e-05 ***
+Year           0.27059    0.02334   11.60 8.37e-05 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.1235 on 5 degrees of freedom
+Multiple R-squared:  0.9641,    Adjusted R-squared:  0.957 
+F-statistic: 134.4 on 1 and 5 DF,  p-value: 8.374e-05</code></pre>
+</div>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(annual, <span class="fu">aes</span>(Year, logTotal)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log(Total annual sales)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-annual-reg" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-annual-reg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-annual-reg-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-annual-reg-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Log of total annual sales with fitted regression line.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The fitted line is <span class="math display">\[\widehat{\log(\text{Total})} = -526.568 + 0.2706 \times \text{Year},\]</span> with <span class="math inline">\(R^2 = 0.964\)</span>. The slope implies annual sales grow by roughly <span class="math inline">\(e^{0.2706} - 1 \approx 31.1\%\)</span> per year.</p>
+</section>
+<section id="d-predictions-of-log-total-sales-for-19941996-4" class="level3">
+<h3 class="anchored" data-anchor-id="d-predictions-of-log-total-sales-for-19941996-4">(d) Predictions of log total sales for 1994–1996 (4)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>new_years <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>pred_log <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_annual, <span class="at">newdata =</span> new_years,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">interval =</span> <span class="st">"prediction"</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>pred_log_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>, <span class="fu">round</span>(pred_log, <span class="dv">4</span>))</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(pred_log_tab,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Predicted log(Total)"</span>, <span class="st">"Lower 95% PI"</span>, <span class="st">"Upper 95% PI"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-souvenir-pred" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-souvenir-pred-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;4: Predicted log total sales with 95% prediction intervals.
+</figcaption>
+<div aria-describedby="tbl-souvenir-pred-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Predicted log(Total)</th>
+<th style="text-align: right;">Lower 95% PI</th>
+<th style="text-align: right;">Upper 95% PI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1994</td>
+<td style="text-align: right;">12.9818</td>
+<td style="text-align: right;">12.5662</td>
+<td style="text-align: right;">13.3974</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1995</td>
+<td style="text-align: right;">13.2524</td>
+<td style="text-align: right;">12.7995</td>
+<td style="text-align: right;">13.7053</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1996</td>
+<td style="text-align: right;">13.5230</td>
+<td style="text-align: right;">13.0283</td>
+<td style="text-align: right;">14.0177</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+</section>
+<section id="e-back-transformed-predictions-and-intervals-4" class="level3">
+<h3 class="anchored" data-anchor-id="e-back-transformed-predictions-and-intervals-4">(e) Back-transformed predictions and intervals (4)</h3>
+<p>Since the model is for <span class="math inline">\(\log(\text{Total})\)</span>, we exponentiate the point predictions and interval end-points:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pred_raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="fu">as.character</span>(<span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>), <span class="fu">exp</span>(pred_log))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(pred_raw, <span class="at">digits =</span> <span class="dv">0</span>, <span class="at">format.args =</span> <span class="fu">list</span>(<span class="at">big.mark =</span> <span class="st">" "</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Predicted total sales"</span>, <span class="st">"Lower 95% PI"</span>, <span class="st">"Upper 95% PI"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-souvenir-backtransform" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-souvenir-backtransform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;5: Back-transformed predictions of total annual sales.
+</figcaption>
+<div aria-describedby="tbl-souvenir-backtransform-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">Year</th>
+<th style="text-align: right;">Predicted total sales</th>
+<th style="text-align: right;">Lower 95% PI</th>
+<th style="text-align: right;">Upper 95% PI</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">1994</td>
+<td style="text-align: right;">434 443</td>
+<td style="text-align: right;">286 706</td>
+<td style="text-align: right;">658 309</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">1995</td>
+<td style="text-align: right;">569 439</td>
+<td style="text-align: right;">362 039</td>
+<td style="text-align: right;">895 651</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">1996</td>
+<td style="text-align: right;">746 383</td>
+<td style="text-align: right;">455 122</td>
+<td style="text-align: right;">1 224 040</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The intervals are asymmetric on the original scale (wider above the prediction than below), reflecting the multiplicative nature of the uncertainty. Note that <span class="math inline">\(e^{\hat{y}}\)</span> estimates the <em>median</em> rather than the mean of total sales. The intervals are very wide because the regression is based on only 7 annual observations and the forecasts extrapolate beyond the data.</p>
+</section>
+</section>
+<section id="question-6-ibm-daily-closing-prices-4" class="level2">
+<h2 class="anchored" data-anchor-id="question-6-ibm-daily-closing-prices-4">Question 6: IBM daily closing prices (4)</h2>
+<ul>
+<li><strong>Time plot:</strong> the series does not fluctuate around a constant mean. It wanders up from about 450 to 600, then falls sharply to about 300–400, with long local “trends”. There is no level to which it reverts, which is typical of a random walk.</li>
+<li><strong>ACF:</strong> the autocorrelations start close to 1 and decay extremely slowly (still about 0.8 at lag 25). For a stationary series the ACF should drop to zero quickly; a slowly decaying ACF is the classic sign of non-stationarity.</li>
+<li><strong>PACF:</strong> there is a single very large spike at lag 1 of almost exactly 1, with all other partial autocorrelations negligible. This indicates <span class="math inline">\(Y_t \approx Y_{t-1} + e_t\)</span>, i.e.&nbsp;an AR(1) with <span class="math inline">\(\phi_1 \approx 1\)</span>, i.e.&nbsp;a unit root.</li>
+</ul>
+<p>Together these show the series is non-stationary and should be differenced (first differences <span class="math inline">\(Y_t - Y_{t-1}\)</span>, i.e.&nbsp;the daily price changes, are likely to be stationary).</p>
+</section>
+<section id="question-7-strikes-in-the-usa-19511980-16" class="level2">
+<h2 class="anchored" data-anchor-id="question-7-strikes-in-the-usa-19511980-16">Question 7: Strikes in the USA, 1951–1980 (16)</h2>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>strikes_raw <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">3</span>, <span class="at">.name_repair =</span> <span class="st">"minimal"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>strikes <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="fu">c</span>(strikes_raw[[<span class="dv">2</span>]], strikes_raw[[<span class="dv">5</span>]]), <span class="at">start =</span> <span class="dv">1951</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<section id="a-why-arima011-3" class="level3">
+<h3 class="anchored" data-anchor-id="a-why-arima011-3">(a) Why ARIMA(0,1,1)? (3)</h3>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Original series</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">First differences</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggtsdisplay</span>(strikes, <span class="at">main =</span> <span class="st">"Number of strikes"</span>, <span class="at">xlab =</span> <span class="st">"Year"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-strikes-display" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-strikes-display-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-strikes-display-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-strikes-display-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: Strikes series: time plot, ACF and PACF.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggtsdisplay</span>(<span class="fu">diff</span>(strikes), <span class="at">main =</span> <span class="st">"Differenced number of strikes"</span>, <span class="at">xlab =</span> <span class="st">"Year"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-strikes-diff" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-strikes-diff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-strikes-diff-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-strikes-diff-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: First differences of the strikes series: time plot, ACF and PACF.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<ul>
+<li>The original series (<a href="#fig-strikes-display" class="quarto-xref">Figure&nbsp;6</a>) wanders: it falls from about 5 000 in the early 1950s to about 3 400 in the early 1960s, then rises to around 6 000 in the 1970s, without reverting to a fixed mean. The ACF decays slowly (0.73 at lag 1 and still positive for several lags), and the PACF has one large spike at lag 1. The series is non-stationary, so it should be <strong>differenced once</strong> (<span class="math inline">\(d = 1\)</span>).</li>
+<li>The differenced series (<a href="#fig-strikes-diff" class="quarto-xref">Figure&nbsp;7</a>) fluctuates around a constant mean of about zero with roughly constant variance, so it appears stationary. Its ACF has a single negative spike at lag 1 (-0.34, close to the <span class="math inline">\(\pm 2/\sqrt{n} \approx \pm 0.37\)</span> bound) and is negligible thereafter (the ACF “cuts off” after lag 1), while the PACF decays. This is the signature of an <strong>MA(1)</strong> process for the differences (<span class="math inline">\(q = 1\)</span>, <span class="math inline">\(p = 0\)</span>).</li>
+</ul>
+<p>Hence ARIMA(0,1,1) is appropriate. (No constant is included since the differences have mean approximately zero, so there is no persistent trend in the series.)</p>
+</section>
+<section id="b-backshift-operator-form-2" class="level3">
+<h3 class="anchored" data-anchor-id="b-backshift-operator-form-2">(b) Backshift operator form (2)</h3>
+<p>With <span class="math inline">\(B Y_t = Y_{t-1}\)</span>, the ARIMA(0,1,1) model is <span class="math display">\[(1 - B)\,Y_t = (1 + \theta_1 B)\, e_t \quad\Longleftrightarrow\quad Y_t = Y_{t-1} + e_t + \theta_1 e_{t-1},\]</span> where <span class="math inline">\(e_t\)</span> is white noise.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>R uses the “<span class="math inline">\(+\theta\)</span>” sign convention; some textbooks write <span class="math inline">\((1 - \theta_1 B)e_t\)</span>, in which case the sign of the estimate is reversed.</p>
+</div>
+</div>
+</section>
+<section id="c-fit-the-model-and-examine-the-residuals-5" class="level3">
+<h3 class="anchored" data-anchor-id="c-fit-the-model-and-examine-the-residuals-5">(c) Fit the model and examine the residuals (5)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fit_strikes <span class="ot">&lt;-</span> <span class="fu">Arima</span>(strikes, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fit_strikes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Series: strikes 
+ARIMA(0,1,1) 
+
+Coefficients:
+          ma1
+      -0.3094
+s.e.   0.1515
+
+sigma^2 = 330817:  log likelihood = -224.98
+AIC=453.95   AICc=454.41   BIC=456.69</code></pre>
+</div>
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_strikes)[<span class="st">"ma1"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The fitted model is <span class="math display">\[(1 - B)\,Y_t = (1 -0.3094\,B)\,e_t, \qquad \hat\sigma^2 = 330 817.\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>lb <span class="ot">&lt;-</span> <span class="fu">checkresiduals</span>(fit_strikes, <span class="at">lag =</span> <span class="dv">10</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Ljung-Box test
+
+data:  Residuals from ARIMA(0,1,1)
+Q* = 4.2581, df = 9, p-value = 0.8936
+
+Model df: 1.   Total lags used: 10</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-strikes-resid" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-strikes-resid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-strikes-resid-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-strikes-resid-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Residual diagnostics for the ARIMA(0,1,1) model.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>The <strong>time plot</strong> of residuals shows no pattern and fluctuates around zero with roughly constant variance.</li>
+<li>All residual <strong>autocorrelations</strong> lie within the significance bounds, so no autocorrelation remains.</li>
+<li>The <strong>histogram</strong> is roughly symmetric and consistent with normality (given only 29 residuals).</li>
+<li>The <strong>Ljung–Box test</strong> gives <span class="math inline">\(Q^* = 4.258\)</span> on 9 df, p-value <span class="math inline">\(= 0.894\)</span>, so we do not reject the null hypothesis that the residuals are white noise.</li>
+</ul>
+<p>The model is therefore <strong>satisfactory</strong>: the residuals behave like white noise, so the model has captured the structure in the data (<a href="#fig-strikes-resid" class="quarto-xref">Figure&nbsp;8</a>).</p>
+</section>
+<section id="d-forecasts-three-steps-ahead-by-hand-4" class="level3">
+<h3 class="anchored" data-anchor-id="d-forecasts-three-steps-ahead-by-hand-4">(d) Forecasts three steps ahead by hand (4)</h3>
+<p>From <span class="math inline">\(Y_t = Y_{t-1} + e_t + \theta_1 e_{t-1}\)</span>, the forecasts made at origin <span class="math inline">\(n = 1980\)</span> are <span class="math display">\[\hat{Y}_{n+1} = Y_n + \hat\theta_1\, e_n, \qquad \hat{Y}_{n+h} = \hat{Y}_{n+h-1} \;\;(h \ge 2),\]</span> because future errors have expectation zero. So all three forecasts are equal.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>y_n <span class="ot">&lt;-</span> <span class="fu">tail</span>(strikes, <span class="dv">1</span>)</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>e_n <span class="ot">&lt;-</span> <span class="fu">tail</span>(<span class="fu">residuals</span>(fit_strikes), <span class="dv">1</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> y_n <span class="sc">+</span> theta <span class="sc">*</span> e_n</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>With <span class="math inline">\(Y_{1980} = 3885\)</span>, the last residual <span class="math inline">\(e_{1980} = -880.24\)</span>, and <span class="math inline">\(\hat\theta_1 = -0.3094\)</span>: <span class="math display">\[\hat{Y}_{1981} = 3885 + (-0.3094)(-880.24) = 4157.33,\]</span> <span class="math display">\[\hat{Y}_{1982} = \hat{Y}_{1983} = 4157.33.\]</span></p>
+<p>Checking with R:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fc_strikes <span class="ot">&lt;-</span> <span class="fu">forecast</span>(fit_strikes, <span class="at">h =</span> <span class="dv">3</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>fc_strikes</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     Point Forecast    Lo 80    Hi 80    Lo 95    Hi 95
+1981       4157.329 3420.224 4894.435 3030.024 5284.635
+1982       4157.329 3261.525 5053.134 2787.314 5527.345
+1983       4157.329 3126.986 5187.673 2581.555 5733.104</code></pre>
+</div>
+</div>
+<p>The R forecasts (4157.33 for each of 1981–1983) agree with the hand calculation.</p>
+</section>
+<section id="e-plot-with-forecasts-and-prediction-intervals-2" class="level3">
+<h3 class="anchored" data-anchor-id="e-plot-with-forecasts-and-prediction-intervals-2">(e) Plot with forecasts and prediction intervals (2)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fc_strikes) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"Number of strikes"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-strikes-fc" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-strikes-fc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="02-tsa-part1-exercise-1_files/figure-html/fig-strikes-fc-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-strikes-fc-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Strikes series with ARIMA(0,1,1) forecasts for 1981–1983 and 80%/95% prediction intervals.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The prediction intervals widen with the forecast horizon (<a href="#fig-strikes-fc" class="quarto-xref">Figure&nbsp;9</a>), since for a non-stationary (integrated) model the forecast-error variance keeps growing: <span class="math inline">\(\text{Var} = \sigma^2[1 + (h-1)(1+\theta_1)^2]\)</span>.</p>
+</section>
+</section>
+<section id="question-8-bituminous-coal-production-10" class="level2">
+<h2 class="anchored" data-anchor-id="question-8-bituminous-coal-production-10">Question 8: Bituminous coal production (10)</h2>
+<section id="a-what-sort-of-arima-model-3" class="level3">
+<h3 class="anchored" data-anchor-id="a-what-sort-of-arima-model-3">(a) What sort of ARIMA model? (3)</h3>
+<p>The model <span class="math inline">\(Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \phi_3 Y_{t-3} + \phi_4 Y_{t-4} + e_t\)</span> is an autoregressive model of order 4 on the undifferenced series with no moving-average terms: an <strong>ARIMA(4,0,0)</strong>, i.e.&nbsp;AR(4), with <span class="math inline">\(p = 4\)</span>, <span class="math inline">\(d = 0\)</span>, <span class="math inline">\(q = 0\)</span>.</p>
+</section>
+<section id="b-why-was-this-model-chosen-1" class="level3">
+<h3 class="anchored" data-anchor-id="b-why-was-this-model-chosen-1">(b) Why was this model chosen? (1)</h3>
+<p>The time plot fluctuates around a fairly constant mean (roughly 300–630 million tons, no persistent trend) and the ACF dies down quickly, so the series appears stationary and <strong>no differencing</strong> is needed (<span class="math inline">\(d=0\)</span>). The ACF decays in a damped, sine-wave-like fashion (typical of an AR process), while the <strong>PACF has significant spikes at lags 1 and 4 and cuts off after lag 4</strong>, which identifies an AR(4) model.</p>
+</section>
+<section id="c-forecasts-for-19691971-6" class="level3">
+<h3 class="anchored" data-anchor-id="c-forecasts-for-19691971-6">(c) Forecasts for 1969–1971 (6)</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>c0  <span class="ot">&lt;-</span> <span class="fl">146.1</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>phi <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.891</span>, <span class="sc">-</span><span class="fl">0.257</span>, <span class="fl">0.392</span>, <span class="sc">-</span><span class="fl">0.333</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>coal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">1964</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">467</span>, <span class="st">`</span><span class="at">1965</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">512</span>, <span class="st">`</span><span class="at">1966</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">534</span>, <span class="st">`</span><span class="at">1967</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">552</span>, <span class="st">`</span><span class="at">1968</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">545</span>)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> coal</span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (h <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) {</span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(Y)</span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">&lt;-</span> <span class="fu">c</span>(Y, c0 <span class="sc">+</span> <span class="fu">sum</span>(phi <span class="sc">*</span> Y[n<span class="sc">:</span>(n <span class="sc">-</span> <span class="dv">3</span>)]))   <span class="co"># uses Y_{t-1}, ..., Y_{t-4}</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>coal_fc <span class="ot">&lt;-</span> <span class="fu">tail</span>(Y, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Future errors are set to zero and forecasts are substituted for unknown future values:</p>
+<p><span class="math display">\[
+\begin{aligned}
+\hat{Y}_{1969} &amp;= 146.1 + 0.891(545) - 0.257(552) + 0.392(534) - 0.333(512) = 528.66 \\
+\hat{Y}_{1970} &amp;= 146.1 + 0.891(528.66) - 0.257(545) + 0.392(552) - 0.333(534) = 515.64 \\
+\hat{Y}_{1971} &amp;= 146.1 + 0.891(515.64) - 0.257(528.66) + 0.392(545) - 0.333(552) = 499.49
+\end{aligned}
+\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Show code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1969</span><span class="sc">:</span><span class="dv">1971</span>, <span class="st">`</span><span class="at">Forecast (million tons)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(coal_fc, <span class="dv">2</span>),</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">check.names =</span> <span class="cn">FALSE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-coal" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-coal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;6: AR(4) forecasts of bituminous coal production.
+</figcaption>
+<div aria-describedby="tbl-coal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="do-not-create-environment cell caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">Year</th>
+<th style="text-align: right;">Forecast (million tons)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1969</td>
+<td style="text-align: right;">528.66</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">515.64</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1971</td>
+<td style="text-align: right;">499.49</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p>The forecasts decline gradually from the 1968 level, moving back towards the long-run mean of the series, <span class="math inline">\(\mu = c/(1 - \sum\phi_i) = 475.9\)</span> million tons, as expected for a stationary AR model (<a href="#tbl-coal" class="quarto-xref">Table&nbsp;6</a>).</p>
 
 
 <!-- -->
 
+</section>
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
@@ -812,37 +1714,423 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Time Series Analysis Part 1: Exercise 1"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 1: Time series foundations, ARIMA and volatility models"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>*Summarise the main ideas of this session in your own words.*</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>**What was most challenging:**</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>**What I now understand:**</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>**Links:** related projects and journal entries.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb29" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Time Series Analysis Part 1: Exercise 1"</span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "The forecasting process, time patterns, ACFs, moving averages, log-linear trends and ARIMA"</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="an">author:</span><span class="co"> "Eden"</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="an">format:</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">  html:</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co">    toc: true</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="co">    toc-depth: 2</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="co">    number-sections: false</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="co">    code-fold: true</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="co">    code-summary: "Show code"</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a><span class="co">    fig-width: 7</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co">    fig-height: 3.6</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a><span class="co">    df-print: kable</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a><span class="an">execute:</span></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a><span class="co">  echo: true</span></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="co">  warning: false</span></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co">  message: false</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>::: {.callout-note collapse="true"}</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Data and setup</span></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>All data come from <span class="in">`TSA_Part1_DataSets.xlsx`</span> (course data sets), stored in the repository's <span class="in">`data/`</span> folder. Sheets are read by position because the "souvenir" sheet name has a trailing space. Code is folded by default; click **Show code** to expand any chunk.</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb29-32"><a href="#cb29-32" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb29-33"><a href="#cb29-33" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(forecast)</span>
+<span id="cb29-34"><a href="#cb29-34" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb29-35"><a href="#cb29-35" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb29-36"><a href="#cb29-36" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">11</span>))</span>
+<span id="cb29-37"><a href="#cb29-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-38"><a href="#cb29-38" aria-hidden="true" tabindex="-1"></a>data_file <span class="ot">&lt;-</span> here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"data"</span>, <span class="st">"TSA_Part1_DataSets.xlsx"</span>)</span>
+<span id="cb29-39"><a href="#cb29-39" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-40"><a href="#cb29-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-41"><a href="#cb29-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 1: The forecasting process (15)</span></span>
+<span id="cb29-42"><a href="#cb29-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-43"><a href="#cb29-43" aria-hidden="true" tabindex="-1"></a>*Context: producing sales forecasts for several products of a large biscuit manufacturer.*</span>
+<span id="cb29-44"><a href="#cb29-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-45"><a href="#cb29-45" aria-hidden="true" tabindex="-1"></a>**1. Problem definition.** The aim is to forecast future sales for the company's range of biscuits so that it can make strategic and operational decisions about how, when and where to sell and produce. This means pinning down exactly what is forecast: which products (individual biscuit lines or product families), at what level (national, regional or by retailer), in what units, how far ahead and how often (e.g. weekly forecasts for production scheduling, monthly forecasts a year ahead for ingredient purchasing and budgeting). This is done by talking to the people who will use the forecasts (production, procurement, sales and marketing, finance).</span>
+<span id="cb29-46"><a href="#cb29-46" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-47"><a href="#cb29-47" aria-hidden="true" tabindex="-1"></a>**2. Data collection.** For each product, collect a record of how many units were sold each period (e.g. monthly), building up a historical time series that can be used to forecast future sales. Also collect information on factors that help explain sales: prices, promotions, advertising campaigns, product launches and competitor activity, along with calendar effects such as public holidays, school holidays and weekends. Knowledge from the sales team about one-off events (stock-outs, factory shutdowns, a large once-off order) is also recorded so the data can be interpreted correctly.</span>
+<span id="cb29-48"><a href="#cb29-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-49"><a href="#cb29-49" aria-hidden="true" tabindex="-1"></a>**3. Data analysis.** This is the exploratory stage, done before any model is fitted. Plot each series and look for trend, seasonality (e.g. peaks before Christmas and Easter), cycles, outliers and structural breaks; check whether a transformation (e.g. logs) or differencing is needed; examine the ACF/PACF; and look at how sales relate to drivers such as promotions, in order to understand consumer demand at different times of the year. The arrow back from model selection shows the process is iterative: what is learnt when fitting a model can send us back to look at the data again.</span>
+<span id="cb29-50"><a href="#cb29-50" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-51"><a href="#cb29-51" aria-hidden="true" tabindex="-1"></a>**4. Model selection and fitting.** Based on the patterns found in the data analysis (and the ACF and PACF, which show the autocorrelation structure), choose candidate models, e.g. exponential smoothing (such as Holt–Winters for trending, seasonal products), ARIMA/seasonal ARIMA, state space models, or regression models with promotion and price effects, and estimate their parameters on the historical data.</span>
+<span id="cb29-52"><a href="#cb29-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-53"><a href="#cb29-53" aria-hidden="true" tabindex="-1"></a>**5. Model validation.** Assess how accurate each model's forecasts are. Split the data so that a hold-out (test) set is kept back, and compare forecasts with the actual values using metrics such as RMSE, MAE and MAPE, using validation approaches such as rolling-origin (time series cross-validation) or sliding windows. Residuals should also be checked to make sure they look like white noise. The best-performing model is chosen.</span>
+<span id="cb29-54"><a href="#cb29-54" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-55"><a href="#cb29-55" aria-hidden="true" tabindex="-1"></a>**6. Forecasting model deployment.** Put the forecasts into practical use, since the whole point of forecasting is to support decisions. The chosen model is built into the company's planning systems and produces forecasts (with prediction intervals) on a regular schedule, which are used for decisions such as production planning, which products to invest in or refine, and advertising strategies targeted at the products and times of year where sales are strongest.</span>
+<span id="cb29-56"><a href="#cb29-56" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-57"><a href="#cb29-57" aria-hidden="true" tabindex="-1"></a>**7. Monitoring forecasting model performance.** Continuously compare forecasts with actual sales as they come in and track the forecast errors over time, to detect bias or deterioration, for instance when consumer preferences change or a competitor changes strategy. This monitoring could be automated (e.g. an automated system or AI agent that is fed new data, updates the forecasts and flags when errors drift or market changes occur). When performance deteriorates, the model is re-estimated or the process returns to an earlier stage.</span>
+<span id="cb29-58"><a href="#cb29-58" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-59"><a href="#cb29-59" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 2: Expected time patterns (8)</span></span>
+<span id="cb29-60"><a href="#cb29-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-61"><a href="#cb29-61" aria-hidden="true" tabindex="-1"></a>**(a) Monthly sales of computer hard drives at a local store (10 years).** Over the 10 years I would expect a *trend*: sales would initially increase steadily as computers became more common and people bought hard drives to keep their computers going for longer, but then trend downwards as technology develops and newer products (e.g. solid-state drives and cloud storage) replace them. There would also be *seasonality* within each year, e.g. at the beginning of the year when school and university go back, and around Black Friday and the festive season. (Because the data are monthly, within-month effects such as payday are not visible.)</span>
+<span id="cb29-62"><a href="#cb29-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-63"><a href="#cb29-63" aria-hidden="true" tabindex="-1"></a>**(b) Hourly pulse rate of a person for one week.** A strong *daily (24-hour) seasonal pattern*: pulse rate is elevated during the day while the person is moving around and active, and drops to a resting level while they sleep at night. If the person exercises every day, there will also be a regular daily spike in heart rate at that time. Little or no trend would be expected over a single week.</span>
+<span id="cb29-64"><a href="#cb29-64" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-65"><a href="#cb29-65" aria-hidden="true" tabindex="-1"></a>**(c) Daily sales at a fast-food store for six months.** A *weekly seasonal pattern*, with increased demand and sales over weekends (Friday nights to Sunday), plus increases around public holidays (and possibly month-end/payday). Six months is quite a short period, so long-term trends would be hard to see.</span>
+<span id="cb29-66"><a href="#cb29-66" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-67"><a href="#cb29-67" aria-hidden="true" tabindex="-1"></a>**(d) Weekly electricity consumption for your local area (10 years).** A strong *annual seasonal pattern*: in South Africa consumption is highest in winter (heating, longer nights) with a possible smaller summer peak from air-conditioning, and dips over the December holidays when businesses and industry shut down. There would also be a *trend* reflecting population growth and development, possibly offset in recent years by load-shedding, higher tariffs and rooftop solar.</span>
+<span id="cb29-68"><a href="#cb29-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-69"><a href="#cb29-69" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 3: Matching series to ACFs (12)</span></span>
+<span id="cb29-70"><a href="#cb29-70" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-71"><a href="#cb29-71" aria-hidden="true" tabindex="-1"></a>The key idea is: a **trend** makes neighbouring values (even ones far apart) similar, so the ACF starts very high and decays *slowly* while staying positive; **seasonality/cycles** make the ACF *oscillate*, with peaks at lags equal to the period; and a series with **neither** has small autocorrelations that die out quickly.</span>
+<span id="cb29-72"><a href="#cb29-72" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-73"><a href="#cb29-73" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Time series <span class="pp">|</span> ACF <span class="pp">|</span> Reason <span class="pp">|</span></span>
+<span id="cb29-74"><a href="#cb29-74" aria-hidden="true" tabindex="-1"></a><span class="pp">|:-----------------|:---:|:----------------------------------------------------------------|</span></span>
+<span id="cb29-75"><a href="#cb29-75" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 1. Daily morning temperature of a cow <span class="pp">|</span> **B** <span class="pp">|</span> No seasonality or strong trend, just a slight downward drift and irregular variation. The ACF has small-to-moderate positive values that die out without any regular oscillation, consistent with a weakly persistent, non-seasonal series. <span class="pp">|</span></span>
+<span id="cb29-76"><a href="#cb29-76" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2. Accidental deaths in USA (monthly) <span class="pp">|</span> **A** <span class="pp">|</span> Clear monthly seasonality with period 12 and no trend. ACF A has a large positive spike at lag 12 and strong negative values around lag 6 (half a seasonal cycle), the pattern of a period-12 seasonal series. <span class="pp">|</span></span>
+<span id="cb29-77"><a href="#cb29-77" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 3. International airline passengers <span class="pp">|</span> **D** <span class="pp">|</span> Strong upward trend plus seasonality. The trend produces very large positive autocorrelations that decay slowly (ACF D starts near 0.9 and stays high); the seasonality shows as a small bump around lag 12. <span class="pp">|</span></span>
+<span id="cb29-78"><a href="#cb29-78" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 4. Annual mink trappings (Canada) <span class="pp">|</span> **C** <span class="pp">|</span> An annual series with a regular population cycle of roughly 10 years. ACF C oscillates with peaks near lags 10 and 20 and troughs near lags 5 and 15, matching a ~10-year cycle. <span class="pp">|</span></span>
+<span id="cb29-79"><a href="#cb29-79" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-80"><a href="#cb29-80" aria-hidden="true" tabindex="-1"></a>: Matching each series to its ACF {.striped .hover}</span>
+<span id="cb29-81"><a href="#cb29-81" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-82"><a href="#cb29-82" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 4: Electric knives: moving averages (15)</span></span>
+<span id="cb29-83"><a href="#cb29-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-86"><a href="#cb29-86" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-87"><a href="#cb29-87" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: knives-data</span></span>
+<span id="cb29-88"><a href="#cb29-88" aria-hidden="true" tabindex="-1"></a>knives <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">1</span>)</span>
+<span id="cb29-89"><a href="#cb29-89" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(knives) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"Time"</span>, <span class="st">"Sales"</span>)</span>
+<span id="cb29-90"><a href="#cb29-90" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> knives<span class="sc">$</span>Sales</span>
+<span id="cb29-91"><a href="#cb29-91" aria-hidden="true" tabindex="-1"></a>knives_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(y, <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1991</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb29-92"><a href="#cb29-92" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-93"><a href="#cb29-93" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-96"><a href="#cb29-96" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-97"><a href="#cb29-97" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-knives</span></span>
+<span id="cb29-98"><a href="#cb29-98" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monthly sales of electric knives, January 1991 – April 1992."</span></span>
+<span id="cb29-99"><a href="#cb29-99" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb29-100"><a href="#cb29-100" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(knives_ts) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb29-101"><a href="#cb29-101" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Month"</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span>
+<span id="cb29-102"><a href="#cb29-102" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-103"><a href="#cb29-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-104"><a href="#cb29-104" aria-hidden="true" tabindex="-1"></a><span class="fu">### (a) Forecasts for May 1992 (10)</span></span>
+<span id="cb29-105"><a href="#cb29-105" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-106"><a href="#cb29-106" aria-hidden="true" tabindex="-1"></a>A $k$-month moving average forecast for the next month is the average of the last $k$ observations:</span>
+<span id="cb29-107"><a href="#cb29-107" aria-hidden="true" tabindex="-1"></a>$$\hat{Y}_{t+1} = \frac{Y_t + Y_{t-1} + \cdots + Y_{t-k+1}}{k}.$$</span>
+<span id="cb29-108"><a href="#cb29-108" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-111"><a href="#cb29-111" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-112"><a href="#cb29-112" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-knives-ma</span></span>
+<span id="cb29-113"><a href="#cb29-113" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Moving average forecasts for May 1992."</span></span>
+<span id="cb29-114"><a href="#cb29-114" aria-hidden="true" tabindex="-1"></a>ks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">5</span>, <span class="dv">7</span>, <span class="dv">9</span>, <span class="dv">11</span>)</span>
+<span id="cb29-115"><a href="#cb29-115" aria-hidden="true" tabindex="-1"></a>ma_fc <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">mean</span>(<span class="fu">tail</span>(y, k)))</span>
+<span id="cb29-116"><a href="#cb29-116" aria-hidden="true" tabindex="-1"></a>vals <span class="ot">&lt;-</span> <span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">paste</span>(<span class="fu">tail</span>(y, k), <span class="at">collapse =</span> <span class="st">", "</span>))</span>
+<span id="cb29-117"><a href="#cb29-117" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">k =</span> ks, <span class="st">`</span><span class="at">Values averaged</span><span class="st">`</span> <span class="ot">=</span> vals,</span>
+<span id="cb29-118"><a href="#cb29-118" aria-hidden="true" tabindex="-1"></a>                 <span class="st">`</span><span class="at">Forecast May 1992</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(ma_fc, <span class="dv">2</span>), <span class="at">check.names =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb29-119"><a href="#cb29-119" aria-hidden="true" tabindex="-1"></a>      <span class="at">align =</span> <span class="st">"clr"</span>)</span>
+<span id="cb29-120"><a href="#cb29-120" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-121"><a href="#cb29-121" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-122"><a href="#cb29-122" aria-hidden="true" tabindex="-1"></a>For example, the 3-month MA forecast is $(17 + 26 + 29)/3 = <span class="in">`r round(ma_fc[1], 2)`</span>$ and the 5-month MA forecast is $(89 + 82 + 17 + 26 + 29)/5 = <span class="in">`r round(ma_fc[2], 2)`</span>$ (@tbl-knives-ma).</span>
+<span id="cb29-123"><a href="#cb29-123" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-124"><a href="#cb29-124" aria-hidden="true" tabindex="-1"></a><span class="fu">### (b) Choice of $k$ (5)</span></span>
+<span id="cb29-125"><a href="#cb29-125" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-126"><a href="#cb29-126" aria-hidden="true" tabindex="-1"></a>To choose $k$ we compute the one-step-ahead forecasts each MA would have made historically and compare the errors. Because the 11-month MA can only forecast from December 1991 onwards, we report the errors both over **all** periods each MA can forecast and over the **common** period December 1991 – April 1992 (a fair like-for-like comparison).</span>
+<span id="cb29-127"><a href="#cb29-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-130"><a href="#cb29-130" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-131"><a href="#cb29-131" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-knives-errors</span></span>
+<span id="cb29-132"><a href="#cb29-132" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "One-step-ahead forecast errors of each moving average."</span></span>
+<span id="cb29-133"><a href="#cb29-133" aria-hidden="true" tabindex="-1"></a>ma_errors <span class="ot">&lt;-</span> <span class="cf">function</span>(k, from) {</span>
+<span id="cb29-134"><a href="#cb29-134" aria-hidden="true" tabindex="-1"></a>  t_idx <span class="ot">&lt;-</span> from<span class="sc">:</span><span class="fu">length</span>(y)</span>
+<span id="cb29-135"><a href="#cb29-135" aria-hidden="true" tabindex="-1"></a>  fc <span class="ot">&lt;-</span> <span class="fu">sapply</span>(t_idx, <span class="cf">function</span>(t) <span class="fu">mean</span>(y[(t <span class="sc">-</span> k)<span class="sc">:</span>(t <span class="sc">-</span> <span class="dv">1</span>)]))</span>
+<span id="cb29-136"><a href="#cb29-136" aria-hidden="true" tabindex="-1"></a>  e  <span class="ot">&lt;-</span> y[t_idx] <span class="sc">-</span> fc</span>
+<span id="cb29-137"><a href="#cb29-137" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="at">MAE =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(e)), <span class="at">MSE =</span> <span class="fu">mean</span>(e<span class="sc">^</span><span class="dv">2</span>), <span class="at">MAPE =</span> <span class="fu">mean</span>(<span class="fu">abs</span>(e <span class="sc">/</span> y[t_idx])) <span class="sc">*</span> <span class="dv">100</span>)</span>
+<span id="cb29-138"><a href="#cb29-138" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-139"><a href="#cb29-139" aria-hidden="true" tabindex="-1"></a>err_all    <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">ma_errors</span>(k, k <span class="sc">+</span> <span class="dv">1</span>)))</span>
+<span id="cb29-140"><a href="#cb29-140" aria-hidden="true" tabindex="-1"></a>err_common <span class="ot">&lt;-</span> <span class="fu">t</span>(<span class="fu">sapply</span>(ks, <span class="cf">function</span>(k) <span class="fu">ma_errors</span>(k, <span class="dv">12</span>)))</span>
+<span id="cb29-141"><a href="#cb29-141" aria-hidden="true" tabindex="-1"></a>err_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">k =</span> ks,</span>
+<span id="cb29-142"><a href="#cb29-142" aria-hidden="true" tabindex="-1"></a>                      <span class="at">n_all =</span> <span class="fu">length</span>(y) <span class="sc">-</span> ks, <span class="fu">round</span>(err_all, <span class="dv">2</span>),</span>
+<span id="cb29-143"><a href="#cb29-143" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">round</span>(err_common, <span class="dv">2</span>))</span>
+<span id="cb29-144"><a href="#cb29-144" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(err_tab) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"k"</span>, <span class="st">"n"</span>, <span class="st">"MAE (all)"</span>, <span class="st">"MSE (all)"</span>, <span class="st">"MAPE % (all)"</span>,</span>
+<span id="cb29-145"><a href="#cb29-145" aria-hidden="true" tabindex="-1"></a>                    <span class="st">"MAE (common)"</span>, <span class="st">"MSE (common)"</span>, <span class="st">"MAPE % (common)"</span>)</span>
+<span id="cb29-146"><a href="#cb29-146" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(err_tab)</span>
+<span id="cb29-147"><a href="#cb29-147" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-148"><a href="#cb29-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-151"><a href="#cb29-151" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-152"><a href="#cb29-152" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: knives-best</span></span>
+<span id="cb29-153"><a href="#cb29-153" aria-hidden="true" tabindex="-1"></a><span class="co">#| include: false</span></span>
+<span id="cb29-154"><a href="#cb29-154" aria-hidden="true" tabindex="-1"></a>best_all_mse    <span class="ot">&lt;-</span> ks[<span class="fu">which.min</span>(err_all[, <span class="st">"MSE"</span>])]</span>
+<span id="cb29-155"><a href="#cb29-155" aria-hidden="true" tabindex="-1"></a>best_common_mse <span class="ot">&lt;-</span> ks[<span class="fu">which.min</span>(err_common[, <span class="st">"MSE"</span>])]</span>
+<span id="cb29-156"><a href="#cb29-156" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-157"><a href="#cb29-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-158"><a href="#cb29-158" aria-hidden="true" tabindex="-1"></a>Using all available forecasts, the **`r best_all_mse`-month** moving average gives the smallest MSE and MAE; over the common five-month window the **`r best_common_mse`-month** MA has the smallest MSE, with $k = 7$ a close second (@tbl-knives-errors). Short windows ($k=3, 5$) react too strongly to the large random month-to-month swings in this series, while $k=11$ averages over too much old data. Assuming the past pattern continues, management should use a **moderately long moving average, $k = 7$ (or $k = 9$)**.</span>
+<span id="cb29-159"><a href="#cb29-159" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-160"><a href="#cb29-160" aria-hidden="true" tabindex="-1"></a>::: {.callout-caution}</span>
+<span id="cb29-161"><a href="#cb29-161" aria-hidden="true" tabindex="-1"></a>The error comparison is based on very few forecasts (only 5 in the common window), so the choice is not clear-cut; the series is very noisy and none of the MAs forecasts it particularly well.</span>
+<span id="cb29-162"><a href="#cb29-162" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-163"><a href="#cb29-163" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-164"><a href="#cb29-164" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 5: Souvenir shop sales (20)</span></span>
+<span id="cb29-165"><a href="#cb29-165" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-168"><a href="#cb29-168" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-169"><a href="#cb29-169" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: souvenir-data</span></span>
+<span id="cb29-170"><a href="#cb29-170" aria-hidden="true" tabindex="-1"></a>souv <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">2</span>)</span>
+<span id="cb29-171"><a href="#cb29-171" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(souv)[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="st">"Month"</span></span>
+<span id="cb29-172"><a href="#cb29-172" aria-hidden="true" tabindex="-1"></a>souv_ts <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="fu">as.vector</span>(<span class="fu">as.matrix</span>(souv[, <span class="sc">-</span><span class="dv">1</span>])), <span class="at">start =</span> <span class="fu">c</span>(<span class="dv">1987</span>, <span class="dv">1</span>), <span class="at">frequency =</span> <span class="dv">12</span>)</span>
+<span id="cb29-173"><a href="#cb29-173" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-174"><a href="#cb29-174" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-175"><a href="#cb29-175" aria-hidden="true" tabindex="-1"></a><span class="fu">### (a) Time plot and description (4)</span></span>
+<span id="cb29-176"><a href="#cb29-176" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-177"><a href="#cb29-177" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb29-178"><a href="#cb29-178" aria-hidden="true" tabindex="-1"></a><span class="fu">## Time plot</span></span>
+<span id="cb29-179"><a href="#cb29-179" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-182"><a href="#cb29-182" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-183"><a href="#cb29-183" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-souvenir</span></span>
+<span id="cb29-184"><a href="#cb29-184" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Monthly sales of the souvenir shop, January 1987 – December 1993."</span></span>
+<span id="cb29-185"><a href="#cb29-185" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(souv_ts) <span class="sc">+</span> <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb29-186"><a href="#cb29-186" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span>
+<span id="cb29-187"><a href="#cb29-187" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-188"><a href="#cb29-188" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-189"><a href="#cb29-189" aria-hidden="true" tabindex="-1"></a><span class="fu">## Seasonal plot</span></span>
+<span id="cb29-190"><a href="#cb29-190" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-193"><a href="#cb29-193" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-194"><a href="#cb29-194" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-souvenir-season</span></span>
+<span id="cb29-195"><a href="#cb29-195" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Seasonal plot: each line is one year."</span></span>
+<span id="cb29-196"><a href="#cb29-196" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.4</span></span>
+<span id="cb29-197"><a href="#cb29-197" aria-hidden="true" tabindex="-1"></a><span class="fu">ggseasonplot</span>(souv_ts, <span class="at">year.labels =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">title =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Sales"</span>)</span>
+<span id="cb29-198"><a href="#cb29-198" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-199"><a href="#cb29-199" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-200"><a href="#cb29-200" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-201"><a href="#cb29-201" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Trend:** sales increase strongly over time, consistent with the shop expanding its premises, products and staff. The growth accelerates in 1992–1993.</span>
+<span id="cb29-202"><a href="#cb29-202" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Seasonality:** a very strong annual pattern. Sales build up through November and peak sharply every **December** (Christmas tourists), then drop back in January. A smaller secondary peak occurs each **March** from 1988 onward (the surf festival). There is no March peak in 1987 because the festival only started in 1988.</span>
+<span id="cb29-203"><a href="#cb29-203" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Changing variance:** the size of the seasonal fluctuations grows with the level of the series (the December peaks become enormous), so the seasonality is multiplicative rather than additive.</span>
+<span id="cb29-204"><a href="#cb29-204" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Unusual features:** sales in **1990–1991 stalled**: December 1990 (<span class="in">`r round(window(souv_ts, c(1990,12), c(1990,12)))`</span>) was *below* December 1989 (<span class="in">`r round(window(souv_ts, c(1989,12), c(1989,12)))`</span>), and January and March 1991 were lower than a year earlier, breaking the upward trend (possibly an economic downturn or poor tourist season). There are also some months that deviate from the usual seasonal shape, e.g. the unusually high March 1990 and the very sharp jump in December 1992 and 1993.</span>
+<span id="cb29-205"><a href="#cb29-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-206"><a href="#cb29-206" aria-hidden="true" tabindex="-1"></a><span class="fu">### (b) Why take logarithms? (2)</span></span>
+<span id="cb29-207"><a href="#cb29-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-208"><a href="#cb29-208" aria-hidden="true" tabindex="-1"></a>The variance of the series increases with its level: the seasonal swings are proportional to the level (multiplicative seasonality). Most models (and linear regression) assume constant variance and additive components. Taking logarithms stabilises the variance and turns multiplicative effects into additive ones ($\log(T \times S \times E) = \log T + \log S + \log E$), and turns exponential growth into a linear trend (@fig-souvenir-log).</span>
+<span id="cb29-209"><a href="#cb29-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-212"><a href="#cb29-212" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-213"><a href="#cb29-213" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-souvenir-log</span></span>
+<span id="cb29-214"><a href="#cb29-214" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Log of monthly sales; the seasonal swings are now roughly constant in size."</span></span>
+<span id="cb29-215"><a href="#cb29-215" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3</span></span>
+<span id="cb29-216"><a href="#cb29-216" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(<span class="fu">log</span>(souv_ts)) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"log(Sales)"</span>)</span>
+<span id="cb29-217"><a href="#cb29-217" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-218"><a href="#cb29-218" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-219"><a href="#cb29-219" aria-hidden="true" tabindex="-1"></a><span class="fu">### (c) Annual totals, logs and linear regression (6)</span></span>
+<span id="cb29-220"><a href="#cb29-220" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-223"><a href="#cb29-223" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-224"><a href="#cb29-224" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-souvenir-annual</span></span>
+<span id="cb29-225"><a href="#cb29-225" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Total annual sales and their logarithms."</span></span>
+<span id="cb29-226"><a href="#cb29-226" aria-hidden="true" tabindex="-1"></a>annual <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="fu">as.numeric</span>(<span class="fu">names</span>(souv)[<span class="sc">-</span><span class="dv">1</span>]),</span>
+<span id="cb29-227"><a href="#cb29-227" aria-hidden="true" tabindex="-1"></a>                     <span class="at">Total =</span> <span class="fu">colSums</span>(souv[, <span class="sc">-</span><span class="dv">1</span>]))</span>
+<span id="cb29-228"><a href="#cb29-228" aria-hidden="true" tabindex="-1"></a>annual<span class="sc">$</span>logTotal <span class="ot">&lt;-</span> <span class="fu">log</span>(annual<span class="sc">$</span>Total)</span>
+<span id="cb29-229"><a href="#cb29-229" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(annual, <span class="at">digits =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">4</span>), <span class="at">row.names =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb29-230"><a href="#cb29-230" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Total sales"</span>, <span class="st">"log(Total sales)"</span>))</span>
+<span id="cb29-231"><a href="#cb29-231" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-232"><a href="#cb29-232" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-235"><a href="#cb29-235" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-236"><a href="#cb29-236" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: souvenir-reg</span></span>
+<span id="cb29-237"><a href="#cb29-237" aria-hidden="true" tabindex="-1"></a>fit_annual <span class="ot">&lt;-</span> <span class="fu">lm</span>(logTotal <span class="sc">~</span> Year, <span class="at">data =</span> annual)</span>
+<span id="cb29-238"><a href="#cb29-238" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_annual)</span>
+<span id="cb29-239"><a href="#cb29-239" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-240"><a href="#cb29-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-243"><a href="#cb29-243" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-244"><a href="#cb29-244" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-annual-reg</span></span>
+<span id="cb29-245"><a href="#cb29-245" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Log of total annual sales with fitted regression line."</span></span>
+<span id="cb29-246"><a href="#cb29-246" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 3.2</span></span>
+<span id="cb29-247"><a href="#cb29-247" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(annual, <span class="fu">aes</span>(Year, logTotal)) <span class="sc">+</span></span>
+<span id="cb29-248"><a href="#cb29-248" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>) <span class="sc">+</span></span>
+<span id="cb29-249"><a href="#cb29-249" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>, <span class="at">linewidth =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb29-250"><a href="#cb29-250" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"log(Total annual sales)"</span>)</span>
+<span id="cb29-251"><a href="#cb29-251" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-252"><a href="#cb29-252" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-253"><a href="#cb29-253" aria-hidden="true" tabindex="-1"></a>The fitted line is</span>
+<span id="cb29-254"><a href="#cb29-254" aria-hidden="true" tabindex="-1"></a>$$\widehat{\log(\text{Total})} = <span class="in">`r round(coef(fit_annual)[1], 3)`</span> + <span class="in">`r round(coef(fit_annual)[2], 4)`</span> \times \text{Year},$$</span>
+<span id="cb29-255"><a href="#cb29-255" aria-hidden="true" tabindex="-1"></a>with $R^2 = <span class="in">`r round(summary(fit_annual)$r.squared, 3)`</span>$. The slope implies annual sales grow by roughly $e^{<span class="in">`r round(coef(fit_annual)[2], 4)`</span>} - 1 \approx <span class="in">`r round(100*(exp(coef(fit_annual)[2]) - 1), 1)`</span>\%$ per year.</span>
+<span id="cb29-256"><a href="#cb29-256" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-257"><a href="#cb29-257" aria-hidden="true" tabindex="-1"></a><span class="fu">### (d) Predictions of log total sales for 1994–1996 (4)</span></span>
+<span id="cb29-258"><a href="#cb29-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-261"><a href="#cb29-261" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-262"><a href="#cb29-262" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-souvenir-pred</span></span>
+<span id="cb29-263"><a href="#cb29-263" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Predicted log total sales with 95% prediction intervals."</span></span>
+<span id="cb29-264"><a href="#cb29-264" aria-hidden="true" tabindex="-1"></a>new_years <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>)</span>
+<span id="cb29-265"><a href="#cb29-265" aria-hidden="true" tabindex="-1"></a>pred_log <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit_annual, <span class="at">newdata =</span> new_years,</span>
+<span id="cb29-266"><a href="#cb29-266" aria-hidden="true" tabindex="-1"></a>                    <span class="at">interval =</span> <span class="st">"prediction"</span>, <span class="at">level =</span> <span class="fl">0.95</span>)</span>
+<span id="cb29-267"><a href="#cb29-267" aria-hidden="true" tabindex="-1"></a>pred_log_tab <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>, <span class="fu">round</span>(pred_log, <span class="dv">4</span>))</span>
+<span id="cb29-268"><a href="#cb29-268" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(pred_log_tab,</span>
+<span id="cb29-269"><a href="#cb29-269" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Predicted log(Total)"</span>, <span class="st">"Lower 95% PI"</span>, <span class="st">"Upper 95% PI"</span>))</span>
+<span id="cb29-270"><a href="#cb29-270" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-271"><a href="#cb29-271" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-272"><a href="#cb29-272" aria-hidden="true" tabindex="-1"></a><span class="fu">### (e) Back-transformed predictions and intervals (4)</span></span>
+<span id="cb29-273"><a href="#cb29-273" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-274"><a href="#cb29-274" aria-hidden="true" tabindex="-1"></a>Since the model is for $\log(\text{Total})$, we exponentiate the point predictions and interval end-points:</span>
+<span id="cb29-275"><a href="#cb29-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-278"><a href="#cb29-278" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-279"><a href="#cb29-279" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-souvenir-backtransform</span></span>
+<span id="cb29-280"><a href="#cb29-280" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "Back-transformed predictions of total annual sales."</span></span>
+<span id="cb29-281"><a href="#cb29-281" aria-hidden="true" tabindex="-1"></a>pred_raw <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="fu">as.character</span>(<span class="dv">1994</span><span class="sc">:</span><span class="dv">1996</span>), <span class="fu">exp</span>(pred_log))</span>
+<span id="cb29-282"><a href="#cb29-282" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(pred_raw, <span class="at">digits =</span> <span class="dv">0</span>, <span class="at">format.args =</span> <span class="fu">list</span>(<span class="at">big.mark =</span> <span class="st">" "</span>),</span>
+<span id="cb29-283"><a href="#cb29-283" aria-hidden="true" tabindex="-1"></a>      <span class="at">col.names =</span> <span class="fu">c</span>(<span class="st">"Year"</span>, <span class="st">"Predicted total sales"</span>, <span class="st">"Lower 95% PI"</span>, <span class="st">"Upper 95% PI"</span>))</span>
+<span id="cb29-284"><a href="#cb29-284" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-285"><a href="#cb29-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-286"><a href="#cb29-286" aria-hidden="true" tabindex="-1"></a>The intervals are asymmetric on the original scale (wider above the prediction than below), reflecting the multiplicative nature of the uncertainty. Note that $e^{\hat{y}}$ estimates the *median* rather than the mean of total sales. The intervals are very wide because the regression is based on only 7 annual observations and the forecasts extrapolate beyond the data.</span>
+<span id="cb29-287"><a href="#cb29-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-288"><a href="#cb29-288" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 6: IBM daily closing prices (4)</span></span>
+<span id="cb29-289"><a href="#cb29-289" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-290"><a href="#cb29-290" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**Time plot:** the series does not fluctuate around a constant mean. It wanders up from about 450 to 600, then falls sharply to about 300–400, with long local "trends". There is no level to which it reverts, which is typical of a random walk.</span>
+<span id="cb29-291"><a href="#cb29-291" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**ACF:** the autocorrelations start close to 1 and decay extremely slowly (still about 0.8 at lag 25). For a stationary series the ACF should drop to zero quickly; a slowly decaying ACF is the classic sign of non-stationarity.</span>
+<span id="cb29-292"><a href="#cb29-292" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>**PACF:** there is a single very large spike at lag 1 of almost exactly 1, with all other partial autocorrelations negligible. This indicates $Y_t \approx Y_{t-1} + e_t$, i.e. an AR(1) with $\phi_1 \approx 1$, i.e. a unit root.</span>
+<span id="cb29-293"><a href="#cb29-293" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-294"><a href="#cb29-294" aria-hidden="true" tabindex="-1"></a>Together these show the series is non-stationary and should be differenced (first differences $Y_t - Y_{t-1}$, i.e. the daily price changes, are likely to be stationary).</span>
+<span id="cb29-295"><a href="#cb29-295" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-296"><a href="#cb29-296" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 7: Strikes in the USA, 1951–1980 (16)</span></span>
+<span id="cb29-297"><a href="#cb29-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-300"><a href="#cb29-300" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-301"><a href="#cb29-301" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: strikes-data</span></span>
+<span id="cb29-302"><a href="#cb29-302" aria-hidden="true" tabindex="-1"></a>strikes_raw <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(data_file, <span class="at">sheet =</span> <span class="dv">3</span>, <span class="at">.name_repair =</span> <span class="st">"minimal"</span>)</span>
+<span id="cb29-303"><a href="#cb29-303" aria-hidden="true" tabindex="-1"></a>strikes <span class="ot">&lt;-</span> <span class="fu">ts</span>(<span class="fu">c</span>(strikes_raw[[<span class="dv">2</span>]], strikes_raw[[<span class="dv">5</span>]]), <span class="at">start =</span> <span class="dv">1951</span>)</span>
+<span id="cb29-304"><a href="#cb29-304" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-305"><a href="#cb29-305" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-306"><a href="#cb29-306" aria-hidden="true" tabindex="-1"></a><span class="fu">### (a) Why ARIMA(0,1,1)? (3)</span></span>
+<span id="cb29-307"><a href="#cb29-307" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-308"><a href="#cb29-308" aria-hidden="true" tabindex="-1"></a>::: {.panel-tabset}</span>
+<span id="cb29-309"><a href="#cb29-309" aria-hidden="true" tabindex="-1"></a><span class="fu">## Original series</span></span>
+<span id="cb29-310"><a href="#cb29-310" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-313"><a href="#cb29-313" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-314"><a href="#cb29-314" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-strikes-display</span></span>
+<span id="cb29-315"><a href="#cb29-315" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Strikes series: time plot, ACF and PACF."</span></span>
+<span id="cb29-316"><a href="#cb29-316" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb29-317"><a href="#cb29-317" aria-hidden="true" tabindex="-1"></a><span class="fu">ggtsdisplay</span>(strikes, <span class="at">main =</span> <span class="st">"Number of strikes"</span>, <span class="at">xlab =</span> <span class="st">"Year"</span>)</span>
+<span id="cb29-318"><a href="#cb29-318" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-319"><a href="#cb29-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-320"><a href="#cb29-320" aria-hidden="true" tabindex="-1"></a><span class="fu">## First differences</span></span>
+<span id="cb29-321"><a href="#cb29-321" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-324"><a href="#cb29-324" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-325"><a href="#cb29-325" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-strikes-diff</span></span>
+<span id="cb29-326"><a href="#cb29-326" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "First differences of the strikes series: time plot, ACF and PACF."</span></span>
+<span id="cb29-327"><a href="#cb29-327" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb29-328"><a href="#cb29-328" aria-hidden="true" tabindex="-1"></a><span class="fu">ggtsdisplay</span>(<span class="fu">diff</span>(strikes), <span class="at">main =</span> <span class="st">"Differenced number of strikes"</span>, <span class="at">xlab =</span> <span class="st">"Year"</span>)</span>
+<span id="cb29-329"><a href="#cb29-329" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-330"><a href="#cb29-330" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-331"><a href="#cb29-331" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-332"><a href="#cb29-332" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The original series (@fig-strikes-display) wanders: it falls from about 5 000 in the early 1950s to about 3 400 in the early 1960s, then rises to around 6 000 in the 1970s, without reverting to a fixed mean. The ACF decays slowly (<span class="in">`r round(acf(strikes, plot = FALSE)$acf[2], 2)`</span> at lag 1 and still positive for several lags), and the PACF has one large spike at lag 1. The series is non-stationary, so it should be **differenced once** ($d = 1$).</span>
+<span id="cb29-333"><a href="#cb29-333" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The differenced series (@fig-strikes-diff) fluctuates around a constant mean of about zero with roughly constant variance, so it appears stationary. Its ACF has a single negative spike at lag 1 (<span class="in">`r round(acf(diff(strikes), plot = FALSE)$acf[2], 2)`</span>, close to the $\pm 2/\sqrt{n} \approx \pm <span class="in">`r round(2/sqrt(length(diff(strikes))), 2)`</span>$ bound) and is negligible thereafter (the ACF "cuts off" after lag 1), while the PACF decays. This is the signature of an **MA(1)** process for the differences ($q = 1$, $p = 0$).</span>
+<span id="cb29-334"><a href="#cb29-334" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-335"><a href="#cb29-335" aria-hidden="true" tabindex="-1"></a>Hence ARIMA(0,1,1) is appropriate. (No constant is included since the differences have mean approximately zero, so there is no persistent trend in the series.)</span>
+<span id="cb29-336"><a href="#cb29-336" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-337"><a href="#cb29-337" aria-hidden="true" tabindex="-1"></a><span class="fu">### (b) Backshift operator form (2)</span></span>
+<span id="cb29-338"><a href="#cb29-338" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-339"><a href="#cb29-339" aria-hidden="true" tabindex="-1"></a>With $B Y_t = Y_{t-1}$, the ARIMA(0,1,1) model is</span>
+<span id="cb29-340"><a href="#cb29-340" aria-hidden="true" tabindex="-1"></a>$$(1 - B)\,Y_t = (1 + \theta_1 B)\, e_t \quad\Longleftrightarrow\quad Y_t = Y_{t-1} + e_t + \theta_1 e_{t-1},$$</span>
+<span id="cb29-341"><a href="#cb29-341" aria-hidden="true" tabindex="-1"></a>where $e_t$ is white noise.</span>
+<span id="cb29-342"><a href="#cb29-342" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-343"><a href="#cb29-343" aria-hidden="true" tabindex="-1"></a>::: {.callout-tip}</span>
+<span id="cb29-344"><a href="#cb29-344" aria-hidden="true" tabindex="-1"></a>R uses the "$+\theta$" sign convention; some textbooks write $(1 - \theta_1 B)e_t$, in which case the sign of the estimate is reversed.</span>
+<span id="cb29-345"><a href="#cb29-345" aria-hidden="true" tabindex="-1"></a>:::</span>
+<span id="cb29-346"><a href="#cb29-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-347"><a href="#cb29-347" aria-hidden="true" tabindex="-1"></a><span class="fu">### (c) Fit the model and examine the residuals (5)</span></span>
+<span id="cb29-348"><a href="#cb29-348" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-351"><a href="#cb29-351" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-352"><a href="#cb29-352" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: strikes-fit</span></span>
+<span id="cb29-353"><a href="#cb29-353" aria-hidden="true" tabindex="-1"></a>fit_strikes <span class="ot">&lt;-</span> <span class="fu">Arima</span>(strikes, <span class="at">order =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb29-354"><a href="#cb29-354" aria-hidden="true" tabindex="-1"></a>fit_strikes</span>
+<span id="cb29-355"><a href="#cb29-355" aria-hidden="true" tabindex="-1"></a>theta <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_strikes)[<span class="st">"ma1"</span>]</span>
+<span id="cb29-356"><a href="#cb29-356" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-357"><a href="#cb29-357" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-358"><a href="#cb29-358" aria-hidden="true" tabindex="-1"></a>The fitted model is</span>
+<span id="cb29-359"><a href="#cb29-359" aria-hidden="true" tabindex="-1"></a>$$(1 - B)\,Y_t = (1 <span class="in">`r round(theta, 4)`</span>\,B)\,e_t, \qquad \hat\sigma^2 = <span class="in">`r format(round(fit_strikes$sigma2), big.mark = " ")`</span>.$$</span>
+<span id="cb29-360"><a href="#cb29-360" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-363"><a href="#cb29-363" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-364"><a href="#cb29-364" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-strikes-resid</span></span>
+<span id="cb29-365"><a href="#cb29-365" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Residual diagnostics for the ARIMA(0,1,1) model."</span></span>
+<span id="cb29-366"><a href="#cb29-366" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4.2</span></span>
+<span id="cb29-367"><a href="#cb29-367" aria-hidden="true" tabindex="-1"></a>lb <span class="ot">&lt;-</span> <span class="fu">checkresiduals</span>(fit_strikes, <span class="at">lag =</span> <span class="dv">10</span>)</span>
+<span id="cb29-368"><a href="#cb29-368" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-369"><a href="#cb29-369" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-370"><a href="#cb29-370" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **time plot** of residuals shows no pattern and fluctuates around zero with roughly constant variance.</span>
+<span id="cb29-371"><a href="#cb29-371" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>All residual **autocorrelations** lie within the significance bounds, so no autocorrelation remains.</span>
+<span id="cb29-372"><a href="#cb29-372" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **histogram** is roughly symmetric and consistent with normality (given only 29 residuals).</span>
+<span id="cb29-373"><a href="#cb29-373" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span>The **Ljung–Box test** gives $Q^* = <span class="in">`r round(lb$statistic, 3)`</span>$ on <span class="in">`r lb$parameter`</span> df, p-value $= <span class="in">`r round(lb$p.value, 3)`</span>$, so we do not reject the null hypothesis that the residuals are white noise.</span>
+<span id="cb29-374"><a href="#cb29-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-375"><a href="#cb29-375" aria-hidden="true" tabindex="-1"></a>The model is therefore **satisfactory**: the residuals behave like white noise, so the model has captured the structure in the data (@fig-strikes-resid).</span>
+<span id="cb29-376"><a href="#cb29-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-377"><a href="#cb29-377" aria-hidden="true" tabindex="-1"></a><span class="fu">### (d) Forecasts three steps ahead by hand (4)</span></span>
+<span id="cb29-378"><a href="#cb29-378" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-379"><a href="#cb29-379" aria-hidden="true" tabindex="-1"></a>From $Y_t = Y_{t-1} + e_t + \theta_1 e_{t-1}$, the forecasts made at origin $n = 1980$ are</span>
+<span id="cb29-380"><a href="#cb29-380" aria-hidden="true" tabindex="-1"></a>$$\hat{Y}_{n+1} = Y_n + \hat\theta_1\, e_n, \qquad \hat{Y}_{n+h} = \hat{Y}_{n+h-1} \;\;(h \ge 2),$$</span>
+<span id="cb29-381"><a href="#cb29-381" aria-hidden="true" tabindex="-1"></a>because future errors have expectation zero. So all three forecasts are equal.</span>
+<span id="cb29-382"><a href="#cb29-382" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-385"><a href="#cb29-385" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-386"><a href="#cb29-386" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: strikes-hand</span></span>
+<span id="cb29-387"><a href="#cb29-387" aria-hidden="true" tabindex="-1"></a>y_n <span class="ot">&lt;-</span> <span class="fu">tail</span>(strikes, <span class="dv">1</span>)</span>
+<span id="cb29-388"><a href="#cb29-388" aria-hidden="true" tabindex="-1"></a>e_n <span class="ot">&lt;-</span> <span class="fu">tail</span>(<span class="fu">residuals</span>(fit_strikes), <span class="dv">1</span>)</span>
+<span id="cb29-389"><a href="#cb29-389" aria-hidden="true" tabindex="-1"></a>f1 <span class="ot">&lt;-</span> y_n <span class="sc">+</span> theta <span class="sc">*</span> e_n</span>
+<span id="cb29-390"><a href="#cb29-390" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-391"><a href="#cb29-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-392"><a href="#cb29-392" aria-hidden="true" tabindex="-1"></a>With $Y_{1980} = <span class="in">`r y_n`</span>$, the last residual $e_{1980} = <span class="in">`r round(e_n, 2)`</span>$, and $\hat\theta_1 = <span class="in">`r round(theta, 4)`</span>$:</span>
+<span id="cb29-393"><a href="#cb29-393" aria-hidden="true" tabindex="-1"></a>$$\hat{Y}_{1981} = <span class="in">`r y_n`</span> + (<span class="in">`r round(theta, 4)`</span>)(<span class="in">`r round(e_n, 2)`</span>) = <span class="in">`r round(f1, 2)`</span>,$$</span>
+<span id="cb29-394"><a href="#cb29-394" aria-hidden="true" tabindex="-1"></a>$$\hat{Y}_{1982} = \hat{Y}_{1983} = <span class="in">`r round(f1, 2)`</span>.$$</span>
+<span id="cb29-395"><a href="#cb29-395" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-396"><a href="#cb29-396" aria-hidden="true" tabindex="-1"></a>Checking with R:</span>
+<span id="cb29-397"><a href="#cb29-397" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-400"><a href="#cb29-400" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-401"><a href="#cb29-401" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: strikes-fc</span></span>
+<span id="cb29-402"><a href="#cb29-402" aria-hidden="true" tabindex="-1"></a>fc_strikes <span class="ot">&lt;-</span> <span class="fu">forecast</span>(fit_strikes, <span class="at">h =</span> <span class="dv">3</span>)</span>
+<span id="cb29-403"><a href="#cb29-403" aria-hidden="true" tabindex="-1"></a>fc_strikes</span>
+<span id="cb29-404"><a href="#cb29-404" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-405"><a href="#cb29-405" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-406"><a href="#cb29-406" aria-hidden="true" tabindex="-1"></a>The R forecasts (<span class="in">`r round(fc_strikes$mean[1], 2)`</span> for each of 1981–1983) agree with the hand calculation.</span>
+<span id="cb29-407"><a href="#cb29-407" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-408"><a href="#cb29-408" aria-hidden="true" tabindex="-1"></a><span class="fu">### (e) Plot with forecasts and prediction intervals (2)</span></span>
+<span id="cb29-409"><a href="#cb29-409" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-412"><a href="#cb29-412" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-413"><a href="#cb29-413" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-strikes-fc</span></span>
+<span id="cb29-414"><a href="#cb29-414" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Strikes series with ARIMA(0,1,1) forecasts for 1981–1983 and 80%/95% prediction intervals."</span></span>
+<span id="cb29-415"><a href="#cb29-415" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fc_strikes) <span class="sc">+</span> <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Year"</span>, <span class="at">y =</span> <span class="st">"Number of strikes"</span>)</span>
+<span id="cb29-416"><a href="#cb29-416" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-417"><a href="#cb29-417" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-418"><a href="#cb29-418" aria-hidden="true" tabindex="-1"></a>The prediction intervals widen with the forecast horizon (@fig-strikes-fc), since for a non-stationary (integrated) model the forecast-error variance keeps growing: $\text{Var} = \sigma^2<span class="co">[</span><span class="ot">1 + (h-1)(1+\theta_1)^2</span><span class="co">]</span>$.</span>
+<span id="cb29-419"><a href="#cb29-419" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-420"><a href="#cb29-420" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 8: Bituminous coal production (10)</span></span>
+<span id="cb29-421"><a href="#cb29-421" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-422"><a href="#cb29-422" aria-hidden="true" tabindex="-1"></a><span class="fu">### (a) What sort of ARIMA model? (3)</span></span>
+<span id="cb29-423"><a href="#cb29-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-424"><a href="#cb29-424" aria-hidden="true" tabindex="-1"></a>The model $Y_t = c + \phi_1 Y_{t-1} + \phi_2 Y_{t-2} + \phi_3 Y_{t-3} + \phi_4 Y_{t-4} + e_t$ is an autoregressive model of order 4 on the undifferenced series with no moving-average terms: an **ARIMA(4,0,0)**, i.e. AR(4), with $p = 4$, $d = 0$, $q = 0$.</span>
+<span id="cb29-425"><a href="#cb29-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-426"><a href="#cb29-426" aria-hidden="true" tabindex="-1"></a><span class="fu">### (b) Why was this model chosen? (1)</span></span>
+<span id="cb29-427"><a href="#cb29-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-428"><a href="#cb29-428" aria-hidden="true" tabindex="-1"></a>The time plot fluctuates around a fairly constant mean (roughly 300–630 million tons, no persistent trend) and the ACF dies down quickly, so the series appears stationary and **no differencing** is needed ($d=0$). The ACF decays in a damped, sine-wave-like fashion (typical of an AR process), while the **PACF has significant spikes at lags 1 and 4 and cuts off after lag 4**, which identifies an AR(4) model.</span>
+<span id="cb29-429"><a href="#cb29-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-430"><a href="#cb29-430" aria-hidden="true" tabindex="-1"></a><span class="fu">### (c) Forecasts for 1969–1971 (6)</span></span>
+<span id="cb29-431"><a href="#cb29-431" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-434"><a href="#cb29-434" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-435"><a href="#cb29-435" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: coal-fc</span></span>
+<span id="cb29-436"><a href="#cb29-436" aria-hidden="true" tabindex="-1"></a>c0  <span class="ot">&lt;-</span> <span class="fl">146.1</span></span>
+<span id="cb29-437"><a href="#cb29-437" aria-hidden="true" tabindex="-1"></a>phi <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.891</span>, <span class="sc">-</span><span class="fl">0.257</span>, <span class="fl">0.392</span>, <span class="sc">-</span><span class="fl">0.333</span>)</span>
+<span id="cb29-438"><a href="#cb29-438" aria-hidden="true" tabindex="-1"></a>coal <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">`</span><span class="at">1964</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">467</span>, <span class="st">`</span><span class="at">1965</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">512</span>, <span class="st">`</span><span class="at">1966</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">534</span>, <span class="st">`</span><span class="at">1967</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">552</span>, <span class="st">`</span><span class="at">1968</span><span class="st">`</span> <span class="ot">=</span> <span class="dv">545</span>)</span>
+<span id="cb29-439"><a href="#cb29-439" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-440"><a href="#cb29-440" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> coal</span>
+<span id="cb29-441"><a href="#cb29-441" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (h <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>) {</span>
+<span id="cb29-442"><a href="#cb29-442" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(Y)</span>
+<span id="cb29-443"><a href="#cb29-443" aria-hidden="true" tabindex="-1"></a>  Y <span class="ot">&lt;-</span> <span class="fu">c</span>(Y, c0 <span class="sc">+</span> <span class="fu">sum</span>(phi <span class="sc">*</span> Y[n<span class="sc">:</span>(n <span class="sc">-</span> <span class="dv">3</span>)]))   <span class="co"># uses Y_{t-1}, ..., Y_{t-4}</span></span>
+<span id="cb29-444"><a href="#cb29-444" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb29-445"><a href="#cb29-445" aria-hidden="true" tabindex="-1"></a>coal_fc <span class="ot">&lt;-</span> <span class="fu">tail</span>(Y, <span class="dv">3</span>)</span>
+<span id="cb29-446"><a href="#cb29-446" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-447"><a href="#cb29-447" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-448"><a href="#cb29-448" aria-hidden="true" tabindex="-1"></a>Future errors are set to zero and forecasts are substituted for unknown future values:</span>
+<span id="cb29-449"><a href="#cb29-449" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-450"><a href="#cb29-450" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb29-451"><a href="#cb29-451" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb29-452"><a href="#cb29-452" aria-hidden="true" tabindex="-1"></a>\hat{Y}_{1969} &amp;= 146.1 + 0.891(545) - 0.257(552) + 0.392(534) - 0.333(512) = <span class="in">`r sprintf("%.2f", coal_fc[1])`</span> <span class="sc">\\</span></span>
+<span id="cb29-453"><a href="#cb29-453" aria-hidden="true" tabindex="-1"></a>\hat{Y}_{1970} &amp;= 146.1 + 0.891(<span class="in">`r sprintf("%.2f", coal_fc[1])`</span>) - 0.257(545) + 0.392(552) - 0.333(534) = <span class="in">`r sprintf("%.2f", coal_fc[2])`</span> <span class="sc">\\</span></span>
+<span id="cb29-454"><a href="#cb29-454" aria-hidden="true" tabindex="-1"></a>\hat{Y}_{1971} &amp;= 146.1 + 0.891(<span class="in">`r sprintf("%.2f", coal_fc[2])`</span>) - 0.257(<span class="in">`r sprintf("%.2f", coal_fc[1])`</span>) + 0.392(545) - 0.333(552) = <span class="in">`r sprintf("%.2f", coal_fc[3])`</span></span>
+<span id="cb29-455"><a href="#cb29-455" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb29-456"><a href="#cb29-456" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb29-457"><a href="#cb29-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-460"><a href="#cb29-460" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb29-461"><a href="#cb29-461" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: tbl-coal</span></span>
+<span id="cb29-462"><a href="#cb29-462" aria-hidden="true" tabindex="-1"></a><span class="co">#| tbl-cap: "AR(4) forecasts of bituminous coal production."</span></span>
+<span id="cb29-463"><a href="#cb29-463" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">data.frame</span>(<span class="at">Year =</span> <span class="dv">1969</span><span class="sc">:</span><span class="dv">1971</span>, <span class="st">`</span><span class="at">Forecast (million tons)</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">round</span>(coal_fc, <span class="dv">2</span>),</span>
+<span id="cb29-464"><a href="#cb29-464" aria-hidden="true" tabindex="-1"></a>                 <span class="at">check.names =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb29-465"><a href="#cb29-465" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb29-466"><a href="#cb29-466" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-467"><a href="#cb29-467" aria-hidden="true" tabindex="-1"></a>The forecasts decline gradually from the 1968 level, moving back towards the long-run mean of the series, $\mu = c/(1 - \sum\phi_i) = <span class="in">`r round(c0 / (1 - sum(phi)), 1)`</span>$ million tons, as expected for a stationary AR model (@tbl-coal).</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
