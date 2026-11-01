@@ -21,7 +21,7 @@ execute:
 ::: {.callout-note collapse="true"}
 ## Data and setup
 
-All data come from `TSA_Part1_DataSets.xlsx` (course data sets), which must sit in the same folder as this page. Sheets are read by position because the "souvenir" sheet name has a trailing space. Code is folded by default; click **Show code** to expand any chunk.
+All data come from `TSA_Part1_DataSets.xlsx` (course data sets), stored in the repository's `data/` folder. Sheets are read by position because the "souvenir" sheet name has a trailing space. Code is folded by default; click **Show code** to expand any chunk.
 :::
 
 ```{r}
@@ -33,7 +33,7 @@ library(ggplot2)
 library(knitr)
 theme_set(theme_minimal(base_size = 11))
 
-data_file <- "TSA_Part1_DataSets.xlsx"
+data_file <- here::here("data", "TSA_Part1_DataSets.xlsx")
 ```
 
 ## Question 1: The forecasting process (15)
