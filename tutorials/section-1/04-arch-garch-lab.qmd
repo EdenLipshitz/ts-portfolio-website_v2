@@ -1,35 +1,400 @@
 ---
 title: "ARCH and GARCH Lab"
 subtitle: "Section 1: Time series foundations, ARIMA and volatility models"
+execute:
+  warning: false
+  message: false
 ---
 
 ::: {.callout-note appearance="simple"}
 **Topics covered:** Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH and GARCH models, volatility forecasting.
+
+**Data:** `Tbrate` (quarterly US 91-day T-bill rate, 1950–1996) and `SP500` (daily S&P 500 returns), both from the `Ecdat` package on CRAN. **Packages:** `Ecdat`, `fGarch`, `tseries`, `knitr`.
 :::
+
+```{r}
+#| label: setup
+library(Ecdat)
+library(tseries)
+library(fGarch)
+library(knitr)
+
+# Helpers used throughout
+lb  <- function(x, lag = 10, fitdf = 0) Box.test(x, lag = lag, type = "Ljung-Box", fitdf = fitdf)$p.value
+aic <- function(fit) unname(fit@fit$ics["AIC"]) * length(fit@data)  # fGarch reports AIC / n
+bic <- function(fit) unname(fit@fit$ics["BIC"]) * length(fit@data)
+f2  <- function(x, d = 2) formatC(x, format = "f", digits = d)
+fp  <- function(p) ifelse(p < 0.001, "< 0.001", formatC(p, format = "f", digits = 3))
+```
 
 ## Overview of the key concepts
 
-*Summarise the main ideas of this session in your own words.*
+Financial and interest-rate series share a few **stylised facts**: the series itself (or its changes) shows little autocorrelation, but its *squares* or absolute values are strongly autocorrelated. This is **volatility clustering**: large moves follow large moves and calm follows calm. Returns are also heavier-tailed than a normal distribution.
+
+An ARMA model only describes the conditional *mean*, and assumes a constant variance. ARCH and GARCH models add an equation for the conditional *variance*:
+
+$$
+\varepsilon_t = \sigma_t z_t, \qquad z_t \overset{iid}{\sim} (0,1)
+$$
+
+- **ARCH(1):** $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2$. Today's variance depends on yesterday's squared shock.
+- **GARCH(1,1):** $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2 + \beta_1 \sigma_{t-1}^2$. Adding the lagged variance gives long memory in volatility with only one extra parameter. Persistence is measured by $\alpha_1 + \beta_1$; the variance is covariance-stationary only if this is below 1.
+
+In practice the two are combined: an ARMA model for the mean with GARCH errors, estimated jointly by maximum likelihood. The conditional distribution of $z_t$ can be normal or a standardised $t$ to allow fat tails.
+
+**Diagnostics** work on two kinds of residuals. The *raw* residuals $\hat\varepsilon_t$ still contain the changing variance, so the ACF of $\hat\varepsilon_t^2$ shows whether ARCH effects are present. The *standardised* residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should be white noise with no remaining structure in their squares if the model is adequate. Ljung-Box tests on $\hat z_t$ and $\hat z_t^2$ formalise this.
+
+A fitted GARCH model gives a **conditional forecast distribution** for the next observation, which lets us compute probabilities of extreme moves given yesterday's information. This is the basis of Value-at-Risk.
 
 ## Worked exercises
 
-*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*
+### Part A: Fitting GARCH models to the T-bill rate
+
+```{r}
+#| label: load-tbill
+data(Tbrate, package = "Ecdat")
+# r = the 91-day treasury bill rate, y = log of real GDP, pi = inflation rate
+Tbill     <- Tbrate[, 1]
+Del.Tbill <- diff(Tbill)
+```
+
+#### Problem 1: Stationarity and heteroskedasticity
+
+```{r}
+#| label: fig-tbill-plots
+#| fig-cap: "T-bill rate (top) and its first difference (bottom): time series plots and ACFs."
+#| fig-height: 6
+#| fig-width: 9
+par(mfrow = c(2, 2))
+plot(Tbill, main = "Tbill", ylab = "Rate (%)")
+acf(Tbill, main = "ACF of Tbill")
+plot(Del.Tbill, main = "Del.Tbill", ylab = "Change (% points)")
+acf(Del.Tbill, main = "ACF of Del.Tbill")
+```
+
+```{r}
+#| label: tbl-unit-root
+#| tbl-cap: "ADF (H0: unit root) and KPSS (H0: level stationary) tests."
+ur <- function(x) {
+  a <- adf.test(x); k <- kpss.test(x)
+  c(ADF = unname(a$statistic), `ADF p` = a$p.value,
+    KPSS = unname(k$statistic), `KPSS p` = k$p.value)
+}
+ur_tab <- rbind(Tbill = ur(Tbill), Del.Tbill = ur(Del.Tbill))
+kable(ur_tab, digits = 3)
+```
+
+`tseries` interpolates p-values from a table, so it truncates them at 0.01 and 0.10. A reported 0.01 means "at most 0.01" and 0.10 means "at least 0.10".
+
+**Which series is stationary?** Tbill is **not** stationary. The ADF test does not reject a unit root (p = `r f2(ur_tab["Tbill", "ADF p"], 3)`), KPSS rejects stationarity (p ≤ 0.01), and the ACF decays very slowly (lag-1 autocorrelation `r f2(acf(Tbill, plot = FALSE)$acf[2])`). The plot wanders with no fixed level: rates climb from under 1% in 1950 to around 15% in 1981 and then fall.
+
+Del.Tbill **is** stationary in the mean. Both tests agree: ADF rejects the unit root (p ≤ 0.01) and KPSS does not reject stationarity (p ≥ 0.10). The ACF has one clear spike at lag 1 (`r f2(acf(Del.Tbill, plot = FALSE)$acf[2])`) and then cuts off, which points to an AR(1) or MA(1) mean. The tests and the ACF only address the mean, though: the variance of Del.Tbill is clearly not constant.
+
+```{r}
+#| label: tbl-sd-by-period
+#| tbl-cap: "Standard deviation of Del.Tbill by period."
+periods <- cut(time(Del.Tbill), c(1950, 1960, 1970, 1979, 1983, 1990, 1998),
+               labels = c("1950s", "1960s", "1970s", "1979–83", "1983–90", "1990s"))
+sd_tab <- tapply(Del.Tbill, periods, sd)
+kable(t(sd_tab), digits = 2)
+lev_cor <- cor(abs(Del.Tbill), Tbill[-length(Tbill)])
+```
+
+**Types of heteroskedasticity.** Two kinds are visible:
+
+1. **Volatility clustering (conditional heteroskedasticity).** Big changes come in bursts. The ACF of the squared changes is strongly significant (Ljung-Box p `r fp(lb(Del.Tbill^2))`), so a GARCH-type model is justified.
+2. **Level-dependent volatility.** The size of the changes grows with the level of the rate. The correlation between |Del.Tbill| and the previous quarter's rate is `r f2(lev_cor)`. The 1979–83 period, when the Federal Reserve targeted money growth and rates were at their peak, has a standard deviation of `r f2(sd_tab["1979–83"])`, roughly `r round(sd_tab["1979–83"] / sd_tab["1950s"])` times the 1950s value. GARCH only lets variance depend on past shocks, not on the level, which matters in Problem 4.
+
+Because Tbill is non-stationary, the model below is fitted to **Del.Tbill**.
+
+```{r}
+#| label: fit-arch1-tbill
+garch.model.Tbill <- garchFit(formula = ~ arma(1, 0) + garch(1, 0),
+                              data = Del.Tbill, trace = FALSE)
+garch.model.Tbill@fit$matcoef
+```
+
+#### Problem 2: The fitted model
+
+```{r}
+#| label: arch1-coefs
+cf <- coef(garch.model.Tbill)
+se <- garch.model.Tbill@fit$se.coef
+```
+
+**(a) Model.** `arma(1,0) + garch(1,0)` is an **AR(1) mean with ARCH(1) errors**. In the notation of the R output, with $Y_t$ = Del.Tbill:
+
+$$
+\begin{aligned}
+Y_t &= \mu + \text{ar1}\, Y_{t-1} + \varepsilon_t, \\
+\varepsilon_t &= \sigma_t z_t, \qquad z_t \overset{iid}{\sim} N(0,1), \\
+\sigma_t^2 &= \omega + \text{alpha1}\, \varepsilon_{t-1}^2 .
+\end{aligned}
+$$
+
+In `fGarch`, $\mu$ is the **intercept** of the AR equation, not the mean of the series. The implied mean is $\mu / (1 - \text{ar1})$ = `r f2(cf["mu"] / (1 - cf["ar1"]), 3)`. I only realised this when my own likelihood (see the implementation section) gave a different "$\mu$" with the same likelihood.
+
+**(b) Estimates.**
+
+| Parameter | Estimate | Std. error | Interpretation |
+|---|---|---|---|
+| mu | `r f2(cf["mu"], 4)` | `r f2(se[1], 4)` | Not significant: no drift in the rate changes |
+| ar1 | `r f2(cf["ar1"], 4)` | `r f2(se[2], 4)` | Moderate positive persistence in quarterly changes |
+| omega | `r f2(cf["omega"], 4)` | `r f2(se[3], 4)` | Baseline variance |
+| alpha1 | `r f2(cf["alpha1"], 4)` | `r f2(se[4], 4)` | A large shock strongly raises next quarter's variance |
+
+The unconditional variance is $\omega / (1 - \alpha_1)$ = `r f2(cf["omega"] / (1 - cf["alpha1"]))`. Since $3\alpha_1^2$ = `r f2(3 * cf["alpha1"]^2)` exceeds 1, this ARCH(1) implies an infinite fourth moment, i.e. very heavy unconditional tails.
+
+```{r}
+#| label: fig-arch1-resid
+#| fig-cap: "Raw residuals (top row) and standardised residuals (bottom row) from the AR(1)/ARCH(1) model for Del.Tbill."
+#| fig-height: 6
+#| fig-width: 10
+res     <- residuals(garch.model.Tbill)
+res_std <- res / garch.model.Tbill@sigma.t
+
+par(mfrow = c(2, 3))
+plot(res, type = "l", main = "res")
+acf(res, main = "acf(res)")
+acf(res^2, main = "acf(res^2)")
+plot(res_std, type = "l", main = "res_std")
+acf(res_std, main = "acf(res_std)")
+acf(res_std^2, main = "acf(res_std^2)")
+```
+
+#### Problem 3: Residual diagnostics
+
+```{r}
+#| label: tbl-lb-arch1
+#| tbl-cap: "Ljung-Box p-values (lag 10) for the AR(1)/ARCH(1) residuals."
+lb_tab <- data.frame(
+  Series = c("res", "res^2", "res_std", "res_std^2"),
+  `Lag-1 ACF` = sapply(list(res, res^2, res_std, res_std^2), function(x) acf(x, plot = FALSE)$acf[2]),
+  `LB p (lag 10)` = sapply(list(res, res^2, res_std, res_std^2), lb),
+  check.names = FALSE)
+kable(lb_tab, digits = 3)
+big <- which(abs(res_std) > 3)
+```
+
+**(a) `acf(res)`** plots the sample autocorrelations of the raw residuals $\hat\varepsilon_t = Y_t - \hat\mu - \widehat{\text{ar1}}\, Y_{t-1}$. It checks the **mean equation**. Almost all lags lie within the bounds; lag 2 is borderline (`r f2(acf(res, plot = FALSE)$acf[3])`) and the Ljung-Box p-value is `r fp(lb(res))`. The AR(1) mean is adequate, though only just at the 10% level.
+
+**(b) `acf(res^2)`** plots the autocorrelations of the squared raw residuals. These are still strongly autocorrelated (lag 4 is `r f2(acf(res^2, plot = FALSE)$acf[5])`; Ljung-Box p `r fp(lb(res^2))`). This is **not a sign of poor fit**. The raw residuals are $\sigma_t z_t$, so they still carry the time-varying variance by construction. The plot tells us that GARCH effects are present in the series, which is the reason for modelling the variance.
+
+**(c) `acf(res_std^2)`** plots the autocorrelations of the squared standardised residuals $\hat z_t^2 = (\hat\varepsilon_t / \hat\sigma_t)^2$. If the variance equation has captured the clustering, these should be white noise. They nearly are: the largest spike is lag 4 (`r f2(acf(res_std^2, plot = FALSE)$acf[5])`) and the Ljung-Box p-value is `r fp(lb(res_std^2))`. ARCH(1) removes most of the volatility clustering. The lag-4 spike in quarterly data hints at more persistence than one lag of ARCH can capture.
+
+**(d) `garch.model.Tbill@sigma.t`** holds the **fitted conditional standard deviations** $\hat\sigma_t = \sqrt{\hat\omega + \hat\alpha_1 \hat\varepsilon_{t-1}^2}$, one per quarter. They range from `r f2(min(garch.model.Tbill@sigma.t))` to `r f2(max(garch.model.Tbill@sigma.t))`. Dividing the residuals by them gives the standardised residuals.
+
+**(e) `plot(res_std)`.** Compared with the raw residuals, the bursts of large values around 1980 have been flattened, so standardising has done its job. Two things stand out:
+
+- A few large standardised residuals remain (`r paste0(floor(time(Del.Tbill)[big]), " Q", cycle(Del.Tbill)[big], " (", f2(res_std[big]), ")", collapse = ", ")`). They happen in calm periods, where ARCH(1) predicted a small $\sigma_t$ because the previous shock was small. A moderate move then looks extreme. ARCH(1) forgets too quickly.
+- The tails are heavier than normal (kurtosis `r f2(mean((res_std - mean(res_std))^4) / var(res_std)^2)`, Shapiro-Wilk p `r fp(shapiro.test(res_std)$p.value)`). A $t$ conditional distribution would be more realistic.
+
+```{r}
+#| label: fit-garch11-tbill
+garch11.Tbill <- garchFit(~ arma(1, 0) + garch(1, 1), data = Del.Tbill, trace = FALSE)
+g11 <- coef(garch11.Tbill)
+```
+
+As a check I also fitted an AR(1)/GARCH(1,1). It is clearly better by AIC (`r f2(aic(garch11.Tbill), 1)` vs `r f2(aic(garch.model.Tbill), 1)`), but $\hat\alpha_1 + \hat\beta_1$ = `r f2(g11["alpha1"] + g11["beta1"])` > 1, so the implied variance is explosive. That is the level effect from Problem 1 showing through: as rates rose, the variance kept rising, and a GARCH model can only express this as non-stationary volatility.
+
+#### Problem 4: Differences of log rates
+
+```{r}
+#| label: fig-dlog-tbill
+#| fig-cap: "Differences of log T-bill rates: series and ACF of the squares."
+#| fig-height: 3.5
+#| fig-width: 9
+del.log.tbill <- diff(log(Tbill))
+par(mfrow = c(1, 2))
+plot(del.log.tbill, main = "diff(log(Tbill))", ylab = "Log change")
+acf(del.log.tbill^2, main = "ACF of squared log changes")
+sd_log <- tapply(del.log.tbill, periods, sd)
+```
+
+The log changes are stationary (ADF p ≤ 0.01; KPSS p = `r f2(kpss.test(del.log.tbill)$p.value, 3)`, not rejected at 5%). The level effect has largely gone: the correlation of |change| with the lagged level falls from `r f2(lev_cor)` to `r f2(cor(abs(del.log.tbill), Tbill[-length(Tbill)]))`, and the 1979–83 standard deviation (`r f2(sd_log["1979–83"])`) is now in line with other decades (`r f2(min(sd_log))`–`r f2(max(sd_log))`). Volatility clustering remains (Ljung-Box on squares p `r fp(lb(del.log.tbill^2))`), so a GARCH model is still needed.
+
+```{r}
+#| label: tbl-dlog-models
+#| tbl-cap: "Candidate ARMA/GARCH models for diff(log(Tbill)). Ljung-Box p-values at lag 10 on standardised residuals (z) and their squares (z²)."
+specs <- list(
+  "AR(1)/ARCH(1), normal"   = list(f = ~ arma(1, 0) + garch(1, 0), d = "norm"),
+  "GARCH(1,1), normal"      = list(f = ~ arma(0, 0) + garch(1, 1), d = "norm"),
+  "AR(1)/GARCH(1,1), normal" = list(f = ~ arma(1, 0) + garch(1, 1), d = "norm"),
+  "AR(1)/GARCH(1,1), t"     = list(f = ~ arma(1, 0) + garch(1, 1), d = "std"))
+dlog_fits <- lapply(specs, function(s) garchFit(s$f, data = del.log.tbill, cond.dist = s$d, trace = FALSE))
+dlog_tab <- t(sapply(dlog_fits, function(g) {
+  z <- residuals(g, standardize = TRUE); cf <- coef(g)
+  c(AIC = aic(g), BIC = bic(g),
+    `alpha1 + beta1` = unname(cf["alpha1"] + ifelse(is.na(cf["beta1"]), 0, cf["beta1"])),
+    `LB p (z)` = lb(z), `LB p (z²)` = lb(z^2))
+}))
+kable(dlog_tab, digits = 3)
+best <- dlog_fits[["AR(1)/GARCH(1,1), t"]]
+```
+
+- Dropping the AR term leaves autocorrelation in the standardised residuals (p = `r fp(dlog_tab[2, "LB p (z)"])`), so the AR(1) mean is needed.
+- AR(1)/ARCH(1) leaves some clustering in the squares (p = `r fp(dlog_tab[1, "LB p (z²)"])`) and has a much worse AIC.
+- AR(1)/GARCH(1,1) passes both residual tests. Switching to a $t$ distribution lowers AIC further, and the estimated degrees of freedom (`r f2(coef(best)["shape"])`) confirm heavy tails.
+
+**Chosen model: AR(1)/GARCH(1,1) with $t$ errors.**
+
+```{r}
+#| label: best-dlog-coefs
+best@fit$matcoef
+```
+
+Persistence is $\hat\alpha_1 + \hat\beta_1$ = `r f2(coef(best)["alpha1"] + coef(best)["beta1"])`: high but below 1, unlike the explosive fit for Del.Tbill.
+
+**Advantages of log differences.**
+
+1. **They remove the level effect.** A log difference is approximately a percentage change. A 1-point move means much more at a 2% rate than at 15%. On the log scale changes are comparable across decades, so volatility depends mainly on past shocks, which is exactly what GARCH assumes.
+2. **Stationary variance.** The GARCH persistence drops below 1, so the model has a finite unconditional variance and forecasts revert to a long-run level.
+3. **Positivity.** Forecasts transformed back with exp() can never give a negative interest rate.
+
+The AIC values for the two responses cannot be compared, because they are on different scales. The comparison has to rest on the diagnostics and the stability of the fitted variance.
+
+### Part B: Black Monday (19 October 1987)
+
+```{r}
+#| label: fit-blackmonday
+data(SP500, package = "Ecdat")
+returnBlMon <- SP500$r500[1805]
+x <- SP500$r500[(1804 - 2 * 253 + 1):1804]
+results  <- garchFit(~ arma(1, 0) + garch(1, 1), data = x, cond.dist = "std", trace = FALSE)
+dfhat    <- as.numeric(results@fit$par[6])
+forecast <- predict(results, n.ahead = 1)
+results@fit$matcoef
+forecast
+```
+
+```{r}
+#| label: fig-blackmonday-returns
+#| fig-cap: "Daily S&P 500 returns for the two years before Black Monday, with Black Monday as the final point."
+#| fig-height: 3.5
+#| fig-width: 9
+plot(c(x, returnBlMon), type = "l", xlab = "Trading day", ylab = "Return")
+points(length(x) + 1, returnBlMon, col = "red", pch = 19)
+```
+
+**(a) Conditional probability.** `fGarch`'s `"std"` distribution is a $t$ rescaled to have variance 1, so the return has standard deviation equal to `standardDeviation`. To use the ordinary $t$ CDF, rescale by $\sqrt{(\nu - 2)/\nu}$:
+
+$$
+P(R \le -0.228 \mid \mathcal{F}_{t-1}) = F_{t_\nu}\!\left(\frac{-0.228 - \hat\mu_t}{\hat\sigma_t \sqrt{(\hat\nu - 2)/\hat\nu}}\right)
+$$
+
+```{r}
+#| label: blackmonday-prob
+mu_f <- forecast$meanForecast
+sd_f <- forecast$standardDeviation
+p_manual <- pt((returnBlMon - mu_f) / (sd_f * sqrt((dfhat - 2) / dfhat)), df = dfhat)
+p_fgarch <- pstd(returnBlMon, mean = mu_f, sd = sd_f, nu = dfhat)   # same thing via fGarch
+p_normal <- pnorm(returnBlMon, mean = mu_f, sd = sd_f)
+c(manual = p_manual, pstd = p_fgarch, normal = p_normal)
+```
+
+With $\hat\mu_t$ = `r f2(mu_f, 4)`, $\hat\sigma_t$ = `r f2(sd_f, 4)` and $\hat\nu$ = `r f2(dfhat)`, the conditional probability is **`r formatC(p_manual, format = "e", digits = 2)`**. That is about once every `r format(round(1 / p_manual / 253), big.mark = ",")` years of trading days. Black Monday was `r f2(abs((returnBlMon - mu_f) / sd_f), 1)` conditional standard deviations below the forecast mean.
+
+Two observations. First, the GARCH model had already raised the forecast volatility to `r f2(sd_f / sd(x), 1)` times the two-year sample standard deviation, because the preceding week (including a `r f2(100 * min(x), 1)`% fall on the Friday) was turbulent. Second, the heavy tails matter enormously: under a normal distribution with the same mean and standard deviation the probability would be `r formatC(p_normal, format = "e", digits = 1)`, i.e. effectively impossible.
+
+**(b) Standardised residuals.**
+
+```{r}
+#| label: fig-blackmonday-stdres
+#| fig-cap: "Standardised residuals from the AR(1)/GARCH(1,1)-t model and the ACFs of the residuals and their squares."
+#| fig-height: 3.5
+#| fig-width: 10
+z <- residuals(results, standardize = TRUE)
+par(mfrow = c(1, 3))
+plot(z, type = "l", main = "Standardised residuals", ylab = "z")
+acf(z, main = "ACF of z")
+acf(z^2, main = "ACF of z^2")
+```
+
+The standardised residuals look like homoskedastic noise, ranging from `r f2(min(z))` to `r f2(max(z))`. No ACF lags fall outside the bounds for either $z$ or $z^2$ (Ljung-Box p = `r fp(lb(z))` and `r fp(lb(z^2))`). **The AR(1)/GARCH(1,1) model fits the two years before Black Monday adequately.** A model that fits well in sample still gave Black Monday a tiny probability: good diagnostics do not protect against rare events outside the data's experience.
+
+**(c) AR(1)/ARCH(1).**
+
+```{r}
+#| label: fit-blackmonday-arch1
+arch1_bm <- garchFit(~ arma(1, 0) + garch(1, 0), data = x, cond.dist = "std", trace = FALSE)
+z_a <- residuals(arch1_bm, standardize = TRUE)
+arch1_bm@fit$matcoef
+```
+
+```{r}
+#| label: fit-blackmonday-ar1
+ar1_bm <- arima(x, order = c(1, 0, 0))
+r_ar   <- residuals(ar1_bm)
+ar1_bm
+```
+
+```{r}
+#| label: tbl-blackmonday-compare
+#| tbl-cap: "Model comparison for the two years before Black Monday. AIC and BIC are on the same scale (−2 log L + penalty); fGarch's values have been multiplied by n."
+bm_tab <- data.frame(
+  Model = c("AR(1)/GARCH(1,1), t", "AR(1)/ARCH(1), t", "AR(1), normal"),
+  AIC = c(aic(results), aic(arch1_bm), AIC(ar1_bm)),
+  BIC = c(bic(results), bic(arch1_bm), BIC(ar1_bm)),
+  `LB p (resid)` = c(lb(z), lb(z_a), lb(r_ar, fitdf = 1)),
+  `LB p (resid²)` = c(lb(z^2), lb(z_a^2), lb(r_ar^2)),
+  check.names = FALSE)
+kable(bm_tab, digits = 3)
+```
+
+By AIC the ARCH(1) model is essentially tied with GARCH(1,1) (difference `r f2(aic(arch1_bm) - aic(results))`), and BIC, which penalises the extra parameter more, slightly prefers ARCH(1). Its standardised residuals pass both Ljung-Box tests. So by the usual criteria **AR(1)/ARCH(1)-t is an adequate fit.** However, its $\hat\alpha_1$ (`r f2(coef(arch1_bm)["alpha1"], 3)`, p = `r fp(arch1_bm@fit$matcoef["alpha1", 4])`) is not significant. Most of the work is done by the heavy-tailed $t$ distribution rather than the variance equation. In the GARCH(1,1) fit $\hat\beta_1$ = `r f2(coef(results)["beta1"])` is highly significant, so volatility persistence is real; ARCH(1) simply cannot represent it. I would still prefer GARCH(1,1) for forecasting volatility, even though both pass the diagnostics.
+
+**(d) AR(1) with Gaussian errors.** The AR(1) model's AIC is `r f2(AIC(ar1_bm) - aic(results), 0)` points worse than GARCH. Its residuals are uncorrelated, and with this short calm window the Ljung-Box test on the squares (p = `r fp(lb(r_ar^2))`) does not detect clustering. But the normality assumption clearly fails: kurtosis `r f2(mean((r_ar - mean(r_ar))^4) / var(r_ar)^2)` and Jarque-Bera p `r fp(jarque.bera.test(r_ar)$p.value)`. **The Gaussian AR(1) is not adequate.** Under it, Black Monday's probability would be about `r formatC(pnorm(returnBlMon, predict(ar1_bm, 1)$pred, predict(ar1_bm, 1)$se), format = "e", digits = 0)`, which shows how badly a constant-variance normal model understates tail risk.
 
 ## Implementation in R
 
-*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*
+To understand what `garchFit` is doing, I wrote the AR(1)/ARCH(1) Gaussian log-likelihood myself and maximised it with `optim`, using the Del.Tbill data from Part A.
+
+For $t = 2, \dots, n$, with $\varepsilon_t = (Y_t - m) - \phi (Y_{t-1} - m)$ and $\sigma_t^2 = \omega + \alpha_1 \varepsilon_{t-1}^2$:
+
+$$
+\ell(m, \phi, \omega, \alpha_1) = -\frac{1}{2}\sum_t \left[\log(2\pi) + \log\sigma_t^2 + \frac{\varepsilon_t^2}{\sigma_t^2}\right].
+$$
+
+I parametrise with the **mean** $m$ (not the intercept), and optimise over $\log\omega$ and $\text{logit}(\alpha_1)$, so that $\omega > 0$ and $0 < \alpha_1 < 1$ hold automatically. The recursion starts with $\sigma_1^2$ equal to the sample variance.
 
 ```{r}
-#| eval: false
-# your code here
+#| label: own-arch1-mle
+arch1_nll <- function(theta, y) {
+  m <- theta[1]; phi <- theta[2]
+  omega <- exp(theta[3]); alpha <- plogis(theta[4])
+  n <- length(y)
+  e <- numeric(n)
+  e[1] <- y[1] - m
+  e[-1] <- (y[-1] - m) - phi * (y[-n] - m)
+  s2 <- numeric(n); s2[1] <- var(y)
+  for (t in 2:n) s2[t] <- omega + alpha * e[t - 1]^2
+  -sum(dnorm(e, 0, sqrt(s2), log = TRUE))
+}
+
+y <- as.numeric(Del.Tbill)
+own <- optim(c(mean(y), 0.2, log(var(y) / 2), 0), arch1_nll, y = y, method = "BFGS")
+own_est <- c(mean = own$par[1], ar1 = own$par[2],
+             omega = exp(own$par[3]), alpha1 = plogis(own$par[4]))
+
+fg <- coef(garch.model.Tbill)
+compare <- rbind(
+  "Own MLE" = c(own_est, `-logL` = own$value),
+  "fGarch"  = c(mean = unname(fg["mu"] / (1 - fg["ar1"])), fg[c("ar1", "omega", "alpha1")],
+                `-logL` = garch.model.Tbill@fit$llh))
+kable(compare, digits = 4)
 ```
+
+The two sets of estimates agree closely once `fGarch`'s intercept is converted to a mean. The small differences in $\alpha_1$ and the log-likelihood come from how the recursion is started: the first observations carry a little weight and the two implementations initialise $\varepsilon_1$ and $\sigma_1^2$ differently. This check is what showed me that `mu` in the `fGarch` output is an intercept.
 
 ## Reflection
 
-**What was most challenging:**
+**What was most challenging:** Reading the `fGarch` output correctly. Three things caught me out: `mu` is the intercept rather than the mean, the AIC from `summary()` is divided by the sample size (so it cannot be compared with `arima()` until multiplied by $n$), and `"std"` is a $t$ rescaled to unit variance, so the probability in Part B needs the $\sqrt{(\nu-2)/\nu}$ correction if computed with `pt()`. Understanding the different jobs of raw and standardised residuals also took time: significant autocorrelation in `res^2` is expected, while the same in `res_std^2` would mean the model has failed.
 
-**What I now understand:**
+**What I now understand:** A GARCH model is a model for the *conditional* variance, and its value shows up in conditional statements, such as the probability of a crash given yesterday's information. Transformations matter as much as model choice. On the raw T-bill changes, a GARCH(1,1) produced an explosive variance because volatility was tied to the level of rates; on log changes the same model gave stationary, sensible persistence. Choosing the right scale for the data fixed a problem that no extra GARCH term could. I also saw that the conditional distribution is not a detail: with the same mean and volatility forecast, the $t$ and normal assumptions gave Black Monday probabilities about 35 orders of magnitude apart.
 
 **Advantages and limitations of the methods:**
 
-**Links:** related projects and journal entries.
+- *Advantages:* GARCH models capture volatility clustering with few parameters, give one-step-ahead volatility forecasts and conditional probabilities directly, and combine naturally with an ARMA mean. With $t$ errors they also allow for fat tails.
+- *Limitations:* Variance responds only to the size of past shocks, not to their sign or to the level of the series (the level effect in T-bill rates needed a transformation instead). The model is symmetric, so it cannot capture the leverage effect where falls raise volatility more than rises (GJR-GARCH or EGARCH would). Good in-sample diagnostics say nothing about events outside the sample's experience: the Black Monday model passed every check yet still put the crash at roughly a once-in-two-centuries event. Model choice between ARCH and GARCH can also be ambiguous when AIC and BIC disagree, as in Part B (c).
+
+**Links:** Project 2 (USD/ZAR volatility and VaR backtesting) extends this lab to daily exchange-rate returns, with my own GARCH likelihood, GJR-GARCH and rolling VaR backtests. See also the journal entry for the ARCH/GARCH week.
