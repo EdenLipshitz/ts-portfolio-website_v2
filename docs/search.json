@@ -445,7 +445,7 @@
     "href": "journal/index.html",
     "title": "Journal",
     "section": "",
-    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\nStationarity and Random Walks\n\n\n\n\n\n\nWeek 03\n\n\nResiduals, Train and Test Samples and Validation\n\n\n\n\n\n\nWeek 04\n\n\nOperators, Stationarity and White Noise\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
+    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\nStationarity and Random Walks\n\n\n\n\n\n\nWeek 03\n\n\nResiduals, Train and Test Samples and Validation\n\n\n\n\n\n\nWeek 04\n\n\nOperators, Stationarity and White Noise\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\nKalman Filter\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
   },
   {
     "objectID": "journal/entries/week-11.html",
@@ -746,35 +746,7 @@
     "href": "journal/entries/week-10.html",
     "title": "Week 10",
     "section": "",
-    "text": "Date: [date of entry]\nSession or topic covered:"
-  },
-  {
-    "objectID": "journal/entries/week-10.html#what-i-did",
-    "href": "journal/entries/week-10.html#what-i-did",
-    "title": "Week 10",
-    "section": "What I did",
-    "text": "What I did"
-  },
-  {
-    "objectID": "journal/entries/week-10.html#what-i-learned",
-    "href": "journal/entries/week-10.html#what-i-learned",
-    "title": "Week 10",
-    "section": "What I learned",
-    "text": "What I learned"
-  },
-  {
-    "objectID": "journal/entries/week-10.html#difficulties-or-open-questions",
-    "href": "journal/entries/week-10.html#difficulties-or-open-questions",
-    "title": "Week 10",
-    "section": "Difficulties or open questions",
-    "text": "Difficulties or open questions"
-  },
-  {
-    "objectID": "journal/entries/week-10.html#what-to-do-next",
-    "href": "journal/entries/week-10.html#what-to-do-next",
-    "title": "Week 10",
-    "section": "What to do next",
-    "text": "What to do next\nLinks: [related tutorials and projects]"
+    "text": "Session or topic covered: Kalman Filter \nThis week was all about the Kalman filter. I worked through the lecture slides and the second half of the state space chapter, and the parts I found hardest were the three updating equations, why the intervals are called prediction intervals, and the difference between filtering and smoothing.\nThe idea itself is simple once you see it. The Kalman filter estimates a hidden state over time by combining what the model predicts the state should be with what we actually observe. Neither is perfect: the prediction carries uncertainty and the observation carries noise, so the filter weighs the two by how much each can be trusted. A phone’s live location works this way. The GPS reading jumps around by a few metres, but your true position moves smoothly, so combining where you probably are (based on where you were a moment ago) with the noisy reading gives a better estimate than either alone.\nWhat made it click for me was thinking about it in Bayesian terms. At each time step, the prediction from the previous step is the prior, the new observation gives the likelihood, and combining them gives the posterior, which then becomes the prior for the next step:\n\\[\n\\pi(\\theta_t \\mid y_{1:t}) \\propto \\pi(y_t \\mid \\theta_t)\\, \\pi(\\theta_t \\mid y_{1:t-1}).\n\\]\nBecause everything is normal, the posterior stays normal, so the filter only ever has to keep track of a mean and a variance.\nThe equations with \\(F\\), \\(G\\), \\(W\\) and \\(V\\) felt abstract until I worked them out for the local level model,\n\\[\ny_t = \\theta_t + v_t, \\quad v_t \\sim N(0, V), \\qquad \\theta_t = \\theta_{t-1} + w_t, \\quad w_t \\sim N(0, W),\n\\]\nwhere \\(F = G = 1\\) and everything is a single number.\nFirst, predict the state:\n\\[\na_t = m_{t-1}, \\qquad R_t = C_{t-1} + W.\n\\]\nMy best guess for today’s level is yesterday’s estimate, but I’m less certain about it because the level could have moved, which is why the state noise \\(W\\) gets added to the variance.\nSecond, predict the observation:\n\\[\nf_t = a_t, \\qquad Q_t = R_t + V.\n\\]\nThe predicted observation is just the predicted state, but its variance is bigger because it includes uncertainty about the state plus the observation noise \\(V\\).\nThird, update once \\(y_t\\) comes in. The forecast error and the Kalman gain are\n\\[\ne_t = y_t - f_t, \\qquad K_t = \\frac{R_t}{R_t + V},\n\\]\nand \\(K_t\\) always sits between 0 and 1. The update can be rewritten as\n\\[\nm_t = a_t + K_t e_t = (1 - K_t)\\, a_t + K_t\\, y_t,\n\\]\nand this was the most useful thing I worked out all week. The new estimate is just a weighted average of my prediction and the observation. If the observations are very noisy (large \\(V\\)), \\(K_t\\) is close to 0 and I mostly trust my prediction. If the state moves around a lot (large \\(W\\), so large \\(R_t\\)), \\(K_t\\) is close to 1 and I mostly trust the new observation. The variance update\n\\[\nC_t = (1 - K_t)\\, R_t\n\\]\nshows that observing something always shrinks the uncertainty.\nMissing values then made sense straight away. If \\(y_t\\) is missing there’s no new information, so \\(K_t = 0\\), giving \\(m_t = a_t\\) and \\(C_t = R_t\\). The posterior equals the prior and the uncertainty keeps growing through \\(W\\). In the Nile example with 1910 to 1915 removed, the filtered level goes flat and the bands widen over exactly those years.\nThe prediction interval question confused me for a while. The interval\n\\[\nf_t \\pm 1.96\\sqrt{Q_t}\n\\]\ndescribes where the next observation will land, so it includes both the uncertainty about the state and the observation noise. That’s what makes it a prediction interval. A confidence interval would be about the state itself and would use \\(C_t\\) instead.\nI also kept mixing up filtering and smoothing. Filtering estimates the state at time \\(t\\) using only data up to \\(t\\), so it reacts to every new observation and jumps around. Smoothing runs backwards once all the data is in and estimates where the state was at time \\(t\\) using everything, including later observations, which is why the smoothed Nile level is so much less jumpy.\nFinally, the likelihood fell into place. Each one-step-ahead prediction satisfies \\(y_t \\mid y_{1:t-1} \\sim N(f_t, Q_t)\\), so the likelihood is just a product of these normals:\n\\[\n\\ell(\\phi) = -\\frac{1}{2}\\sum_{t=1}^{n} \\log Q_t - \\frac{1}{2}\\sum_{t=1}^{n} \\frac{(y_t - f_t)^2}{Q_t}.\n\\]\nThat’s what lets \\(V\\) and \\(W\\) be estimated by maximum likelihood instead of assumed known, although the surface can be flat or have several peaks, so it’s worth trying different starting values. Next I want to write the filter myself from scratch, check it against dlm on simulated data and the Nile series, and then add the smoother and likelihood so I can estimate the variances on my own.\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "journal/entries/week-12.html",
