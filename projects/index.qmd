@@ -10,7 +10,7 @@ Four substantial projects, two from each section of the course. Between them the
 ::: {.portfolio-card}
 [Section 1]{.card-tag}
 
-### [Project 1: Forecasting accommodation demand with ARIMA and SARIMA](project-01/project-01-sarima-tourism_v4.qmd){.stretched-link}
+### [Project 1: Forecasting accommodation demand with ARIMA and SARIMA](project-01/project-01-sarima-tourism.qmd){.stretched-link}
 
 Benchmarks, ARMA, ARIMA and SARIMA models for Stats SA monthly nights sold, and how the treatment of the COVID-19 break changes the results.
 
@@ -22,7 +22,7 @@ Benchmarks, ARMA, ARIMA and SARIMA models for Stats SA monthly nights sold, and 
 ::: {.portfolio-card}
 [Section 1]{.card-tag}
 
-### [Project 2: Volatility of the rand with ARCH and GARCH](project-02/project-02-garch-zar_v4.qmd){.stretched-link}
+### [Project 2: Volatility of the rand with ARCH and GARCH](project-02/project-02-garch-zar.qmd){.stretched-link}
 
 Stylised facts of USD/ZAR returns, ARCH and GARCH models, my own GARCH(1,1) likelihood code, and a rolling Value-at-Risk backtest.
 
@@ -34,7 +34,7 @@ Stylised facts of USD/ZAR returns, ARCH and GARCH models, my own GARCH(1,1) like
 ::: {.portfolio-card}
 [Section 2]{.card-tag}
 
-### [Project 3: Modelling the COVID-19 shock](project-03/project-03-covid-intervention-tourism_v2.qmd){.stretched-link}
+### [Project 3: Modelling the COVID-19 shock](project-03/project-03-regression-ets-tourism.qmd){.stretched-link}
 
 ETS, regression with ARIMA errors and intervention terms, and a basic structural model fitted with the Kalman filter, compared with Project 1 on the same test set.
 
@@ -46,7 +46,7 @@ ETS, regression with ARIMA errors and intervention terms, and a basic structural
 ::: {.portfolio-card}
 [Section 2]{.card-tag}
 
-### [Project 4: Building a Kalman filter](project-04/project-04-placeholder.qmd){.stretched-link}
+### [Project 4: Building a Kalman filter](project-04/project-04-state-space-tourism.qmd){.stretched-link}
 
 My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series. In progress.
 

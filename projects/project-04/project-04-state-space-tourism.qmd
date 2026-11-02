@@ -1,0 +1,901 @@
+---
+title: "Project 4: State Space Models for South African Accommodation Demand"
+subtitle: "Section 2: State space models and the Kalman filter, built from first principles"
+author: "Eden"
+number-sections: true
+execute:
+  warning: false
+  message: false
+  echo: true
+fig-width: 7
+fig-height: 4
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+# Packages --------------------------------------------------------------
+library(fpp3)      # tsibble, fable, feasts, dplyr, tidyr, ggplot2
+library(readxl)
+library(knitr)
+
+set.seed(2026)
+theme_set(theme_minimal(base_size = 11))
+options(knitr.table.format = "pipe", knitr.kable.NA = "")
+
+# Data and key dates (identical to Projects 1 and 3) --------------------
+tourism_file <- "../../data/tourist_data.xlsx"
+covid_start  <- yearmonth("2020 Mar")
+covid_end    <- yearmonth("2022 Mar")
+test_start   <- yearmonth("2024 Jul")
+
+# Helpers for inline text -----------------------------------------------
+fmt  <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ",")
+pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%")
+pfmt <- function(p) ifelse(p < 0.001, "< 0.001", formatC(p, format = "f", digits = 3))
+sci  <- function(x, d = 1) formatC(x, format = "e", digits = d)
+month_num <- function(m) year(as.Date(m)) * 12 + month(as.Date(m))
+`%||%` <- function(x, y) if (is.null(x)) y else x   # also in base R >= 4.4
+```
+
+# Executive summary {.unnumbered}
+
+::: {.callout-note appearance="simple"}
+## Executive summary
+
+**Title:** State space models for South African accommodation demand
+
+**Section and topic:** Section 2. Linear Gaussian state space models, the Kalman filter and smoother, maximum likelihood estimation through the prediction error decomposition, structural time series models (local level, local linear trend, damped trend, seasonal and AR components), and missing observations.
+
+**Type of project:** Implementation from first principles, a simulation study, and model comparison on real-world data.
+
+**Question:** Can a state space model, which handles missing observations without deleting or imputing anything, forecast monthly accommodation demand as well as the Project 1 SARIMA and the Project 3 regression and exponential smoothing models? And what does the model say about the demand lost during COVID-19?
+
+**Data:** The Nile river annual flow (1871–1970, in base R) for validation, and real-world, publicly available data from Statistics South Africa, *Tourist Accommodation* release P6410, series B64100 (stay unit nights sold, total industry, thousands), monthly, January 2015 to June 2026. Source details are in @sec-data-source.
+
+**Methods:** I write my own Kalman filter (with missing observations), Kalman smoother, log likelihood and forecasting functions for a general univariate state space model, and estimate the variances by maximum likelihood. The code is validated by reproducing the published local level results for the Nile data, by a missing-data experiment, and by a simulation study with known parameters. I then fit four structural models to the log accommodation series with the COVID months treated as missing, compare them by AIC and residual diagnostics, use the smoother to estimate the demand that would have been sold without COVID, and evaluate the forecasts on the same test set as Projects 1 and 3 and by rolling-origin cross-validation.
+
+**Key findings:** See @sec-findings.
+
+**What I would do differently:** Use the exact diffuse initialisation instead of the large-variance approximation, and add the Project 3 intervention terms to the state space model so that the COVID months can be used instead of skipped.
+
+**Detailed analysis:** the sections below.
+:::
+
+# Introduction and research question
+
+Projects 1 and 3 dealt with the COVID-19 collapse in three ways: deleting the months (SARIMA with missing values), modelling them (regression with intervention terms) and imputing them (so that exponential smoothing could be used). Each had a cost. The intervention model needs the shape of the shock to be specified, and imputation treats invented values as data.
+
+State space models offer a fourth route. The series is described by unobserved components (a level, a slope, a seasonal pattern) that evolve over time, and the Kalman filter updates the estimates of these components one observation at a time. When an observation is missing the filter simply skips the update step, so the COVID months can be left out without breaking the time ordering and without inventing values. The Kalman smoother then gives an estimate, with uncertainty, of where the components were during the gap: in other words, what demand would have been without the pandemic.
+
+The same machinery sits behind many of the models used in earlier projects. `ARIMA()` evaluates its likelihood with a Kalman filter, which is how the Project 1 SARIMA coped with the missing COVID months, and every ETS model from Project 3 is a state space model in innovations form. Building the filter myself is a way of opening that black box.
+
+**Research question.** *Can structural state space models, estimated with my own Kalman filter and with the COVID months treated as missing, match the Project 1 and Project 3 models in forecasting accommodation demand, and how much demand do they estimate was lost to COVID-19?*
+
+# The linear Gaussian state space model
+
+Following Durbin and Koopman (2012), a univariate linear Gaussian state space model has an observation equation and a state equation:
+
+$$
+\begin{aligned}
+y_t &= Z^\top \alpha_t + \varepsilon_t, & \varepsilon_t &\sim N(0, H), \\
+\alpha_{t+1} &= T \alpha_t + R \eta_t, & \eta_t &\sim N(0, Q), \qquad \alpha_1 \sim N(a_1, P_1).
+\end{aligned}
+$$
+
+$\alpha_t$ is the $m \times 1$ state vector (the unobserved components), $Z$ picks out the combination of states that is observed, $T$ says how the states move from one period to the next, and $R$ and $Q$ describe the random shocks to the states. Different choices of $Z$, $T$, $R$ and $Q$ give different models; the code below never changes, only the system matrices do.
+
+## The Kalman filter
+
+Write $a_t = E(\alpha_t \mid y_1, \dots, y_{t-1})$ and $P_t = \text{Var}(\alpha_t \mid y_1, \dots, y_{t-1})$ for the one-step predicted state and its variance. For each $t$ the filter computes
+
+$$
+\begin{aligned}
+v_t &= y_t - Z^\top a_t, & F_t &= Z^\top P_t Z + H, & K_t &= T P_t Z / F_t, \\
+a_{t+1} &= T a_t + K_t v_t, & P_{t+1} &= T P_t T^\top - K_t K_t^\top F_t + R Q R^\top .
+\end{aligned}
+$$
+
+$v_t$ is the one-step prediction error (the *innovation*), $F_t$ its variance and $K_t$ the Kalman gain, which says how much of the surprise $v_t$ is passed on to the state estimate. **If $y_t$ is missing**, there is no innovation, so the update is skipped: $a_{t+1} = T a_t$ and $P_{t+1} = T P_t T^\top + R Q R^\top$. The state is carried forward by the model alone and its variance grows.
+
+## The likelihood
+
+Because the innovations are independent with variances $F_t$, the log likelihood is the *prediction error decomposition*
+
+$$
+\log L = -\frac{1}{2} \sum_{t} \left( \log 2\pi + \log F_t + \frac{v_t^2}{F_t} \right),
+$$
+
+summed over the observed $t$ only. This is what makes maximum likelihood with missing data straightforward: missing months contribute nothing. The unknown variances are estimated by maximising $\log L$ numerically (on the log scale, so they stay positive).
+
+**Initialisation.** The initial level and seasonal effects are unknown, so I use a *diffuse* prior: $a_1 = 0$ and $P_1 = \kappa I$ with $\kappa = 10^7$. The first $d$ innovations, where $d$ is the number of non-stationary states, have huge variances and carry no information about the parameters, so they are left out of the likelihood. This is the large-$\kappa$ approximation to the exact diffuse filter in Durbin and Koopman (2012, Chapter 5).
+
+## The Kalman smoother
+
+The filter uses only past data. The smoother uses all of it: working backwards with $L_t = T - K_t Z^\top$, $r_n = 0$ and $N_n = 0$,
+
+$$
+r_{t-1} = Z v_t / F_t + L_t^\top r_t, \qquad N_{t-1} = Z Z^\top / F_t + L_t^\top N_t L_t,
+$$
+
+with $r_{t-1} = T^\top r_t$ and $N_{t-1} = T^\top N_t T$ when $y_t$ is missing. The smoothed state and its variance are then $\hat\alpha_t = a_t + P_t r_{t-1}$ and $V_t = P_t - P_t N_{t-1} P_t$. Inside a gap of missing observations, the smoother bridges between the data on either side.
+
+## Forecasting
+
+Forecasting is the filter run with every future observation missing: from $a_{n+1}$ and $P_{n+1}$, repeat $a \leftarrow T a$ and $P \leftarrow T P T^\top + RQR^\top$. The $h$-step forecast of $y$ is $Z^\top a$ with variance $Z^\top P Z + H$.
+
+# Implementation
+
+```{r}
+#| label: ssm-functions
+
+# Kalman filter for a univariate linear Gaussian state space model ----------
+# y may contain NA (missing observations). Returns predicted states a_t,
+# variances P_t, innovations v_t, their variances F_t and the gains K_t.
+kfilter <- function(y, sys) {
+  Z <- sys$Z; H <- sys$H; Tm <- sys$T
+  RQR <- sys$R %*% sys$Q %*% t(sys$R)
+  n <- length(y); m <- length(sys$a1)
+  a <- matrix(0, n + 1, m); P <- array(0, c(m, m, n + 1))
+  v <- Fv <- rep(NA_real_, n); K <- matrix(0, n, m)
+  a[1, ] <- sys$a1; P[, , 1] <- sys$P1
+  for (t in 1:n) {
+    at <- a[t, ]; Pt <- P[, , t]
+    if (is.na(y[t])) {                         # missing: prediction step only
+      a[t + 1, ]   <- Tm %*% at
+      P[, , t + 1] <- Tm %*% Pt %*% t(Tm) + RQR
+    } else {                                   # observed: update and predict
+      PZ <- Pt %*% Z
+      Ft <- as.numeric(crossprod(Z, PZ)) + H
+      vt <- y[t] - sum(Z * at)
+      Kt <- (Tm %*% PZ) / Ft
+      a[t + 1, ]   <- Tm %*% at + Kt * vt
+      P[, , t + 1] <- Tm %*% Pt %*% t(Tm) - Kt %*% t(Kt) * Ft + RQR
+      v[t] <- vt; Fv[t] <- Ft; K[t, ] <- Kt
+    }
+  }
+  list(a = a, P = P, v = v, F = Fv, K = K, n = n)
+}
+
+# Log likelihood (prediction error decomposition), dropping the first d
+# observed innovations because of the diffuse initialisation
+kloglik <- function(kf, d) {
+  ok <- which(!is.na(kf$v))
+  ok <- ok[-seq_len(d)]
+  -0.5 * sum(log(2 * pi) + log(kf$F[ok]) + kf$v[ok]^2 / kf$F[ok])
+}
+
+# Standardised innovations e_t = v_t / sqrt(F_t), after the diffuse period
+std_innov <- function(kf, d) {
+  e  <- kf$v / sqrt(kf$F)
+  ok <- which(!is.na(e))
+  e[ok[seq_len(d)]] <- NA
+  e
+}
+
+# Kalman smoother (Durbin and Koopman 2012, Section 4.4) --------------------
+ksmooth <- function(kf, y, sys) {
+  Z <- sys$Z; Tm <- sys$T; n <- kf$n; m <- length(sys$a1)
+  r <- rep(0, m); N <- matrix(0, m, m)
+  ahat <- matrix(0, n, m); V <- array(0, c(m, m, n))
+  for (t in n:1) {
+    if (is.na(y[t])) {
+      r <- crossprod(Tm, r)
+      N <- t(Tm) %*% N %*% Tm
+    } else {
+      L <- Tm - kf$K[t, ] %*% t(Z)
+      r <- Z * kf$v[t] / kf$F[t] + crossprod(L, r)
+      N <- Z %*% t(Z) / kf$F[t] + t(L) %*% N %*% L
+    }
+    Pt <- kf$P[, , t]
+    ahat[t, ] <- kf$a[t, ] + Pt %*% r
+    V[, , t]  <- Pt - Pt %*% N %*% Pt
+  }
+  list(ahat = ahat, V = V)
+}
+
+# h-step forecasts: the filter run with all future observations missing -------
+kforecast <- function(kf, sys, h) {
+  a <- kf$a[kf$n + 1, ]; P <- kf$P[, , kf$n + 1]
+  RQR <- sys$R %*% sys$Q %*% t(sys$R)
+  mean <- var <- numeric(h)
+  for (j in 1:h) {
+    mean[j] <- sum(sys$Z * a)
+    var[j]  <- as.numeric(t(sys$Z) %*% P %*% sys$Z) + sys$H
+    a <- sys$T %*% a
+    P <- sys$T %*% P %*% t(sys$T) + RQR
+  }
+  tibble(h = 1:h, mean = mean, var = var)
+}
+```
+
+The four functions are about 90 lines of R in total. They know nothing about any particular model: each model is a function that turns a parameter vector into the system matrices $(Z, H, T, R, Q, a_1, P_1)$.
+
+# Validation
+
+## The Nile data: reproducing a published result {#sec-nile}
+
+The local level model is the simplest state space model:
+
+$$
+y_t = \mu_t + \varepsilon_t, \qquad \mu_{t+1} = \mu_t + \xi_t, \qquad \varepsilon_t \sim N(0, \sigma^2_\varepsilon), \; \xi_t \sim N(0, \sigma^2_\xi),
+$$
+
+so $m = 1$, $Z = T = R = 1$, $H = \sigma^2_\varepsilon$ and $Q = \sigma^2_\xi$. Durbin and Koopman (2012, Section 2.10) fit it to the annual flow of the Nile at Aswan (1871–1970) and report maximum likelihood estimates $\hat\sigma^2_\varepsilon = 15099$ and $\hat\sigma^2_\xi = 1469.1$, with a log likelihood of $-632.54$. Reproducing these numbers is a direct test of my filter, likelihood and optimiser.
+
+```{r}
+#| label: nile-fit
+
+y_nile <- as.numeric(Nile)
+
+local_level <- function(lpar) {
+  list(Z = matrix(1), H = exp(lpar[1]), T = matrix(1), R = matrix(1),
+       Q = matrix(exp(lpar[2])), a1 = 0, P1 = matrix(1e7))
+}
+nile_negll <- function(lpar, y = y_nile) -kloglik(kfilter(y, local_level(lpar)), d = 1)
+
+nile_opt <- optim(log(c(var(y_nile) / 2, var(y_nile) / 20)), nile_negll,
+                  method = "BFGS", hessian = TRUE)
+nile_var <- exp(nile_opt$par)
+nile_se  <- sqrt(diag(solve(nile_opt$hessian)))          # SEs of the log variances
+nile_ci  <- exp(cbind(nile_opt$par - 1.96 * nile_se, nile_opt$par + 1.96 * nile_se))
+
+nile_struct <- StructTS(Nile, type = "level")
+```
+
+```{r}
+#| label: tbl-nile
+#| tbl-cap: "Local level model for the Nile data: my implementation against the published values and against StructTS() in base R. Confidence intervals are Wald intervals on the log scale, transformed back."
+
+tibble(
+  ` ` = c("Irregular variance", "Level variance", "Log likelihood"),
+  `Durbin & Koopman (2012)` = c("15,099", "1,469.1", "-632.54"),
+  `My code` = c(fmt(nile_var[1], 0), fmt(nile_var[2], 1), fmt(-nile_opt$value, 2)),
+  `95% CI (my code)` = c(paste0("(", fmt(nile_ci[1, 1], 0), ", ", fmt(nile_ci[1, 2], 0), ")"),
+                         paste0("(", fmt(nile_ci[2, 1], 0), ", ", fmt(nile_ci[2, 2], 0), ")"), ""),
+  `StructTS()` = c(fmt(nile_struct$coef["epsilon"], 0), fmt(nile_struct$coef["level"], 1),
+                   "(different constant)")
+) |> kable()
+```
+
+My estimates agree with the published values to the precision reported (@tbl-nile), and so does the log likelihood, which confirms that the filter, the diffuse treatment of the first observation and the optimiser all work. `StructTS()` gives the same variance estimates. The confidence interval for the level variance is wide, a first sign that variance parameters in these models are hard to pin down.
+
+```{r}
+#| label: fig-nile
+#| fig-cap: "Nile flow (points) with the filtered level (dashed) and the smoothed level with its 90% interval (blue). Right: the same with years 21-40 and 61-80 deleted, where the filter carries the level forward unchanged and the smoother bridges the gap."
+#| fig-height: 3.6
+
+nile_sys <- local_level(nile_opt$par)
+
+nile_paths <- function(y, label) {
+  kf <- kfilter(y, nile_sys); ks <- ksmooth(kf, y, nile_sys)
+  tibble(year = 1871:1970, y = y, filtered = kf$a[-1, 1][c(NA, 1:99)],
+         smoothed = ks$ahat[, 1], se = sqrt(ks$V[1, 1, ]), panel = label)
+}
+
+y_gap <- y_nile; y_gap[c(21:40, 61:80)] <- NA
+
+bind_rows(nile_paths(y_nile, "Complete data"), nile_paths(y_gap, "With missing years")) |>
+  ggplot(aes(year)) +
+  geom_ribbon(aes(ymin = smoothed - 1.645 * se, ymax = smoothed + 1.645 * se),
+              fill = "steelblue", alpha = 0.25) +
+  geom_point(aes(y = y), size = 0.6, colour = "grey30", na.rm = TRUE) +
+  geom_line(aes(y = filtered), linetype = "dashed", colour = "grey20", na.rm = TRUE) +
+  geom_line(aes(y = smoothed), colour = "steelblue4", linewidth = 0.8) +
+  facet_wrap(vars(panel)) +
+  labs(x = NULL, y = "Flow (10^8 m^3)")
+```
+
+The right panel of @fig-nile is the missing-data experiment from Durbin and Koopman (2012, Section 2.7). Over each gap the filtered level is flat (the best prediction from a random walk is its last value) and the smoother draws a straight line between the observations on either side, with a band that is widest in the middle of the gap. This is exactly the behaviour I will rely on for the COVID months.
+
+## Link to exponential smoothing
+
+For the local level model the Kalman gain converges quickly to a constant $\bar K$, and once it has, the filter is $a_{t+1} = a_t + \bar K (y_t - a_t)$: simple exponential smoothing with $\alpha = \bar K$. Theory gives $\bar K = \bar P / (\bar P + \sigma^2_\varepsilon)$ with $\bar P = \sigma^2_\varepsilon \left(q + \sqrt{q^2 + 4q}\right)/2$ and $q = \sigma^2_\xi / \sigma^2_\varepsilon$.
+
+```{r}
+#| label: ses-link
+
+kf_nile <- kfilter(y_nile, nile_sys)
+K_bar_filter <- tail(kf_nile$K[, 1], 1)
+q <- nile_var[2] / nile_var[1]
+P_bar <- nile_var[1] * (q + sqrt(q^2 + 4 * q)) / 2
+K_bar_theory <- P_bar / (P_bar + nile_var[1])
+
+nile_tsb <- as_tsibble(Nile)
+alpha_ses <- tidy(nile_tsb |> model(ETS(value ~ error("A") + trend("N") + season("N")))) |>
+  filter(term == "alpha") |> pull(estimate)
+```
+
+The filter's gain settles at $\bar K$ = `r fmt(K_bar_filter, 4)`, the formula gives `r fmt(K_bar_theory, 4)`, and fitting simple exponential smoothing to the Nile with `ETS(A,N,N)` in `fable` gives $\hat\alpha$ = `r fmt(alpha_ses, 4)`. The small difference with the ETS estimate comes from the different treatment of the start of the series (ETS estimates the initial level as a parameter). This is the clearest link between Projects 3 and 4: an exponential smoothing method is the steady state of a Kalman filter, and the smoothing parameter is determined by the *signal-to-noise ratio* $q$. A noisy series (small $q$) gets a small $\alpha$; a series whose level moves a lot relative to the noise gets an $\alpha$ near 1, which is what happened when ETS was fitted to the raw COVID data in Project 3.
+
+## Simulation study: how well are the variances estimated?
+
+The Nile confidence intervals suggest that the variances are imprecisely estimated. To see how my estimator behaves when the truth is known, I simulate series of length 100 from a local level model with $\sigma^2_\varepsilon = 15000$ in two settings: $\sigma^2_\xi = 1500$ (signal-to-noise ratio $q = 0.1$, close to the Nile estimates) and $\sigma^2_\xi = 300$ ($q = 0.02$, a level that moves much more slowly relative to the noise). For each of 300 series per setting I estimate both variances with my code and check whether the 95% interval for the 101st observation contains the simulated value.
+
+```{r}
+#| label: simulation
+#| cache: true
+
+sim_one <- function(n = 100, s2e = 15000, s2x = 1500) {
+  mu <- 1000 + cumsum(c(0, rnorm(n, 0, sqrt(s2x))))       # n + 1 levels
+  y  <- mu + rnorm(n + 1, 0, sqrt(s2e))
+  fit <- optim(log(c(var(y[1:n]) / 2, var(y[1:n]) / 20)), nile_negll,
+               y = y[1:n], method = "BFGS")
+  kf <- kfilter(y[1:n], local_level(fit$par))
+  fc <- kforecast(kf, local_level(fit$par), 1)
+  tibble(s2e_hat = exp(fit$par[1]), s2x_hat = exp(fit$par[2]),
+         covered = abs(y[n + 1] - fc$mean) <= 1.96 * sqrt(fc$var),
+         converged = fit$convergence == 0)
+}
+
+sims <- bind_rows(
+  bind_rows(replicate(300, sim_one(s2x = 1500), simplify = FALSE)) |> mutate(true_s2x = 1500),
+  bind_rows(replicate(300, sim_one(s2x = 300),  simplify = FALSE)) |> mutate(true_s2x = 300)
+) |>
+  mutate(setting = factor(paste0("q = ", true_s2x / 15000), levels = c("q = 0.1", "q = 0.02")))
+```
+
+```{r}
+#| label: tbl-sim
+#| tbl-cap: "Simulation study: 300 series of length 100 from a local level model in each setting (irregular variance 15,000). Coverage refers to the 95% one-step-ahead forecast interval computed with the estimated variances."
+
+sim_tbl <- sims |>
+  group_by(Setting = setting) |>
+  summarise(`True level var` = first(true_s2x),
+            `Mean est. irregular` = mean(s2e_hat),
+            `Mean est. level` = mean(s2x_hat),
+            `Median est. level` = median(s2x_hat),
+            `Rel. RMSE irregular` = sqrt(mean((s2e_hat - 15000)^2)) / 15000,
+            `Rel. RMSE level` = sqrt(mean((s2x_hat - true_s2x)^2)) / first(true_s2x),
+            `Level var near zero` = mean(s2x_hat < 0.05 * true_s2x),
+            `Coverage 95%` = mean(covered),
+            .groups = "drop")
+
+sim_tbl |>
+  mutate(`Level var near zero` = pct(`Level var near zero`), `Coverage 95%` = pct(`Coverage 95%`, 1)) |>
+  kable(digits = c(0, 0, 0, 0, 0, 2, 2, 0, 0), format.args = list(big.mark = ","))
+
+ss <- function(q, col) sim_tbl[[col]][sim_tbl$Setting == q]
+sim_zero_hi <- ss("q = 0.1", "Level var near zero"); sim_zero_lo <- ss("q = 0.02", "Level var near zero")
+sim_cover   <- mean(sims$covered)
+```
+
+```{r}
+#| label: fig-sim
+#| fig-cap: "Sampling distribution of the estimated level variance in each setting (true value dashed). Estimates piled up at zero are the boundary problem."
+#| fig-height: 3
+
+ggplot(sims, aes(s2x_hat)) +
+  geom_histogram(bins = 40, fill = "steelblue", colour = "white") +
+  geom_vline(aes(xintercept = true_s2x), linetype = "dashed") +
+  facet_wrap(vars(setting), scales = "free") +
+  labs(x = "Estimated level variance", y = "Count")
+```
+
+The irregular variance is estimated well in both settings (relative RMSE about `r fmt(ss("q = 0.1", "Rel. RMSE irregular"), 2)`), but the level variance is much less precise (@tbl-sim, @fig-sim): its relative RMSE is `r fmt(ss("q = 0.1", "Rel. RMSE level"), 2)` when $q = 0.1$ and `r fmt(ss("q = 0.02", "Rel. RMSE level"), 2)` when $q = 0.02$. With $q = 0.1$ the level variance is estimated at essentially zero (below 5% of its true value) in `r pct(sim_zero_hi)` of the samples, but with $q = 0.02$ this happens in `r pct(sim_zero_lo)`. This is the *pile-up* problem: when the level moves slowly relative to the noise, the likelihood often has its maximum on the boundary (a fixed level), even though the true variance is positive. Despite this, the one-step 95% forecast intervals cover the next observation in `r pct(ss("q = 0.1", "Coverage 95%"), 1)` and `r pct(ss("q = 0.02", "Coverage 95%"), 1)` of the simulations, close to the nominal level, because forecasts depend on the parameters mainly through the gain $\bar K$, which is better determined than either variance on its own. The lesson for the tourism models is to expect some variance estimates on the boundary and to judge the models by their innovations and forecasts rather than by the individual variances.
+
+# Application to accommodation demand
+
+## Data {#sec-data-source}
+
+::: {.callout-tip appearance="simple"}
+## Data sources at a glance
+
+| | |
+|:--|:--|
+| **Accommodation data** | Statistics South Africa (Stats SA), *Tourist Accommodation*, statistical release P6410 (monthly), file `tourist_data.xlsx`, series B64100 (stay units nights sold, total industry, actual figures, thousands). Available from <https://www.statssa.gov.za/?page_id=1854&PPN=P6410> |
+| **Validation data** | `Nile` data set in base R: annual flow of the river Nile at Aswan, 1871–1970 (Durbin and Koopman, 2012) |
+| **Period analysed** | January 2015 to June 2026 |
+| **Licence and privacy** | Public, aggregated official statistics; no personal information, so POPIA does not apply |
+:::
+
+```{r}
+#| label: load-data
+
+raw <- read_excel(tourism_file)
+
+nights_sold <- raw |>
+  filter(H03 == "B64100") |>
+  select(starts_with("MO")) |>
+  pivot_longer(everything(), names_to = "code", values_to = "nights") |>
+  mutate(Month  = yearmonth(make_date(as.integer(substr(code, 5, 8)),
+                                      as.integer(substr(code, 3, 4)), 1L)),
+         nights = as.numeric(nights)) |>
+  filter(!is.na(nights)) |>
+  select(Month, nights) |>
+  as_tsibble(index = Month) |>
+  filter_index("2015 Jan" ~ .) |>
+  mutate(period = case_when(
+    Month <  covid_start ~ "Pre-COVID",
+    Month <= covid_end   ~ "COVID window",
+    TRUE                 ~ "Post-COVID"
+  ))
+
+train <- nights_sold |> filter(Month < test_start)
+test  <- nights_sold |> filter(Month >= test_start)
+
+# Log series with the COVID window set to missing
+y_tour <- log(train$nights)
+y_tour[train$period == "COVID window"] <- NA
+```
+
+The series, the log transformation, the COVID window (March 2020 to March 2022, `r sum(is.na(y_tour))` months set to missing) and the training and test split are exactly as in Projects 1 and 3. The exploratory analysis is in Project 1.
+
+## Four structural models
+
+All four models are written for $y_t = \log(\text{nights}_t)$ and share a seasonal component in dummy form, $s_{t+1} = -\sum_{j=0}^{10} s_{t-j} + \omega_t$, so that the seasonal effects sum to approximately zero over a year and can evolve slowly. They differ in the trend and in whether a short-run AR(1) component $c_t$ is added:
+
+| Model | Trend | Extra component | States $m$ |
+|:--|:--|:--|:--|
+| **BSM** (basic structural model) | Local linear trend: $\mu_{t+1} = \mu_t + \nu_t + \xi_t$, $\nu_{t+1} = \nu_t + \zeta_t$ | none | 13 |
+| **Level + seasonal** | Local level: $\mu_{t+1} = \mu_t + \xi_t$ | none | 12 |
+| **Damped trend** | $\mu_{t+1} = \mu_t + \nu_t + \xi_t$, $\nu_{t+1} = \phi \nu_t + \zeta_t$, $0 < \phi < 1$ | none | 13 |
+| **Damped trend + AR(1)** | as above | $c_{t+1} = \rho c_t + \kappa_t$ | 14 |
+
+and in each case $y_t = \mu_t + s_t\, (+\, c_t) + \varepsilon_t$. The damped trend model is the state space counterpart of the damped Holt–Winters method that did best in Project 3, and the level + seasonal model corresponds to ETS(A,N,A). The AR(1) component addresses the diagnostic failure of the `StructTS()` model in an earlier version of Project 3: it allows short-lived deviations from the trend that persist for a few months.
+
+```{r}
+#| label: model-builder
+
+# Build the system matrices for one of the structural models ------------------
+# trend: "llt" (local linear trend), "ll" (local level), "damped"
+param_names <- function(trend, ar) {
+  c("eps", "level", if (trend != "ll") "slope", "seas",
+    if (trend == "damped") "phi", if (ar) c("ar_var", "rho"))
+}
+
+unpack <- function(theta, trend, ar) {
+  nm <- param_names(trend, ar)
+  p  <- as.list(exp(theta)); names(p) <- nm
+  if (trend == "damped") p$phi <- 0.98 * plogis(theta[nm == "phi"])   # phi in (0, 0.98)
+  if (ar)                p$rho <- tanh(theta[nm == "rho"])             # rho in (-1, 1)
+  if (trend == "ll")     p$slope <- NA
+  p
+}
+
+structural_sys <- function(p, trend, ar) {
+  n_tr <- if (trend == "ll") 1 else 2
+  m <- n_tr + 11 + ar
+  Tm <- matrix(0, m, m); Z <- numeric(m)
+  Tm[1, 1] <- 1; Z[1] <- 1                                  # level
+  if (n_tr == 2) {                                          # slope
+    Tm[1, 2] <- 1
+    Tm[2, 2] <- if (trend == "damped") p$phi else 1
+  }
+  s1 <- n_tr + 1                                            # seasonal block (11 states)
+  Tm[s1, s1:(s1 + 10)] <- -1
+  Tm[(s1 + 1):(s1 + 10), s1:(s1 + 9)] <- diag(10)
+  Z[s1] <- 1
+  if (ar) { Tm[m, m] <- p$rho; Z[m] <- 1 }                  # AR(1) component
+  shock_rows <- c(1, if (n_tr == 2) 2, s1, if (ar) m)
+  shock_var  <- c(p$level, if (n_tr == 2) p$slope, p$seas, if (ar) p$ar_var)
+  R <- matrix(0, m, length(shock_rows))
+  R[cbind(shock_rows, seq_along(shock_rows))] <- 1
+  P1 <- diag(1e7, m)                                        # diffuse prior
+  if (ar) P1[m, m] <- p$ar_var / (1 - p$rho^2)              # stationary prior for c_t
+  list(Z = matrix(Z), H = p$eps, T = Tm, R = R,
+       Q = diag(shock_var, length(shock_var)), a1 = rep(0, m), P1 = P1)
+}
+
+d_diffuse <- 13   # same number of dropped innovations for every model, so AIC is comparable
+
+ssm_negll <- function(theta, y, trend, ar) {
+  -kloglik(kfilter(y, structural_sys(unpack(theta, trend, ar), trend, ar)), d = d_diffuse)
+}
+
+# Maximum likelihood with several starting values (the surface is flat near the boundary)
+fit_structural <- function(y, trend, ar, start = NULL) {
+  nm <- param_names(trend, ar)
+  th0 <- c(eps = log(1e-3), level = log(1e-3), slope = log(1e-5), seas = log(1e-5),
+           phi = qlogis(0.9 / 0.98), ar_var = log(1e-3), rho = atanh(0.5))[nm]
+  starts <- if (is.null(start)) list(th0, th0 + 0.5, th0 - 1) else list(start)
+  best <- NULL
+  for (s in starts) {
+    o <- optim(s, ssm_negll, y = y, trend = trend, ar = ar, method = "BFGS",
+               control = list(maxit = 500))
+    o <- optim(o$par, ssm_negll, y = y, trend = trend, ar = ar, method = "Nelder-Mead",
+               control = list(maxit = 4000))
+    if (is.null(best) || o$value < best$value) best <- o
+  }
+  p   <- unpack(best$par, trend, ar)
+  sys <- structural_sys(p, trend, ar)
+  kf  <- kfilter(y, sys)
+  list(theta = best$par, p = p, sys = sys, kf = kf, loglik = -best$value,
+       k = length(nm), trend = trend, ar = ar, converged = best$convergence == 0)
+}
+```
+
+## Estimation and model selection
+
+```{r}
+#| label: fit-tourism
+#| cache: true
+
+specs <- list(`BSM`                  = list(trend = "llt",    ar = FALSE),
+              `Level + seasonal`     = list(trend = "ll",     ar = FALSE),
+              `Damped trend`         = list(trend = "damped", ar = FALSE),
+              `Damped trend + AR(1)` = list(trend = "damped", ar = TRUE))
+
+ssm_fits <- lapply(specs, function(s) fit_structural(y_tour, s$trend, s$ar))
+```
+
+```{r}
+#| label: tbl-ssm
+#| tbl-cap: "Maximum likelihood estimates for the four structural models (log scale; variances). AIC is comparable across models because the same observations enter every likelihood. The Ljung and Box test uses 24 lags of the standardised innovations."
+
+ssm_tbl <- bind_rows(lapply(names(ssm_fits), function(nm) {
+  f <- ssm_fits[[nm]]
+  e <- std_innov(f$kf, d_diffuse)
+  tibble(Model = nm,
+         `Irregular` = f$p$eps, `Level` = f$p$level, `Slope` = f$p$slope,
+         `Seasonal` = f$p$seas, `phi` = f$p$phi %||% NA, `AR var` = f$p$ar_var %||% NA,
+         `rho` = f$p$rho %||% NA,
+         `Log lik` = f$loglik, AIC = -2 * f$loglik + 2 * f$k,
+         `Ljung-Box p` = Box.test(na.omit(e), lag = 24, type = "Ljung-Box")$p.value,
+         Converged = ifelse(f$converged, "Yes", "No"))
+}))
+
+ssm_tbl |>
+  mutate(across(c(Irregular, Level, Slope, Seasonal, `AR var`), ~ ifelse(is.na(.x), NA, sci(.x))),
+         `Ljung-Box p` = pfmt(`Ljung-Box p`)) |>
+  kable(digits = c(0, 0, 0, 0, 0, 3, 0, 3, 2, 1, 0, 0))
+
+sv  <- function(m, col) ssm_tbl[[col]][ssm_tbl$Model == m]
+best_aic <- ssm_tbl$Model[which.min(ssm_tbl$AIC)]
+```
+
+```{r}
+#| label: structts-check
+#| include: false
+# The BSM is also available in base R; evaluate its estimates under my likelihood
+st <- StructTS(ts(y_tour, start = c(2015, 1), frequency = 12), type = "BSM")
+st_theta <- log(pmax(c(st$coef["epsilon"], st$coef["level"], st$coef["slope"], st$coef["seas"]), 1e-12))
+st_ll_mine <- -ssm_negll(st_theta, y_tour, "llt", FALSE)
+```
+
+Several patterns stand out (@tbl-ssm).
+
+* **The irregular variance is essentially zero in every model.** All short-run noise is absorbed by the level, so on the log scale the series behaves like a random-walk level plus a slowly changing seasonal pattern. This is the boundary problem from the simulation study, and it means the individual variances should not be over-interpreted.
+* **The slope barely moves.** In the BSM the slope variance is `r sci(sv("BSM", "Slope"))`, so the slope is effectively a fixed drift estimated from the whole sample.
+* **Damping.** The damped trend model estimates $\phi$ = `r fmt(sv("Damped trend", "phi"), 3)`, so a change in the slope loses `r pct(1 - sv("Damped trend", "phi"))` of its effect each month.
+* **The AR(1) component adds little.** Its log likelihood is only `r fmt(sv("Damped trend + AR(1)", "Log lik") - sv("Damped trend", "Log lik"), 2)` higher than the damped trend model's, for two extra parameters, so AIC rejects it.
+* **Model selection.** The lowest AIC belongs to the **`r best_aic`** model. `r if (max(ssm_tbl$AIC) - min(ssm_tbl$AIC) < 6) "The AIC values span only a few units, so the data do not strongly distinguish between the trend specifications; as in Project 3, the trend matters more for long-horizon forecasts than for one-step fit." else ""`
+
+**Comparison with `StructTS()`.** The BSM is also available as `StructTS()`, which Project 3 originally used. Evaluated under my likelihood, the `StructTS()` estimates have a log likelihood of `r fmt(st_ll_mine, 2)`, against `r fmt(sv("BSM", "Log lik"), 2)` at my estimates. `r if (sv("BSM", "Log lik") - st_ll_mine > 2) "So my optimiser, started from several points, finds a much higher maximum. This explains why the StructTS() model failed its residual diagnostics: it was not at the maximum likelihood estimate. A flat likelihood with several variances near zero is exactly where a single optimiser run can stop early." else "The two sets of estimates are close."`
+
+## Diagnostics
+
+```{r}
+#| label: fig-ssm-diag
+#| fig-cap: "Standardised innovations of the selected model over time (the COVID gap is left empty), their ACF and a normal QQ plot."
+#| fig-height: 5.5
+
+sel <- ssm_fits[[best_aic]]
+e_sel <- std_innov(sel$kf, d_diffuse)
+diag_df <- tibble(Month = train$Month, e = e_sel)
+
+p1 <- ggplot(diag_df, aes(as.Date(Month), e)) +
+  geom_hline(yintercept = c(-2, 0, 2), linetype = c("dashed", "solid", "dashed"), colour = "grey50") +
+  geom_point(size = 0.8, na.rm = TRUE) +
+  labs(x = NULL, y = "Standardised innovation")
+
+acf_e <- acf(na.omit(e_sel), lag.max = 36, plot = FALSE)
+p2 <- tibble(lag = acf_e$lag[-1], acf = acf_e$acf[-1]) |>
+  ggplot(aes(lag, acf)) +
+  geom_hline(yintercept = 0) +
+  geom_hline(yintercept = c(-1, 1) * 1.96 / sqrt(sum(!is.na(e_sel))),
+             linetype = "dashed", colour = "steelblue") +
+  geom_segment(aes(xend = lag, yend = 0)) +
+  labs(x = "Lag (months)", y = "ACF")
+
+p3 <- ggplot(diag_df, aes(sample = e)) + stat_qq(size = 0.8, na.rm = TRUE) +
+  stat_qq_line(na.rm = TRUE) + labs(x = "Normal quantiles", y = "Sample quantiles")
+
+if (requireNamespace("patchwork", quietly = TRUE)) {
+  patchwork::wrap_plots(p1, patchwork::wrap_plots(p2, p3), ncol = 1)
+} else {
+  print(p1); print(p2); print(p3)
+}
+
+sw_p <- shapiro.test(na.omit(e_sel))$p.value
+```
+
+For a correctly specified model the standardised innovations $v_t / \sqrt{F_t}$ should be independent standard normal. I treat this exactly like step 5 of the Box and Jenkins loop. `r if (min(ssm_tbl$"Ljung-Box p") > 0.05) "All four models pass the Ljung and Box test at the 5% level (@tbl-ssm)." else "Not all four models pass the Ljung and Box test (@tbl-ssm)."` For the selected `r best_aic` model there is no remaining autocorrelation at the seasonal lags (@fig-ssm-diag), so the evolving seasonal component is adequate, and the Shapiro–Wilk test gives p = `r pfmt(sw_p)`. `r if (sw_p < 0.05) "The QQ plot shows somewhat heavier tails than the normal distribution. The largest surprise is the first month after the gap (April 2022), and the post-COVID innovations are more spread out than the pre-COVID ones, a hint that demand has been more volatile since the pandemic. The Gaussian prediction intervals may therefore be slightly too narrow in the tails." else "The innovations are consistent with normality, so the Gaussian prediction intervals are reasonable."`
+
+## Smoothed components and the demand lost to COVID-19
+
+```{r}
+#| label: smooth
+
+ks_sel <- ksmooth(sel$kf, y_tour, sel$sys)
+s1 <- if (sel$trend == "ll") 2 else 3                      # index of the current seasonal state
+Zs <- sel$sys$Z
+
+signal_mean <- as.numeric(ks_sel$ahat %*% Zs)               # level + seasonal (+ AR)
+signal_se   <- sqrt(vapply(seq_len(nrow(ks_sel$ahat)),
+                           function(t) as.numeric(t(Zs) %*% ks_sel$V[, , t] %*% Zs), 0))
+
+comp <- tibble(Month = train$Month, observed = log(train$nights),
+               level = ks_sel$ahat[, 1], season = ks_sel$ahat[, s1],
+               signal = signal_mean, se = signal_se, period = train$period)
+
+lost <- comp |>
+  filter(period == "COVID window") |>
+  mutate(counterfactual = exp(signal + se^2 / 2),
+         lo = exp(signal - 1.96 * se), hi = exp(signal + 1.96 * se),
+         actual = exp(observed),
+         lost = counterfactual - actual)
+
+total_lost    <- sum(lost$lost)
+total_lost_lo <- sum(lost$lo - lost$actual)
+total_lost_hi <- sum(lost$hi - lost$actual)
+share_lost    <- total_lost / sum(lost$counterfactual)
+```
+
+```{r}
+#| label: fig-components
+#| fig-cap: "Smoothed level and seasonal component of the selected model (log scale). The COVID window is shaded; there the components are estimated from the data on either side."
+#| fig-height: 4.5
+
+comp |>
+  select(Month, Level = level, Seasonal = season) |>
+  pivot_longer(-Month) |>
+  ggplot(aes(as.Date(Month), value)) +
+  annotate("rect", xmin = as.Date(covid_start), xmax = as.Date(covid_end),
+           ymin = -Inf, ymax = Inf, alpha = 0.15, fill = "firebrick") +
+  geom_line(colour = "steelblue4") +
+  facet_wrap(vars(name), ncol = 1, scales = "free_y") +
+  labs(x = NULL, y = NULL)
+```
+
+```{r}
+#| label: fig-counterfactual
+#| fig-cap: "Observed nights sold (black) and the smoothed estimate of demand without COVID-19 (blue, with 95% interval) during the COVID window. The vertical gap is the estimated demand lost."
+#| fig-height: 3.6
+
+comp |>
+  filter(Month >= yearmonth("2019 Jan"), Month <= yearmonth("2022 Dec")) |>
+  mutate(cf = exp(signal + se^2 / 2), lo = exp(signal - 1.96 * se), hi = exp(signal + 1.96 * se),
+         cf = if_else(period == "COVID window", cf, NA_real_),
+         lo = if_else(period == "COVID window", lo, NA_real_),
+         hi = if_else(period == "COVID window", hi, NA_real_)) |>
+  ggplot(aes(as.Date(Month))) +
+  geom_ribbon(aes(ymin = lo, ymax = hi), fill = "steelblue", alpha = 0.25, na.rm = TRUE) +
+  geom_line(aes(y = cf), colour = "steelblue4", linewidth = 0.8, na.rm = TRUE) +
+  geom_line(aes(y = exp(observed)), colour = "black") +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = "Nights sold (thousands)")
+```
+
+The smoothed level (@fig-components) falls gently before 2020 and is lower after the gap than before it; inside the gap the smoother bridges the two, just as in the Nile experiment. The seasonal component hardly changes over the decade, consistent with the near-zero seasonal smoothing in Project 3. Because the COVID months were not used to estimate anything, the smoothed signal in the window is a model-based estimate of what demand would have been without the pandemic (@fig-counterfactual). Comparing it with what was actually sold, the model estimates that about **`r fmt(total_lost / 1000, 1)` million stay unit nights** were lost between March 2020 and March 2022 (95% band from the smoother: `r fmt(total_lost_lo / 1000, 1)` to `r fmt(total_lost_hi / 1000, 1)` million), or `r pct(share_lost)` of the demand expected over those 25 months. The band only reflects uncertainty about the components given the model; it does not include uncertainty about the model itself, for example about the shape of the path between the pre- and post-COVID levels.
+
+# Forecast evaluation
+
+## Forecasts on the test set
+
+The state space forecasts are produced by `kforecast()` on the log scale and back-transformed with the bias adjustment $\exp(\hat\mu + \hat\sigma^2/2)$. For comparison, the seasonal naive benchmark, the Project 1 SARIMA(0,1,1)(0,1,1)~12~ (COVID as missing) and the best Project 3 model, damped Holt–Winters on the regression-imputed series, are refitted here with the same code as in those projects.
+
+```{r}
+#| label: reference-models
+
+# Project 3 imputation of the COVID window (regression on the non-COVID months)
+impute_covid <- function(df) {
+  n_win <- month_num(covid_end) - month_num(covid_start) + 2
+  df <- df |>
+    as_tibble() |>
+    mutate(t = row_number(), mon = factor(month(as.Date(Month))),
+           in_win = Month >= covid_start & Month <= covid_end,
+           ramp = pmin(pmax((month_num(Month) - month_num(covid_start) + 1) / n_win, 0), 1),
+           y_obs = if_else(in_win, NA_real_, log(nights)))
+  fit <- lm(y_obs ~ t + mon + ramp, data = df)
+  df |>
+    mutate(nights_imp = if_else(in_win, exp(predict(fit, newdata = df)), nights)) |>
+    select(Month, nights, nights_imp, period)
+}
+
+ref_forecasts <- function(d, h) {
+  dB <- d |> mutate(nights = if_else(period == "COVID window", NA_real_, nights))
+  dI <- impute_covid(d) |> as_tsibble(index = Month)
+  summ <- function(fc) {
+    dist <- fc[[fabletools::distribution_var(fc)]]
+    tibble(.model = fc$.model, Month = fc$Month, mean = fc$.mean,
+           lo95 = quantile(dist, 0.025), hi95 = quantile(dist, 0.975))
+  }
+  bind_rows(
+    summ(forecast(d  |> model(`Seasonal naive` = SNAIVE(nights)), h = h)),
+    summ(forecast(dB |> model(`SARIMA (Project 1)` =
+                                ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))), h = h)),
+    summ(forecast(dI |> model(`Damped HW (Project 3)` =
+                                ETS(log(nights_imp) ~ error("A") + trend("Ad") + season("A"))),
+                  h = h))
+  )
+}
+
+ssm_forecasts <- function(fits, months) {
+  bind_rows(lapply(names(fits), function(nm) {
+    fc <- kforecast(fits[[nm]]$kf, fits[[nm]]$sys, length(months))
+    tibble(.model = nm, Month = months,
+           mean = exp(fc$mean + fc$var / 2),
+           lo95 = exp(fc$mean - 1.96 * sqrt(fc$var)),
+           hi95 = exp(fc$mean + 1.96 * sqrt(fc$var)))
+  }))
+}
+
+fc_all <- bind_rows(ref_forecasts(train, 24), ssm_forecasts(ssm_fits, test$Month)) |>
+  left_join(as_tibble(test) |> select(Month, actual = nights), by = "Month")
+```
+
+```{r}
+#| label: tbl-accuracy
+#| tbl-cap: "Test set accuracy, July 2024 to June 2026 (thousands of nights). MASE uses the in-sample seasonal naive error as its scale. Bias is the mean of actual minus forecast, so a positive value means the model under-forecast."
+
+mase_scale <- mean(abs(diff(train$nights, lag = 12)))
+model_order <- c("Seasonal naive", "SARIMA (Project 1)", "Damped HW (Project 3)", names(ssm_fits))
+
+results <- fc_all |>
+  group_by(Model = .model) |>
+  summarise(RMSE = sqrt(mean((actual - mean)^2)),
+            MAE  = mean(abs(actual - mean)),
+            MAPE = 100 * mean(abs(actual - mean) / actual),
+            MASE = mean(abs(actual - mean)) / mase_scale,
+            Bias = mean(actual - mean),
+            cover95 = mean(actual >= lo95 & actual <= hi95),
+            width95 = mean(hi95 - lo95), .groups = "drop") |>
+  mutate(Model = factor(Model, levels = model_order)) |>
+  arrange(Model)
+
+results |>
+  mutate(cover95 = pct(cover95)) |>
+  kable(digits = c(0, 1, 1, 2, 2, 1, 0, 0),
+        col.names = c("Model", "RMSE", "MAE", "MAPE (%)", "MASE", "Bias", "Cover 95%", "Mean 95% width"),
+        format.args = list(big.mark = ","))
+
+rg <- function(m, col) results[[col]][results$Model == m]
+best_ssm_test <- names(ssm_fits)[which.min(sapply(names(ssm_fits), rg, col = "RMSE"))]
+best_all_test <- as.character(results$Model[which.min(results$RMSE)])
+```
+
+```{r}
+#| label: fig-forecasts
+#| fig-cap: "Test set forecasts with 95% prediction intervals for the four state space models. Black: observed values."
+#| fig-height: 5
+
+hist_df <- nights_sold |> as_tibble() |> filter(Month >= yearmonth("2022 Apr"))
+
+fc_all |>
+  filter(.model %in% names(ssm_fits)) |>
+  mutate(.model = factor(.model, levels = names(ssm_fits))) |>
+  ggplot(aes(as.Date(Month))) +
+  geom_ribbon(aes(ymin = lo95, ymax = hi95), fill = "steelblue", alpha = 0.25) +
+  geom_line(aes(y = mean), colour = "steelblue4", linewidth = 0.6) +
+  geom_line(data = hist_df, aes(as.Date(Month), nights), colour = "black", linewidth = 0.4) +
+  facet_wrap(vars(.model), ncol = 2) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = "Nights sold (thousands)")
+```
+
+## Rolling-origin cross-validation
+
+As in Projects 1 and 3, I repeat the comparison over 13 origins from June 2024 to June 2025, forecasting 1 to 12 months ahead. At each origin every model is re-estimated; the state space models start the optimiser from their training-set estimates to save time. The two state space models with the lowest AIC are included.
+
+```{r}
+#| label: cv
+#| cache: true
+
+cv_models <- ssm_tbl$Model[order(ssm_tbl$AIC)][1:2]
+cv_origins <- 13; cv_h <- 12
+
+cv_fc <- bind_rows(lapply(seq_len(cv_origins), function(i) {
+  d <- nights_sold |> filter(Month < test_start + (i - 1))
+  months <- max(d$Month) + 1:cv_h
+  y_d <- log(d$nights); y_d[d$period == "COVID window"] <- NA
+  fits_i <- lapply(setNames(cv_models, cv_models), function(nm)
+    fit_structural(y_d, specs[[nm]]$trend, specs[[nm]]$ar, start = ssm_fits[[nm]]$theta))
+  bind_rows(ref_forecasts(d, cv_h), ssm_forecasts(fits_i, months)) |>
+    group_by(.model) |> mutate(h = row_number(), origin = i) |> ungroup()
+})) |>
+  left_join(as_tibble(nights_sold) |> select(Month, actual = nights), by = "Month") |>
+  filter(!is.na(actual))
+
+cv_overall <- cv_fc |>
+  group_by(Model = .model) |>
+  summarise(RMSE = sqrt(mean((actual - mean)^2)),
+            MAE  = mean(abs(actual - mean)),
+            MAPE = 100 * mean(abs(actual - mean) / actual),
+            n = n(), .groups = "drop") |>
+  arrange(RMSE)
+
+cv_by_h <- cv_fc |>
+  group_by(.model, h) |>
+  summarise(RMSE = sqrt(mean((actual - mean)^2)), .groups = "drop")
+```
+
+```{r}
+#| label: tbl-cv
+#| tbl-cap: "Rolling-origin cross-validation (13 origins, horizons 1 to 12 months). RMSE and MAE in thousands of nights."
+
+cv_overall |> kable(digits = c(0, 1, 1, 2, 0))
+cvr <- function(m) cv_overall$RMSE[cv_overall$Model == m]
+cv_best <- cv_overall$Model[1]
+cv_best_ssm <- cv_overall$Model[cv_overall$Model %in% names(ssm_fits)][1]
+```
+
+```{r}
+#| label: fig-cv
+#| fig-cap: "Rolling-origin cross-validation RMSE by forecast horizon."
+#| fig-height: 3.5
+
+ggplot(cv_by_h, aes(h, RMSE, colour = .model)) +
+  geom_line() + geom_point(size = 1) +
+  scale_x_continuous(breaks = 1:12) +
+  labs(x = "Forecast horizon (months)", y = "RMSE (thousands)", colour = NULL)
+```
+
+## Results
+
+**Test set.** The best state space model on the test set is **`r best_ssm_test`** (RMSE `r fmt(rg(best_ssm_test, "RMSE"))`), against `r fmt(rg("Seasonal naive", "RMSE"))` for seasonal naive, `r fmt(rg("SARIMA (Project 1)", "RMSE"))` for the Project 1 SARIMA and `r fmt(rg("Damped HW (Project 3)", "RMSE"))` for the Project 3 damped Holt–Winters model. The lowest RMSE overall belongs to `r best_all_test`. The trend specification again decides the ranking: the BSM, whose almost fixed slope comes from the pre-COVID decline, has an RMSE of `r fmt(rg("BSM", "RMSE"))`, `r if (rg("BSM", "RMSE") > rg("Seasonal naive", "RMSE")) "worse than the seasonal naive benchmark," else ""` while letting the trend die out (damped trend, RMSE `r fmt(rg("Damped trend", "RMSE"))`) or removing it (level + seasonal, RMSE `r fmt(rg("Level + seasonal", "RMSE"))`) helps a great deal (@fig-forecasts). `r if (best_ssm_test != best_aic) paste0("Note that the best model on the test set, ", best_ssm_test, ", is not the one AIC selected (", best_aic, ", RMSE ", fmt(rg(best_aic, "RMSE")), "): the AIC differences were small, and as in Project 3 one-step fit in the training data is a weak guide to which trend will extrapolate best.") else ""` `r if (all(sapply(names(ssm_fits), rg, col = "Bias") > 0)) "All four state space models under-forecast (positive bias): demand grew faster in 2024–2026 than the models' level and trend imply." else ""` The 95% intervals of the state space models cover at least `r pct(min(sapply(names(ssm_fits), rg, col = "cover95")))` of the test months, but they are wide (mean width `r fmt(rg(best_ssm_test, "width95"), 0)` thousand nights for the best model, against `r fmt(rg("SARIMA (Project 1)", "width95"), 0)` for the SARIMA): with a random-walk level and no irregular noise, all the uncertainty accumulates in the level as the horizon grows.
+
+**Cross-validation.** Over 13 origins the best model is **`r cv_best`** (RMSE `r fmt(cvr(cv_best))`) and the best state space model is `r cv_best_ssm` (RMSE `r fmt(cvr(cv_best_ssm))`). For reference, `r paste0(if (cv_best != "SARIMA (Project 1)") paste0("the SARIMA has ", fmt(cvr("SARIMA (Project 1)")), ", ") else "", "the Project 3 damped Holt-Winters model has ", fmt(cvr("Damped HW (Project 3)")), " and seasonal naive ", fmt(cvr("Seasonal naive")))` (@tbl-cv, @fig-cv). The Project 1 SARIMA therefore remains the model to beat over short horizons, and the best state space model is competitive with the Project 3 exponential smoothing model without needing any imputation.
+
+# Comparison across the portfolio
+
+```{r}
+#| label: tbl-portfolio
+#| tbl-cap: "How each project handled the COVID-19 months, and the resulting test set RMSE (thousands of nights). All models are refitted in this document except the Project 3 regression, whose value is taken from the Project 3 report."
+
+tibble(
+  Project = c("1", "3", "3", "4"),
+  `Treatment of the COVID months` = c("Missing values inside ARIMA",
+                                      "Intervention terms in a regression with ARIMA errors",
+                                      "Imputed by regression, then damped Holt-Winters",
+                                      paste0("Missing values in a structural model (", best_ssm_test, ")")),
+  `Test RMSE` = c(fmt(rg("SARIMA (Project 1)", "RMSE")), "see Project 3",
+                  fmt(rg("Damped HW (Project 3)", "RMSE")), fmt(rg(best_ssm_test, "RMSE"))),
+  `What the treatment gives in addition` = c("Nothing extra; the months are ignored",
+                                             "Size, shape and persistence of the shock",
+                                             "A complete series for any method",
+                                             "Smoothed counterfactual and an estimate of demand lost, with uncertainty")
+) |> kable()
+```
+
+The state space approach is the only one in the portfolio that treats the COVID months as missing *and* says something about them: the smoother turns the gap into an estimate of lost demand with an uncertainty band. In forecasting terms, `r if (rg(best_ssm_test, "RMSE") < min(rg("SARIMA (Project 1)", "RMSE"), rg("Damped HW (Project 3)", "RMSE"))) "the best structural model beats both the Project 1 and Project 3 models on the test set" else if (rg(best_ssm_test, "RMSE") < max(rg("SARIMA (Project 1)", "RMSE"), rg("Damped HW (Project 3)", "RMSE"))) "the best structural model sits between the Project 1 SARIMA and the Project 3 damped Holt-Winters model on the test set" else "the structural models do not beat the Project 1 and Project 3 models on the test set"`, and the results across all three projects point the same way: once the break is handled sensibly, the remaining differences come from how each model extrapolates the trend.
+
+# Discussion
+
+## Key findings {#sec-findings}
+
+1. **My implementation is correct.** It reproduces the published Nile estimates ($\hat\sigma^2_\varepsilon$ = `r fmt(nile_var[1], 0)`, $\hat\sigma^2_\xi$ = `r fmt(nile_var[2], 1)`, log likelihood `r fmt(-nile_opt$value, 2)`), handles missing observations as theory predicts, and its steady-state gain is close to the simple exponential smoothing parameter estimated by `ETS()` (`r fmt(K_bar_filter, 3)` against `r fmt(alpha_ses, 3)`).
+2. **Variances are hard to estimate.** In the simulation study the level variance was estimated at essentially zero in `r pct(sim_zero_lo)` of samples when the signal-to-noise ratio was low ($q = 0.02$), yet the forecast intervals still covered `r pct(sim_cover)` of the next observations.
+3. **Treating COVID as missing works for state space models.** All four structural models fitted with the COVID months skipped `r if (min(ssm_tbl$"Ljung-Box p") > 0.05) "pass the white noise test on their innovations" else "were checked against the white noise standard"`. The earlier `StructTS()` failure was largely an optimisation problem: my estimates have a log likelihood `r fmt(sv("BSM", "Log lik") - st_ll_mine, 1)` units higher.
+4. **The trend decides the forecasts.** The `r best_aic` model has the lowest AIC; on the test set `r best_ssm_test` is the best state space model (RMSE `r fmt(rg(best_ssm_test, "RMSE"))`), and the BSM with its fixed slope is the worst (RMSE `r fmt(rg("BSM", "RMSE"))`).
+5. **Demand lost to COVID-19.** The smoother estimates that about `r fmt(total_lost / 1000, 1)` million stay unit nights (`r pct(share_lost)` of expected demand) were lost between March 2020 and March 2022.
+
+## Issues and limitations
+
+* **Approximate diffuse initialisation.** Using $\kappa = 10^7$ and dropping the first 13 innovations works (it reproduces the Nile results), but the exact diffuse filter is more accurate when the initial states matter, and with 13 diffuse states it uses up more than a year of data.
+* **Boundary estimates.** Several variances are estimated at or near zero. Likelihood ratio tests and AIC behave non-standardly on the boundary, so the AIC comparison is only a guide.
+* **The counterfactual depends on the model.** Inside the gap the smoother interpolates with a random-walk level, so the estimated path between the pre- and post-COVID levels is close to a straight line. A model in which the "no-COVID" world kept growing at the pre-2020 rate would give a different estimate of the demand lost.
+* **Wide intervals.** With no irregular noise the forecast uncertainty is all in the level and grows like a random walk, so the intervals are wide at longer horizons.
+* **Same test window throughout.** All projects use one test window and a short cross-validation period that both fall in the post-COVID recovery, which favours models that do not extrapolate a negative trend.
+
+## What I would do differently
+
+I would implement the exact diffuse Kalman filter, add the Project 3 intervention terms as regression effects inside the state space model so that the COVID months can be used rather than skipped (combining the strengths of Projects 3 and 4), and try a multiplicative or log-normal observation model in the original units. A Bayesian treatment of the variances, with priors that keep them away from zero, would also address the boundary problem seen in the simulation study.
+
+# References {.unnumbered}
+
+* Durbin, J. and Koopman, S.J. (2012) *Time Series Analysis by State Space Methods*, 2nd edn. Oxford: Oxford University Press.
+* Harvey, A.C. (1989) *Forecasting, Structural Time Series Models and the Kalman Filter*. Cambridge: Cambridge University Press.
+* Hyndman, R.J. and Athanasopoulos, G. (2021) *Forecasting: Principles and Practice*, 3rd edn. Melbourne: OTexts. Available at: <https://otexts.com/fpp3/>.
+* Statistics South Africa (2026) *Tourist Accommodation (Statistical release P6410)*, time series data. Pretoria: Statistics South Africa. Available at: <https://www.statssa.gov.za/?page_id=1854&PPN=P6410>.
+
+# Reproducibility {.unnumbered}
+
+All results are produced by the code in this document from `tourist_data.xlsx` (Stats SA P6410) in the `data/` folder and the `Nile` data set in base R. The Kalman filter, smoother, likelihood and forecasting functions are my own code; `fable` is used only for the reference models. The simulation, the model fitting and the cross-validation chunks are cached, so delete the cache folder if the data change. The random seed is set in the setup chunk.
+
+```{r}
+#| label: session-info
+#| echo: false
+sessionInfo()
+```

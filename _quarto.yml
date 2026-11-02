@@ -15,13 +15,13 @@ website:
           - href: projects/index.qmd
             text: All projects
           - text: "---"
-          - href: projects/project-01/project-01-sarima-tourism_v4.qmd
+          - href: projects/project-01/project-01-sarima-tourism.qmd
             text: "Project 1: ARIMA and SARIMA"
-          - href: projects/project-02/project-02-garch-zar_v4.qmd
+          - href: projects/project-02/project-02-garch-zar.qmd
             text: "Project 2: GARCH volatility"
-          - href: projects/project-03/project-03-covid-intervention-tourism_v2.qmd
+          - href: projects/project-03/project-03-regression-ets-tourism.qmd
             text: "Project 3: Modelling the COVID shock"
-          - href: projects/project-04/project-04-placeholder.qmd
+          - href: projects/project-04/project-04-state-space-tourism.qmd
             text: "Project 4: Kalman filter"
       - text: Journal
         menu:
