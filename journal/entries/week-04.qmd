@@ -1,18 +1,24 @@
 ---
 title: "Week 04"
-description: "*[Session or topic covered this week]*"
+description: "*Operators, Stationarity and White Noise*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
 
-## What I did
+**Session or topic covered:Operators, Stationarity and White Noise **
 
-## What I learned
+This week covered operators, stationarity and white noise, and at first it felt like the most abstract week so far. When I first saw the lag operator I didn't see the point of it, because writing $Ly_t = y_{t-1}$ seemed like a complicated way of saying the previous value. It made more sense once I thought of an operator as a shortcut for moving around a time series. $L$ takes you back one period and the lead operator $F$ takes you forward one. Many real series, like GDP, inflation and exchange rates, depend on their own recent past, and operators give a clean way to describe that without writing out the value two periods ago every time.
 
-## Difficulties or open questions
+The direction of the shift confused me. Take the series 3, 7, 4, 8, 5 observed at times 1 to 5. Applying $L$ gives NA, 3, 7, 4, 8. At time 2 the lagged value is 3, which was observed at time 1, and at time 1 there is nothing earlier, so there is a gap. I expected a lag to move things backwards, but the subscript records where the value came from, not where it is displayed, so the series shifts to the right. The lead operator does the opposite and gives 7, 4, 8, 5, NA. I also had to be careful not to read $L^2 y_t$ as $(y_{t-1})^2$. It means applying the lag twice, so $L^2 y_t = y_{t-2}$. Lagging is also different from differencing: lagging only moves a value to a new time label, while $(1 - L)y_t = y_t - y_{t-1}$ creates a new series of changes.
 
-## What to do next
+For stationarity, what helped me was realising that the values can move around while the rules generating them stay the same. The mean and variance are constant, and the covariance between two observations depends only on how far apart they are, not on when they occur. This made it clear why a series with a trend or seasonality is not stationary, since in both cases the mean depends on when you look. I didn't see the point of ergodicity at first, but it clicked when I realised we only ever observe one realisation of a process. Ergodicity means that averaging over time along that one long series gives the same answer as averaging across all the series the process could have produced.
 
-**Links:** *[related tutorials and projects]*
+Transformations were the most confusing part for me. I thought the reason for transforming a series was to make it normal, but I had mixed two ideas together. A log or Box-Cox transform is mainly there to stabilise the variance when the spread grows with the level, because it shrinks large values more than small ones. Normality is a separate question. Once I separated these, I could match each problem to its fix: a transformation for growing variance, removing a fitted trend when the trend is deterministic, differencing when it is stochastic, seasonal differencing for seasonality that doesn't fade, and splitting the sample at a structural break. Transforming before differencing also makes sense, since stabilising the variance first often means less differencing is needed.
+
+I didn't understand why white noise got so much attention until I saw that it is what we want our residuals to look like. If the residuals still show a pattern, the model has missed something, and if they look like white noise, it has captured the linear structure. Weak white noise only requires the observations to be uncorrelated, while strict white noise requires them to be independent and identically distributed. The key for me was that uncorrelated does not mean independent, because correlation only measures linear relationships. For example, if $x$ is equally likely to be $-1$, $0$ or $1$ and $y = x^2$, then $y$ is completely determined by $x$, yet their correlation is zero, because $y$ rises whether $x$ is negative or positive, so there is no straight-line pattern.
+
+Finally, we saw how dependence can be built from white noise using
+$$
+y_t = \tfrac{1}{3}(\varepsilon_{t-1} + \varepsilon_t + \varepsilon_{t+1}).
+$$
+Each value is a weighted combination of three nearby shocks. The shocks are unrelated, but $y_t$ and $y_{t+1}$ share $\varepsilon_t$ and $\varepsilon_{t+1}$, so they are correlated and the result is no longer white noise. This is called filtering. I also saw why this filter is useful for smoothing but not for forecasting, because it uses $\varepsilon_{t+1}$, a future shock we would never have when making a forecast. A forecasting model can only combine current and past shocks.

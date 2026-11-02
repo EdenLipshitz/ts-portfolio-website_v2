@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Residuals, Train and Test Samples and Validation">
 
 <title>Week 03 – Time Series Portfolio</title>
 <style>
@@ -296,17 +296,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -318,7 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    Residuals, Train and Test Samples and Validation
   </div>
 </div>
 
@@ -335,25 +326,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Session or topic covered:Residuals, Train and Test Samples and Validation</strong></p>
+<p>I actually really enjoyed the start of this weeks material. I found the concepts generally quite standard for a statistical anlysis and I could start visualizing a bit more clearly how a project or genuine analysis could shape.</p>
+<p>My first issues started to appear when I initially didn’t really understand the difference between residuals and forecast errors because both are essentially measuring how wrong the model is. I now understand that the key difference is what data we are measuring the error on. Residuals are the errors on data the model has already seen and used to fit itself, so they are useful for checking the model’s fit and diagnosing problems. Forecast errors are the errors on new data that the model has never seen, so they tell us how well the model actually predicts. This also helped me understand why small residuals don’t necessarily mean the model will forecast well.</p>
+<p>One thing I found particularly interesting was the idea of temporal ordering in forecasting. I initially thought that when splitting data into training and validation sets, we could simply choose observations randomly, like we often do in other statistical or machine learning problems. However, with time series, this would allow information from the future to influence the model, which would not reflect how forecasting actually works. The rule that every training observation must come before every validation observation makes intuitive sense because, when we are forecasting the future, we can only use information that was available at that point in time. This also helped me understand temporal leakage as a model that can appear extremely accurate if it accidentally uses future information, but that accuracy is misleading because we would not have access to that information when making a real forecast.</p>
+<p>I initially found rolling-origin evaluation quite confusing, but it helped once I thought of it as repeatedly pretending to be at different points in the past. Instead of having one fixed train/test split, we move the forecasting point forward through time, each time using only the data that would have been available at that point to predict what comes next. For example, we could use January–June to predict July, then January–July to predict August, and so on. I used an LLM to visually understand how the validation metjods could work and this immediatley helped to understand it in a bit of a different and intuitive way. We then look at all the forecast errors together. I like the intuition that we are essentially asking, if I had been making forecasts at different points in time, how well would my model have performed? This gives us a more reliable picture of forecasting accuracy than relying on just one train/test split.</p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -809,22 +790,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 03"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Residuals, Train and Test Samples and Validation"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:Residuals, Train and Test Samples and Validation**</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>I actually really enjoyed the start of this weeks material. I found the concepts generally quite standard for a statistical anlysis and I could start visualizing a bit more clearly how a project or genuine analysis could shape. </span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>My first issues started to appear when I initially didn’t really understand the difference between residuals and forecast errors because both are essentially measuring how wrong the model is. I now understand that the key difference is what data we are measuring the error on. Residuals are the errors on data the model has already seen and used to fit itself, so they are useful for checking the model’s fit and diagnosing problems. Forecast errors are the errors on new data that the model has never seen, so they tell us how well the model actually predicts. This also helped me understand why small residuals don’t necessarily mean the model will forecast well.</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>One thing I found particularly interesting was the idea of temporal ordering in forecasting. I initially thought that when splitting data into training and validation sets, we could simply choose observations randomly, like we often do in other statistical or machine learning problems. However, with time series, this would allow information from the future to influence the model, which would not reflect how forecasting actually works. The rule that every training observation must come before every validation observation makes intuitive sense because, when we are forecasting the future, we can only use information that was available at that point in time. This also helped me understand temporal leakage as a model that can appear extremely accurate if it accidentally uses future information, but that accuracy is misleading because we would not have access to that information when making a real forecast.</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>I initially found rolling-origin evaluation quite confusing, but it helped once I thought of it as repeatedly pretending to be at different points in the past. Instead of having one fixed train/test split, we move the forecasting point forward through time, each time using only the data that would have been available at that point to predict what comes next. For example, we could use January–June to predict July, then January–July to predict August, and so on. I used an LLM to visually understand how the validation metjods could work and this immediatley helped to understand it in a bit of a different and intuitive way. We then look at all the forecast errors together. I like the intuition that we are essentially asking, if I had been making forecasts at different points in time, how well would my model have performed? This gives us a more reliable picture of forecasting accuracy than relying on just one train/test split.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

@@ -445,7 +445,7 @@
     "href": "journal/index.html",
     "title": "Journal",
     "section": "",
-    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\nStationarity and Random Walks\n\n\n\n\n\n\nWeek 03\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 04\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
+    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\nStationarity and Random Walks\n\n\n\n\n\n\nWeek 03\n\n\nResiduals, Train and Test Samples and Validation\n\n\n\n\n\n\nWeek 04\n\n\nOperators, Stationarity and White Noise\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
   },
   {
     "objectID": "journal/entries/week-11.html",
@@ -592,35 +592,7 @@
     "href": "journal/entries/week-03.html",
     "title": "Week 03",
     "section": "",
-    "text": "Date: [date of entry]\nSession or topic covered:"
-  },
-  {
-    "objectID": "journal/entries/week-03.html#what-i-did",
-    "href": "journal/entries/week-03.html#what-i-did",
-    "title": "Week 03",
-    "section": "What I did",
-    "text": "What I did"
-  },
-  {
-    "objectID": "journal/entries/week-03.html#what-i-learned",
-    "href": "journal/entries/week-03.html#what-i-learned",
-    "title": "Week 03",
-    "section": "What I learned",
-    "text": "What I learned"
-  },
-  {
-    "objectID": "journal/entries/week-03.html#difficulties-or-open-questions",
-    "href": "journal/entries/week-03.html#difficulties-or-open-questions",
-    "title": "Week 03",
-    "section": "Difficulties or open questions",
-    "text": "Difficulties or open questions"
-  },
-  {
-    "objectID": "journal/entries/week-03.html#what-to-do-next",
-    "href": "journal/entries/week-03.html#what-to-do-next",
-    "title": "Week 03",
-    "section": "What to do next",
-    "text": "What to do next\nLinks: [related tutorials and projects]"
+    "text": "Session or topic covered:Residuals, Train and Test Samples and Validation\nI actually really enjoyed the start of this weeks material. I found the concepts generally quite standard for a statistical anlysis and I could start visualizing a bit more clearly how a project or genuine analysis could shape.\nMy first issues started to appear when I initially didn’t really understand the difference between residuals and forecast errors because both are essentially measuring how wrong the model is. I now understand that the key difference is what data we are measuring the error on. Residuals are the errors on data the model has already seen and used to fit itself, so they are useful for checking the model’s fit and diagnosing problems. Forecast errors are the errors on new data that the model has never seen, so they tell us how well the model actually predicts. This also helped me understand why small residuals don’t necessarily mean the model will forecast well.\nOne thing I found particularly interesting was the idea of temporal ordering in forecasting. I initially thought that when splitting data into training and validation sets, we could simply choose observations randomly, like we often do in other statistical or machine learning problems. However, with time series, this would allow information from the future to influence the model, which would not reflect how forecasting actually works. The rule that every training observation must come before every validation observation makes intuitive sense because, when we are forecasting the future, we can only use information that was available at that point in time. This also helped me understand temporal leakage as a model that can appear extremely accurate if it accidentally uses future information, but that accuracy is misleading because we would not have access to that information when making a real forecast.\nI initially found rolling-origin evaluation quite confusing, but it helped once I thought of it as repeatedly pretending to be at different points in the past. Instead of having one fixed train/test split, we move the forecasting point forward through time, each time using only the data that would have been available at that point to predict what comes next. For example, we could use January–June to predict July, then January–July to predict August, and so on. I used an LLM to visually understand how the validation metjods could work and this immediatley helped to understand it in a bit of a different and intuitive way. We then look at all the forecast errors together. I like the intuition that we are essentially asking, if I had been making forecasts at different points in time, how well would my model have performed? This gives us a more reliable picture of forecasting accuracy than relying on just one train/test split.\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "journal/entries/week-01.html",
@@ -697,35 +669,7 @@
     "href": "journal/entries/week-04.html",
     "title": "Week 04",
     "section": "",
-    "text": "Date: [date of entry]\nSession or topic covered:"
-  },
-  {
-    "objectID": "journal/entries/week-04.html#what-i-did",
-    "href": "journal/entries/week-04.html#what-i-did",
-    "title": "Week 04",
-    "section": "What I did",
-    "text": "What I did"
-  },
-  {
-    "objectID": "journal/entries/week-04.html#what-i-learned",
-    "href": "journal/entries/week-04.html#what-i-learned",
-    "title": "Week 04",
-    "section": "What I learned",
-    "text": "What I learned"
-  },
-  {
-    "objectID": "journal/entries/week-04.html#difficulties-or-open-questions",
-    "href": "journal/entries/week-04.html#difficulties-or-open-questions",
-    "title": "Week 04",
-    "section": "Difficulties or open questions",
-    "text": "Difficulties or open questions"
-  },
-  {
-    "objectID": "journal/entries/week-04.html#what-to-do-next",
-    "href": "journal/entries/week-04.html#what-to-do-next",
-    "title": "Week 04",
-    "section": "What to do next",
-    "text": "What to do next\nLinks: [related tutorials and projects]"
+    "text": "Session or topic covered:Operators, Stationarity and White Noise \nThis week covered operators, stationarity and white noise, and at first it felt like the most abstract week so far. When I first saw the lag operator I didn’t see the point of it, because writing \\(Ly_t = y_{t-1}\\) seemed like a complicated way of saying the previous value. It made more sense once I thought of an operator as a shortcut for moving around a time series. \\(L\\) takes you back one period and the lead operator \\(F\\) takes you forward one. Many real series, like GDP, inflation and exchange rates, depend on their own recent past, and operators give a clean way to describe that without writing out the value two periods ago every time.\nThe direction of the shift confused me. Take the series 3, 7, 4, 8, 5 observed at times 1 to 5. Applying \\(L\\) gives NA, 3, 7, 4, 8. At time 2 the lagged value is 3, which was observed at time 1, and at time 1 there is nothing earlier, so there is a gap. I expected a lag to move things backwards, but the subscript records where the value came from, not where it is displayed, so the series shifts to the right. The lead operator does the opposite and gives 7, 4, 8, 5, NA. I also had to be careful not to read \\(L^2 y_t\\) as \\((y_{t-1})^2\\). It means applying the lag twice, so \\(L^2 y_t = y_{t-2}\\). Lagging is also different from differencing: lagging only moves a value to a new time label, while \\((1 - L)y_t = y_t - y_{t-1}\\) creates a new series of changes.\nFor stationarity, what helped me was realising that the values can move around while the rules generating them stay the same. The mean and variance are constant, and the covariance between two observations depends only on how far apart they are, not on when they occur. This made it clear why a series with a trend or seasonality is not stationary, since in both cases the mean depends on when you look. I didn’t see the point of ergodicity at first, but it clicked when I realised we only ever observe one realisation of a process. Ergodicity means that averaging over time along that one long series gives the same answer as averaging across all the series the process could have produced.\nTransformations were the most confusing part for me. I thought the reason for transforming a series was to make it normal, but I had mixed two ideas together. A log or Box-Cox transform is mainly there to stabilise the variance when the spread grows with the level, because it shrinks large values more than small ones. Normality is a separate question. Once I separated these, I could match each problem to its fix: a transformation for growing variance, removing a fitted trend when the trend is deterministic, differencing when it is stochastic, seasonal differencing for seasonality that doesn’t fade, and splitting the sample at a structural break. Transforming before differencing also makes sense, since stabilising the variance first often means less differencing is needed.\nI didn’t understand why white noise got so much attention until I saw that it is what we want our residuals to look like. If the residuals still show a pattern, the model has missed something, and if they look like white noise, it has captured the linear structure. Weak white noise only requires the observations to be uncorrelated, while strict white noise requires them to be independent and identically distributed. The key for me was that uncorrelated does not mean independent, because correlation only measures linear relationships. For example, if \\(x\\) is equally likely to be \\(-1\\), \\(0\\) or \\(1\\) and \\(y = x^2\\), then \\(y\\) is completely determined by \\(x\\), yet their correlation is zero, because \\(y\\) rises whether \\(x\\) is negative or positive, so there is no straight-line pattern.\nFinally, we saw how dependence can be built from white noise using \\[\ny_t = \\tfrac{1}{3}(\\varepsilon_{t-1} + \\varepsilon_t + \\varepsilon_{t+1}).\n\\] Each value is a weighted combination of three nearby shocks. The shocks are unrelated, but \\(y_t\\) and \\(y_{t+1}\\) share \\(\\varepsilon_t\\) and \\(\\varepsilon_{t+1}\\), so they are correlated and the result is no longer white noise. This is called filtering. I also saw why this filter is useful for smoothing but not for forecasting, because it uses \\(\\varepsilon_{t+1}\\), a future shock we would never have when making a forecast. A forecasting model can only combine current and past shocks.\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "journal/entries/week-06.html",

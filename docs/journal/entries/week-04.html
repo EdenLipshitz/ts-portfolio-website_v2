@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Operators, Stationarity and White Noise">
 
 <title>Week 04 – Time Series Portfolio</title>
 <style>
@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -296,17 +325,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -318,7 +338,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    <em>Operators, Stationarity and White Noise</em>
   </div>
 </div>
 
@@ -335,25 +355,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Session or topic covered:Operators, Stationarity and White Noise </strong></p>
+<p>This week covered operators, stationarity and white noise, and at first it felt like the most abstract week so far. When I first saw the lag operator I didn’t see the point of it, because writing <span class="math inline">\(Ly_t = y_{t-1}\)</span> seemed like a complicated way of saying the previous value. It made more sense once I thought of an operator as a shortcut for moving around a time series. <span class="math inline">\(L\)</span> takes you back one period and the lead operator <span class="math inline">\(F\)</span> takes you forward one. Many real series, like GDP, inflation and exchange rates, depend on their own recent past, and operators give a clean way to describe that without writing out the value two periods ago every time.</p>
+<p>The direction of the shift confused me. Take the series 3, 7, 4, 8, 5 observed at times 1 to 5. Applying <span class="math inline">\(L\)</span> gives NA, 3, 7, 4, 8. At time 2 the lagged value is 3, which was observed at time 1, and at time 1 there is nothing earlier, so there is a gap. I expected a lag to move things backwards, but the subscript records where the value came from, not where it is displayed, so the series shifts to the right. The lead operator does the opposite and gives 7, 4, 8, 5, NA. I also had to be careful not to read <span class="math inline">\(L^2 y_t\)</span> as <span class="math inline">\((y_{t-1})^2\)</span>. It means applying the lag twice, so <span class="math inline">\(L^2 y_t = y_{t-2}\)</span>. Lagging is also different from differencing: lagging only moves a value to a new time label, while <span class="math inline">\((1 - L)y_t = y_t - y_{t-1}\)</span> creates a new series of changes.</p>
+<p>For stationarity, what helped me was realising that the values can move around while the rules generating them stay the same. The mean and variance are constant, and the covariance between two observations depends only on how far apart they are, not on when they occur. This made it clear why a series with a trend or seasonality is not stationary, since in both cases the mean depends on when you look. I didn’t see the point of ergodicity at first, but it clicked when I realised we only ever observe one realisation of a process. Ergodicity means that averaging over time along that one long series gives the same answer as averaging across all the series the process could have produced.</p>
+<p>Transformations were the most confusing part for me. I thought the reason for transforming a series was to make it normal, but I had mixed two ideas together. A log or Box-Cox transform is mainly there to stabilise the variance when the spread grows with the level, because it shrinks large values more than small ones. Normality is a separate question. Once I separated these, I could match each problem to its fix: a transformation for growing variance, removing a fitted trend when the trend is deterministic, differencing when it is stochastic, seasonal differencing for seasonality that doesn’t fade, and splitting the sample at a structural break. Transforming before differencing also makes sense, since stabilising the variance first often means less differencing is needed.</p>
+<p>I didn’t understand why white noise got so much attention until I saw that it is what we want our residuals to look like. If the residuals still show a pattern, the model has missed something, and if they look like white noise, it has captured the linear structure. Weak white noise only requires the observations to be uncorrelated, while strict white noise requires them to be independent and identically distributed. The key for me was that uncorrelated does not mean independent, because correlation only measures linear relationships. For example, if <span class="math inline">\(x\)</span> is equally likely to be <span class="math inline">\(-1\)</span>, <span class="math inline">\(0\)</span> or <span class="math inline">\(1\)</span> and <span class="math inline">\(y = x^2\)</span>, then <span class="math inline">\(y\)</span> is completely determined by <span class="math inline">\(x\)</span>, yet their correlation is zero, because <span class="math inline">\(y\)</span> rises whether <span class="math inline">\(x\)</span> is negative or positive, so there is no straight-line pattern.</p>
+<p>Finally, we saw how dependence can be built from white noise using <span class="math display">\[
+y_t = \tfrac{1}{3}(\varepsilon_{t-1} + \varepsilon_t + \varepsilon_{t+1}).
+\]</span> Each value is a weighted combination of three nearby shocks. The shocks are unrelated, but <span class="math inline">\(y_t\)</span> and <span class="math inline">\(y_{t+1}\)</span> share <span class="math inline">\(\varepsilon_t\)</span> and <span class="math inline">\(\varepsilon_{t+1}\)</span>, so they are correlated and the result is no longer white noise. This is called filtering. I also saw why this filter is useful for smoothing but not for forecasting, because it uses <span class="math inline">\(\varepsilon_{t+1}\)</span>, a future shock we would never have when making a forecast. A forecasting model can only combine current and past shocks.</p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -809,22 +823,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 04"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*Operators, Stationarity and White Noise*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:Operators, Stationarity and White Noise **</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>This week covered operators, stationarity and white noise, and at first it felt like the most abstract week so far. When I first saw the lag operator I didn't see the point of it, because writing $Ly_t = y_{t-1}$ seemed like a complicated way of saying the previous value. It made more sense once I thought of an operator as a shortcut for moving around a time series. $L$ takes you back one period and the lead operator $F$ takes you forward one. Many real series, like GDP, inflation and exchange rates, depend on their own recent past, and operators give a clean way to describe that without writing out the value two periods ago every time.</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>The direction of the shift confused me. Take the series 3, 7, 4, 8, 5 observed at times 1 to 5. Applying $L$ gives NA, 3, 7, 4, 8. At time 2 the lagged value is 3, which was observed at time 1, and at time 1 there is nothing earlier, so there is a gap. I expected a lag to move things backwards, but the subscript records where the value came from, not where it is displayed, so the series shifts to the right. The lead operator does the opposite and gives 7, 4, 8, 5, NA. I also had to be careful not to read $L^2 y_t$ as $(y_{t-1})^2$. It means applying the lag twice, so $L^2 y_t = y_{t-2}$. Lagging is also different from differencing: lagging only moves a value to a new time label, while $(1 - L)y_t = y_t - y_{t-1}$ creates a new series of changes.</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>For stationarity, what helped me was realising that the values can move around while the rules generating them stay the same. The mean and variance are constant, and the covariance between two observations depends only on how far apart they are, not on when they occur. This made it clear why a series with a trend or seasonality is not stationary, since in both cases the mean depends on when you look. I didn't see the point of ergodicity at first, but it clicked when I realised we only ever observe one realisation of a process. Ergodicity means that averaging over time along that one long series gives the same answer as averaging across all the series the process could have produced.</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>Transformations were the most confusing part for me. I thought the reason for transforming a series was to make it normal, but I had mixed two ideas together. A log or Box-Cox transform is mainly there to stabilise the variance when the spread grows with the level, because it shrinks large values more than small ones. Normality is a separate question. Once I separated these, I could match each problem to its fix: a transformation for growing variance, removing a fitted trend when the trend is deterministic, differencing when it is stochastic, seasonal differencing for seasonality that doesn't fade, and splitting the sample at a structural break. Transforming before differencing also makes sense, since stabilising the variance first often means less differencing is needed.</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>I didn't understand why white noise got so much attention until I saw that it is what we want our residuals to look like. If the residuals still show a pattern, the model has missed something, and if they look like white noise, it has captured the linear structure. Weak white noise only requires the observations to be uncorrelated, while strict white noise requires them to be independent and identically distributed. The key for me was that uncorrelated does not mean independent, because correlation only measures linear relationships. For example, if $x$ is equally likely to be $-1$, $0$ or $1$ and $y = x^2$, then $y$ is completely determined by $x$, yet their correlation is zero, because $y$ rises whether $x$ is negative or positive, so there is no straight-line pattern.</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>Finally, we saw how dependence can be built from white noise using</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>y_t = \tfrac{1}{3}(\varepsilon_{t-1} + \varepsilon_t + \varepsilon_{t+1}).</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>Each value is a weighted combination of three nearby shocks. The shocks are unrelated, but $y_t$ and $y_{t+1}$ share $\varepsilon_t$ and $\varepsilon_{t+1}$, so they are correlated and the result is no longer white noise. This is called filtering. I also saw why this filter is useful for smoothing but not for forecasting, because it uses $\varepsilon_{t+1}$, a future shock we would never have when making a forecast. A forecasting model can only combine current and past shocks.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
