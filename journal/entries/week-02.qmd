@@ -1,18 +1,9 @@
 ---
 title: "Week 02"
-description: "*[Session or topic covered this week]*"
+description: "Stationarity and Random Walks"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
+**Stationary and Random Walks**
+Generally I found this weeks work quite intuitive. Generally the weeks are moving quite slowly with small amounts of theory covered everything. At first when I revised this weeks content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time-series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off. I now understand that the difference comes from how each process responds to shocks. In a random walk, shocks accumulate over time, meaning that the further ahead we forecast, the more uncertainty builds up. In a stationary AR(1) process, however, the effects of shocks gradually disappear and the process returns towards its long-run mean. Therefore, although uncertainty initially increases as the forecasting horizon grows, it eventually reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary.
 
-## What I did
-
-## What I learned
-
-## Difficulties or open questions
-
-## What to do next
-
-**Links:** *[related tutorials and projects]*

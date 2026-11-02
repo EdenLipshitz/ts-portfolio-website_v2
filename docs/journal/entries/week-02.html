@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Stationarity and Random Walks">
 
 <title>Week 02 – Time Series Portfolio</title>
 <style>
@@ -296,17 +296,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -318,7 +309,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    Stationarity and Random Walks
   </div>
 </div>
 
@@ -335,25 +326,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Stationary and Random Walks</strong> Generally I found this weeks work quite intuitive. Generally the weeks are moving quite slowly with small amounts of theory covered everything. At first when I revised this weeks content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time-series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off. I now understand that the difference comes from how each process responds to shocks. In a random walk, shocks accumulate over time, meaning that the further ahead we forecast, the more uncertainty builds up. In a stationary AR(1) process, however, the effects of shocks gradually disappear and the process returns towards its long-run mean. Therefore, although uncertainty initially increases as the forecasting horizon grows, it eventually reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary.</p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -809,22 +786,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 02"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "Stationarity and Random Walks"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>**Stationary and Random Walks**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Generally I found this weeks work quite intuitive. Generally the weeks are moving quite slowly with small amounts of theory covered everything. At first when I revised this weeks content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time-series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off. I now understand that the difference comes from how each process responds to shocks. In a random walk, shocks accumulate over time, meaning that the further ahead we forecast, the more uncertainty builds up. In a stationary AR(1) process, however, the effects of shocks gradually disappear and the process returns towards its long-run mean. Therefore, although uncertainty initially increases as the forecasting horizon grows, it eventually reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

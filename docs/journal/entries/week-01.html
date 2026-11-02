@@ -296,17 +296,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -335,25 +326,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Introdcution to Time Series</strong></p>
+<p>Coming into the 1st lesson of the semesterI had a very trivial understanding of what time series was and during the first lecture we covered very basic foundational definition base level of time series such as ordering the types of time series we can get the spacing and how dependents can be made visible. I think the most challenging concept for me in the week 1 content was definitely the temporal regularity aggregation effect. At first I don’t really understand the idea of smoothing out high frequency structures and how aggregation reveals a frequency structure, these words were quite complicated and confusing and therefore after a bit of research understand exactly what this meant. Usually when I feel confused about a topic I ask AI To explain the concept not just mathematically or statistically but intuitively so that I can understand the idea in a trivial way and build it up into a deaper foundational understanindg. I now understand that the granularity is when you change the resolution so that you can see a deeper pattern as you change the granularity you’re going to notice deeper patterns when you focus on a smaller subset or deep dive into a particular segment. For example hourly temperature data may show fluctuations throughout the day while daily data only shows the average temperature the temperature doesn’t really change but we’re seeing a different level of detail as we move further in. So now I understand what the notes meant by nothing changes about the underlying process only what we see changes.</p>
+<p>During class we discussed the difference between prediction and forecasting, which I initially found confusing. After doing some research, I now understand forecasting as a specific type of prediction. Both involve using available information to estimate an unknown quantity, but forecasting specifically focuses on estimating a future value, often by using historical time-series data and assuming that patterns observed in the past may continue into the future. Prediction is a broader concept and does not necessarily involve time or historical data.</p>
+<p>From the initial introduction to time series I think one of the most important slides and conversations we had in class was around the goals and planning. The loop of the forecasting to goal to plan to implement and to outcome is extremely important in understanding the life cycle of the forecaster data and helps me understand how exactly to go about setting a goal and planning how we should go about organizing and managing the data which I think will be extremely helpful and impact when dealing with major projects.</p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -812,19 +792,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>**Introdcution to Time Series**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>Coming into the 1st lesson of the semesterI had a very trivial understanding of what time series was and during the first lecture we covered very basic foundational definition base level of time series such as ordering the types of time series we can get the spacing and how dependents can be made visible. I think the most challenging concept for me in the week 1 content was definitely the temporal regularity aggregation effect. At first I don't really understand the idea of smoothing out high frequency structures and how aggregation reveals a frequency structure, these words were quite complicated and confusing and therefore after a bit of research understand exactly what this meant. Usually when I feel confused about a topic I ask AI To explain the concept not just mathematically or statistically but intuitively so that I can understand the idea in a trivial way and build it up into a deaper foundational understanindg. I now understand that the granularity is when you change the resolution so that you can see a deeper pattern as you change the granularity you're going to notice deeper patterns when you focus on a smaller subset or deep dive into a particular segment. For example hourly temperature data may show fluctuations throughout the day while daily data only shows the average temperature the temperature doesn't really change but we're seeing a different level of detail as we move further in. So now I understand what the notes meant by nothing changes about the underlying process only what we see changes.</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>During class we discussed the difference between prediction and forecasting, which I initially found confusing. After doing some research, I now understand forecasting as a specific type of prediction. Both involve using available information to estimate an unknown quantity, but forecasting specifically focuses on estimating a future value, often by using historical time-series data and assuming that patterns observed in the past may continue into the future. Prediction is a broader concept and does not necessarily involve time or historical data.</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>From the initial introduction to time series I think one of the most important slides and conversations we had in class was around the goals and planning. The loop of the forecasting to goal to plan to implement and to outcome is extremely important in understanding the life cycle of the forecaster data and helps me understand how exactly to go about setting a goal and planning how we should go about organizing and managing the data which I think will be extremely helpful and impact when dealing with major projects.</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

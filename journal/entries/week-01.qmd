@@ -3,16 +3,13 @@ title: "Week 01"
 description: "*[Session or topic covered this week]*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
+**Introdcution to Time Series**
 
-## What I did
+Coming into the 1st lesson of the semesterI had a very trivial understanding of what time series was and during the first lecture we covered very basic foundational definition base level of time series such as ordering the types of time series we can get the spacing and how dependents can be made visible. I think the most challenging concept for me in the week 1 content was definitely the temporal regularity aggregation effect. At first I don't really understand the idea of smoothing out high frequency structures and how aggregation reveals a frequency structure, these words were quite complicated and confusing and therefore after a bit of research understand exactly what this meant. Usually when I feel confused about a topic I ask AI To explain the concept not just mathematically or statistically but intuitively so that I can understand the idea in a trivial way and build it up into a deaper foundational understanindg. I now understand that the granularity is when you change the resolution so that you can see a deeper pattern as you change the granularity you're going to notice deeper patterns when you focus on a smaller subset or deep dive into a particular segment. For example hourly temperature data may show fluctuations throughout the day while daily data only shows the average temperature the temperature doesn't really change but we're seeing a different level of detail as we move further in. So now I understand what the notes meant by nothing changes about the underlying process only what we see changes.
 
-## What I learned
+During class we discussed the difference between prediction and forecasting, which I initially found confusing. After doing some research, I now understand forecasting as a specific type of prediction. Both involve using available information to estimate an unknown quantity, but forecasting specifically focuses on estimating a future value, often by using historical time-series data and assuming that patterns observed in the past may continue into the future. Prediction is a broader concept and does not necessarily involve time or historical data.
 
-## Difficulties or open questions
+From the initial introduction to time series I think one of the most important slides and conversations we had in class was around the goals and planning. The loop of the forecasting to goal to plan to implement and to outcome is extremely important in understanding the life cycle of the forecaster data and helps me understand how exactly to go about setting a goal and planning how we should go about organizing and managing the data which I think will be extremely helpful and impact when dealing with major projects.
 
-## What to do next
 
-**Links:** *[related tutorials and projects]*

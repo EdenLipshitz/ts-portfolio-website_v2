@@ -445,7 +445,7 @@
     "href": "journal/index.html",
     "title": "Journal",
     "section": "",
-    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 03\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 04\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
+    "text": "A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the AI use log.\n\n\n\n\n\n\n\n\n\n\n\n\nWeek\n\n\n\nTopic\n\n\n\n\n\n\n\n\nWeek 01\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 02\n\n\nStationarity and Random Walks\n\n\n\n\n\n\nWeek 03\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 04\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 05\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 06\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 07\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 08\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 09\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 10\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 11\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nWeek 12\n\n\n[Session or topic covered this week]\n\n\n\n\n\n\nNo matching items\n Back to top"
   },
   {
     "objectID": "journal/entries/week-11.html",
@@ -627,35 +627,7 @@
     "href": "journal/entries/week-01.html",
     "title": "Week 01",
     "section": "",
-    "text": "Date: [date of entry]\nSession or topic covered:"
-  },
-  {
-    "objectID": "journal/entries/week-01.html#what-i-did",
-    "href": "journal/entries/week-01.html#what-i-did",
-    "title": "Week 01",
-    "section": "What I did",
-    "text": "What I did"
-  },
-  {
-    "objectID": "journal/entries/week-01.html#what-i-learned",
-    "href": "journal/entries/week-01.html#what-i-learned",
-    "title": "Week 01",
-    "section": "What I learned",
-    "text": "What I learned"
-  },
-  {
-    "objectID": "journal/entries/week-01.html#difficulties-or-open-questions",
-    "href": "journal/entries/week-01.html#difficulties-or-open-questions",
-    "title": "Week 01",
-    "section": "Difficulties or open questions",
-    "text": "Difficulties or open questions"
-  },
-  {
-    "objectID": "journal/entries/week-01.html#what-to-do-next",
-    "href": "journal/entries/week-01.html#what-to-do-next",
-    "title": "Week 01",
-    "section": "What to do next",
-    "text": "What to do next\nLinks: [related tutorials and projects]"
+    "text": "Introdcution to Time Series\nComing into the 1st lesson of the semesterI had a very trivial understanding of what time series was and during the first lecture we covered very basic foundational definition base level of time series such as ordering the types of time series we can get the spacing and how dependents can be made visible. I think the most challenging concept for me in the week 1 content was definitely the temporal regularity aggregation effect. At first I don’t really understand the idea of smoothing out high frequency structures and how aggregation reveals a frequency structure, these words were quite complicated and confusing and therefore after a bit of research understand exactly what this meant. Usually when I feel confused about a topic I ask AI To explain the concept not just mathematically or statistically but intuitively so that I can understand the idea in a trivial way and build it up into a deaper foundational understanindg. I now understand that the granularity is when you change the resolution so that you can see a deeper pattern as you change the granularity you’re going to notice deeper patterns when you focus on a smaller subset or deep dive into a particular segment. For example hourly temperature data may show fluctuations throughout the day while daily data only shows the average temperature the temperature doesn’t really change but we’re seeing a different level of detail as we move further in. So now I understand what the notes meant by nothing changes about the underlying process only what we see changes.\nDuring class we discussed the difference between prediction and forecasting, which I initially found confusing. After doing some research, I now understand forecasting as a specific type of prediction. Both involve using available information to estimate an unknown quantity, but forecasting specifically focuses on estimating a future value, often by using historical time-series data and assuming that patterns observed in the past may continue into the future. Prediction is a broader concept and does not necessarily involve time or historical data.\nFrom the initial introduction to time series I think one of the most important slides and conversations we had in class was around the goals and planning. The loop of the forecasting to goal to plan to implement and to outcome is extremely important in understanding the life cycle of the forecaster data and helps me understand how exactly to go about setting a goal and planning how we should go about organizing and managing the data which I think will be extremely helpful and impact when dealing with major projects.\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "appendix/code-and-data.html",
@@ -718,35 +690,7 @@
     "href": "journal/entries/week-02.html",
     "title": "Week 02",
     "section": "",
-    "text": "Date: [date of entry]\nSession or topic covered:"
-  },
-  {
-    "objectID": "journal/entries/week-02.html#what-i-did",
-    "href": "journal/entries/week-02.html#what-i-did",
-    "title": "Week 02",
-    "section": "What I did",
-    "text": "What I did"
-  },
-  {
-    "objectID": "journal/entries/week-02.html#what-i-learned",
-    "href": "journal/entries/week-02.html#what-i-learned",
-    "title": "Week 02",
-    "section": "What I learned",
-    "text": "What I learned"
-  },
-  {
-    "objectID": "journal/entries/week-02.html#difficulties-or-open-questions",
-    "href": "journal/entries/week-02.html#difficulties-or-open-questions",
-    "title": "Week 02",
-    "section": "Difficulties or open questions",
-    "text": "Difficulties or open questions"
-  },
-  {
-    "objectID": "journal/entries/week-02.html#what-to-do-next",
-    "href": "journal/entries/week-02.html#what-to-do-next",
-    "title": "Week 02",
-    "section": "What to do next",
-    "text": "What to do next\nLinks: [related tutorials and projects]"
+    "text": "Stationary and Random Walks Generally I found this weeks work quite intuitive. Generally the weeks are moving quite slowly with small amounts of theory covered everything. At first when I revised this weeks content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time-series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off. I now understand that the difference comes from how each process responds to shocks. In a random walk, shocks accumulate over time, meaning that the further ahead we forecast, the more uncertainty builds up. In a stationary AR(1) process, however, the effects of shocks gradually disappear and the process returns towards its long-run mean. Therefore, although uncertainty initially increases as the forecasting horizon grows, it eventually reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary.\n\n\n\n\n\n Back to top"
   },
   {
     "objectID": "journal/entries/week-04.html",
