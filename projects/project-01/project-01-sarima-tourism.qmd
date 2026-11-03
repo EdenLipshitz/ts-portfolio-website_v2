@@ -28,7 +28,7 @@ theme_set(theme_minimal(base_size = 11))
 options(knitr.table.format = "pipe")
 
 # Date the Stats SA file was downloaded (used in the data statement)
-download_date <- "[DD Month 2026]"   # <- EDIT THIS ONE LINE
+download_date <- "20 August 2026"
 
 # Path to the Stats SA P6410 spreadsheet. The file lives in the data/
 # folder at the root of the portfolio. Watch out for trailing
@@ -62,7 +62,7 @@ pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%
 
 **Data:** Real-world, publicly available data from Statistics South Africa (Stats SA), *Tourist Accommodation* statistical release P6410, series B64100 (stay unit nights sold, total industry, thousands), monthly. Analysis window January 2015 to June 2026. Full source details are in @sec-data-source.
 
-**Methods:** The analysis follows the seven-step ARIMA modelling procedure from the lectures (plot, transform, difference, identify, estimate, check residuals, forecast). In the main analysis the COVID months (March 2020 to March 2022) are treated as missing, so all models are estimated from the pre- and post-COVID data only; fitting the same models with the COVID months kept is reported as a sensitivity check. The transformation and the orders of differencing are chosen from the pre-COVID data using time plots, the Guerrero estimate of the Box–Cox parameter, ACF/PACF plots and unit root tests. A candidate SARIMA model is identified by hand from the ACF and PACF and compared with the model chosen automatically by `ARIMA()`. Each candidate is checked with residual plots, Ljung–Box tests and, for the final model, its MA roots. The candidates are then compared with four benchmarks (mean, naive, seasonal naive, drift) and simpler ARMA and ARIMA models on a 24-month test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding-window rolling-origin cross-validation over horizons of 1 to 12 months.
+**Methods:** The analysis follows the seven-step ARIMA modelling procedure from the lectures (plot, transform, difference, identify, estimate, check residuals, forecast). In the main analysis the COVID months (March 2020 to March 2022) are treated as missing, so all models are estimated from the pre- and post-COVID data only; fitting the same models with the COVID months kept is reported as a sensitivity check. The transformation and the orders of differencing are chosen from the pre-COVID data using time plots, ACF/PACF plots and unit root tests, with the Guerrero estimate of the Box–Cox parameter reported as a check. A candidate SARIMA model is identified by hand from the ACF and PACF and compared with the model chosen automatically by `ARIMA()`. Each candidate is checked with residual plots, Ljung–Box tests and, for the final model, its MA roots. The candidates are then compared with four benchmarks (mean, naive, seasonal naive, drift) and simpler ARMA and ARIMA models on a 24-month test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding-window rolling-origin cross-validation over horizons of 1 to 12 months.
 
 **Target variable:** This analysis focuses on stay unit nights sold. This was chosen over income level and occupancy rate because it appears to be the most consistent. Occupancy rate can change when room supply changes and income can be disrupted by inflation or other general increases. Unit nights sold tells a very clear demand picture with minimal factors affecting the quality of the variable over the years.
 
@@ -252,7 +252,7 @@ stl_feats <- pre_covid |>
 lambda_g <- pre_covid |> features(nights, guerrero) |> pull(lambda_guerrero)
 ```
 
-The log scale is used because the seasonal swings are roughly proportional to the level (they shrank when the level fell in 2020 and 2021), so a log transformation turns multiplicative seasonality into additive seasonality. The Guerrero method, applied to the pre-COVID data, gives a Box–Cox parameter of $\hat\lambda$ = `r fmt(lambda_g, 2)`. A value of 0 corresponds to the log; the log is kept because it is easy to interpret (differences of logs are approximately percentage changes) and because the same transformation is used in Projects 3 and 4. On the pre-COVID data the strength of seasonality is `r fmt(stl_feats$seasonal_strength_year, 2)` and the strength of trend is `r fmt(stl_feats$trend_strength, 2)` (both measured from 0 to 1), so seasonality is the dominant feature. In @fig-stl the COVID collapse is absorbed almost entirely by the trend and the remainder, while the seasonal component is unaffected.
+The log scale is used because the seasonal swings are roughly proportional to the level (they shrank when the level fell in 2020 and 2021), so a log transformation turns multiplicative seasonality into additive seasonality. The Guerrero method, applied to the pre-COVID data, gives a Box–Cox parameter of $\hat\lambda$ = `r fmt(lambda_g, 2)`. This is below 0 (the log), close to an inverse transformation, so the Guerrero method suggests an even stronger transformation than the log. I do not follow this estimate, for three reasons. First, the Guerrero method chooses $\lambda$ by relating the spread of the series to its level across subseries, and before COVID the level barely moves (@tbl-data-overview: all pre-COVID months lie between about 1,900 and 2,600 thousand), so there is little information about how the variance changes with the level and $\hat\lambda$ is poorly determined. Second, the clearest evidence on that relationship comes from 2020 and 2021, when the seasonal swings shrank roughly in proportion to the level, which is the behaviour the log describes. Third, the log is easy to interpret (differences of logs are approximately percentage changes) and is used in Projects 3 and 4, which keeps the projects comparable. The transformation is therefore a judgement call, and comparing the log with a Box–Cox transformation at $\hat\lambda$ is noted as a limitation. On the pre-COVID data the strength of seasonality is `r fmt(stl_feats$seasonal_strength_year, 2)` and the strength of trend is `r fmt(stl_feats$trend_strength, 2)` (both measured from 0 to 1), so seasonality is the dominant feature. In @fig-stl the COVID collapse is absorbed almost entirely by the trend and the remainder, while the seasonal component is unaffected.
 
 ## Hotels compared with the total industry
 
@@ -351,7 +351,7 @@ the SARIMA(0,1,1)(0,1,1)~12~ or "airline" model. No constant is included because
 The modelling follows the seven-step ARIMA modelling procedure (the Box and Jenkins workflow) from the lectures. Each step maps to a part of this report:
 
 1. **Plot the data:** the time plot, seasonal plots and STL decomposition in the exploratory analysis.
-2. **Transform if needed to stabilise the variance:** a log transformation, supported by the proportional seasonal swings and the Guerrero estimate.
+2. **Transform if needed to stabilise the variance:** a log transformation, chosen from the proportional seasonal swings. The Guerrero estimate is reported but not followed, for the reasons given in the exploratory analysis.
 3. **Difference until approximately stationary:** one seasonal and one first difference of log nights sold, chosen from the unit root tests, the ACF and the time plot.
 4. **Identify candidate orders from the ACF and PACF:** the lag 1 spike, together with the seasonal difference, points to the SARIMA(0,1,1)(0,1,1)~12~ model. The model chosen automatically by `ARIMA()` is included as an alternative candidate.
 5. **Estimate by maximum likelihood:** `ARIMA()` in `fable`, in the main analysis and in the sensitivity check.
@@ -498,7 +498,7 @@ The two designs give very different models from the same data. Under Design A th
 
 ```{r}
 #| label: fig-roots
-#| fig-cap: "Inverse MA roots of the Design B airline model. All roots lie inside the unit circle, so the model is invertible."
+#| fig-cap: "Inverse MA roots of the Design B airline model. All roots lie inside the unit circle, so the model is invertible. The twelve roots near the circle come from the seasonal MA term (modulus about 0.94); the single root near 0.33 comes from the non-seasonal MA term."
 #| fig-height: 3.5
 
 fit |>
