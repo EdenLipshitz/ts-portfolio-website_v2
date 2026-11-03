@@ -23,7 +23,7 @@ library(patchwork)
 
 set.seed(2026)
 theme_set(theme_minimal(base_size = 11))
-options(knitr.table.format = "pipe")
+options(knitr.table.format = "pipe", knitr.kable.NA = "–")
 
 # Data settings -----------------------------------------------------------
 # The FRED series is downloaded once and saved, so later renders use the
@@ -907,6 +907,16 @@ Using the preferred `r final_model` model fitted to the full sample, the conditi
 ## What I would do differently
 
 I would add a skewed Student t distribution (available in `rugarch`) so that the GARCH VaR can reflect the positive skewness found in the backtest, use a longer test period so that the 1% tests have more power, and add expected shortfall to the backtest. A further comparison would be a hidden Markov model that lets volatility switch between a small number of regimes, using the same returns and the same backtest.
+
+## Project reflections and development
+
+When I started Project 1 my first idea was to use financial data, but the volatility in the financial stock data I looked at made it a poor fit for ARIMA models. This project let me come back to that idea with the right tools. The most important shift for me was seeing that for returns the interesting part is not the mean but the variance: the direction of tomorrow's move in the rand is close to unpredictable, but how big the move will be is not. Seeing the ACF of the returns sit flat on zero while the ACF of the squared returns stayed significant out to 50 lags made volatility clustering concrete in a way the notes alone had not.
+
+Writing my own GARCH(1,1) likelihood was the part I learned the most from. Getting the same estimates as `rugarch` felt like the end of the job, but the simulation check showed it was not. In almost half of the simulated series my code returned $\hat\alpha = 0$ and $\hat\beta = 1$, even though I knew every series had GARCH effects. Working out why taught me that a correct likelihood is not enough: the optimiser also has to find its maximum. The cause was the size of the first BFGS step, and rescaling the objective fixed it. I would not have found this by comparing with a package, and it changed how I think about checking my own code. Agreement with another program shows the two agree on one dataset; a simulation shows whether the method works when the truth is known.
+
+The backtest also did not turn out the way I expected. I assumed the model with the best in-sample fit, the GJR-GARCH with t errors, would also have the best VaR coverage, but historical simulation, the simplest method, was the only one with no rejected tests. At first this looked like a contradiction. Looking at where the GARCH models failed showed that all their rejections came from too few hits in the lower tail, and checking the data showed that the returns are positively skewed, which a symmetric distribution cannot capture. This taught me to look at the pattern behind a test result rather than just counting rejections, and that different evaluation measures answer different questions: the loss functions measure overall forecast quality, while the coverage tests check calibration in one tail.
+
+Going forward, the natural next step is a GARCH model with a skewed Student t distribution, which would keep the advantages of GARCH (a volatility that reacts within days and the asymmetry between depreciation and appreciation) while fixing the lower tail. I would also like to add expected shortfall, because VaR says nothing about how large the losses are on the days it is exceeded.
 
 # Reproducibility {.unnumbered}
 
