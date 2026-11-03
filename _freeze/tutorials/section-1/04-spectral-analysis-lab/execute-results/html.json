@@ -1,0 +1,15 @@
+{
+  "hash": "310cd8f24737a6a53a6e0432f48129ea",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Spectral Analysis Lab\"\nsubtitle: \"Section 1: Time series foundations, ARIMA and volatility models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Topics covered:** Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models.\n:::\n\n## Overview of the key concepts\n\n*Summarise the main ideas of this session in your own words.*\n\n## Worked exercises\n\n*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*\n\n## Implementation in R\n\n*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# your code here\n```\n:::\n\n\n## Reflection\n\n**What was most challenging:**\n\n**What I now understand:**\n\n**Advantages and limitations of the methods:**\n\n**Links:** related projects and journal entries.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
