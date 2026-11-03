@@ -36,7 +36,8 @@ Stylised facts of USD/ZAR returns, ARCH and GARCH models, my own GARCH(1,1) like
 
 ### [Project 3: Modelling the COVID-19 shock](project-03/project-03-regression-ets-tourism.qmd){.stretched-link}
 
-ETS, regression with ARIMA errors and intervention terms, and a basic structural model fitted with the Kalman filter, compared with Project 1 on the same test set.
+
+Regression with ARIMA errors and COVID intervention terms, and exponential smoothing, compared with Project 1 on the same test set. 
 
 *Model comparison, real-world data*
 :::
@@ -48,7 +49,7 @@ ETS, regression with ARIMA errors and intervention terms, and a basic structural
 
 ### [Project 4: Building a Kalman filter](project-04/project-04-state-space-tourism.qmd){.stretched-link}
 
-My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series. In progress.
+My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series.
 
 *Implementation and simulation study*
 :::
