@@ -126,6 +126,8 @@ sigma_hat
 c(mine = sigma_hat, ses = sqrt(fit.ses$model$sigma2))
 ```
 
+My estimate of σ is 5.519, the same as ses(). It's the square root of the SSE divided by n − 2, because two parameters (α and ℓ₀) were estimated.
+
 ### Question 2: SES on the oil data
 
 ```{r}
@@ -160,6 +162,8 @@ rbind(by_hand = c(lower = my_lower, upper = my_upper),
 alpha = 0.999
 
 l = 110.888
+
+My interval (448.8, 635.9) is a bit narrower than R's (446.2, 638.5). This is because sd() divides by n − 1 and subtracts the mean of the residuals, while ses() uses the square root of SSE/(n − 2), so R's σ is slightly bigger.
 
 ### Question 3: Estimating α and ℓ₀ with optim
 
@@ -197,6 +201,8 @@ rbind(optim = c(l0 = opt$par[1],       alpha = opt$par[2]),
       ses   = c(l0 = ses_sub$model$par["l"], alpha = ses_sub$model$par["alpha"]))
 ```
 
+Yes, the values are basically the same: α = 0.834 and ℓ₀ = 446.58 from optim, and α = 0.834 and ℓ₀ = 446.59 from ses(). The tiny differences are just because the two optimisers stop in slightly different places.
+
 ### Question 4: Paperback and hardcover book sales
 
 #### a) SES
@@ -233,6 +239,8 @@ accuracy(ses_pb)["Training set", "RMSE"]
 accuracy(ses_hc)["Training set", "RMSE"]
 ```
 
+Both series are very noisy from day to day, but both drift upwards over the 30 days, and the trend looks stronger for hardcover (from around 140 to 260) than for paperback. There's no obvious weekly pattern, and the two series don't move together much (correlation of about 0.22). The SES forecasts are flat, so they ignore the upward drift.
+
 #### b) Holt
 
 ```{r}
@@ -268,6 +276,35 @@ To account for this, I also compared AICc, which penalises extra parameters. For
 Something I noticed is that both Holt fits have α and β of about 0.0001. This means the level and slope barely update at all, so Holt is basically fitting a straight trend line through the 30 days (slope of about 1.3 books per day for paperback and 3.3 for hardcover). The SES fits are more reactive, with α = 0.17 for paperback and 0.33 for hardcover.
 
 I would use Holt for hardcover, where the upward trend is clear, and SES or Holt for paperback, where the evidence for a trend is weak. With only 30 noisy days, I wouldn’t trust either method much beyond the 4-day horizon.
+
+#### c) Comparing the forecasts
+
+```{r}
+#| label: q4c-compare
+rbind(paperback_SES  = ses_pb$mean,
+      paperback_Holt = book_holt_pb$mean,
+      hardcover_SES  = ses_hc$mean,
+      hardcover_Holt = book_holt_hc$mean)
+```
+
+SES gives a flat forecast of about 207 paperbacks and 240 hardcovers a day, while Holt keeps rising (209 to 213 for paperback, 250 to 260 for hardcover). For hardcover I think Holt is best, because the upward trend is clear and SES will probably forecast too low. For paperback the two forecasts are very close over 4 days, and SES had the better AICc, so I'd go with SES.
+
+#### d) 95% prediction intervals for the first forecast
+
+```{r}
+#| label: q4d-intervals
+# By hand: first forecast +/- 1.96 * RMSE
+pi_rmse <- function(fit) fit$mean[1] + c(-1.96, 1.96) * rmse(fit)
+# From ses() and holt()
+pi_r <- function(fit) c(fit$lower[1, "95%"], fit$upper[1, "95%"])
+
+rbind(paperback_SES_RMSE  = pi_rmse(ses_pb),       paperback_SES_R  = pi_r(ses_pb),
+      paperback_Holt_RMSE = pi_rmse(book_holt_pb), paperback_Holt_R = pi_r(book_holt_pb),
+      hardcover_SES_RMSE  = pi_rmse(ses_hc),       hardcover_SES_R  = pi_r(ses_hc),
+      hardcover_Holt_RMSE = pi_rmse(book_holt_hc), hardcover_Holt_R = pi_r(book_holt_hc))
+```
+
+The intervals using the RMSE are narrower than R's in every case. The RMSE divides the SSE by n, but ses() divides by n − 2 and holt() by n − 4, to account for the estimated parameters. With only 30 days this makes a noticeable difference, especially for Holt.
 
 ### Question 5: Simulating from the state-space model
 
@@ -306,6 +343,8 @@ rbind(true  = c(l0 = l0_true,                alpha = a_true,                    
       optim = c(l0 = opt_ses$par[1],         alpha = opt_ses$par[2],               sigma = sigma_optim),
       ses   = c(l0 = fit_ses$model$par["l"], alpha = fit_ses$model$par["alpha"],   sigma = sqrt(fit_ses$model$sigma2)))
 ```
+
+The estimates are close to the true values (α = 0.316 vs 0.3, ℓ₀ = 49.07 vs 50, σ = 2.02 vs 2), and optim and ses() agree to three decimals. They aren't exactly the true values because this is only one simulated series.
 
 ## Implementation in R
 
