@@ -333,6 +333,7 @@ reg_coef <- tidy(fit_reg) |>
   filter(term %in% c("decay", "mar20", "may20", "step"))
 
 reg_coef |>
+  mutate(p.value = pfmt(p.value)) |>
   select(Term = term, Estimate = estimate,
          `Std. error` = std.error, `p-value` = p.value) |>
   kable(digits = 3)
