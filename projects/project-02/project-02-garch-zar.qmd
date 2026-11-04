@@ -74,6 +74,8 @@ Exchange rate returns behave very differently from the seasonal series in Projec
 
 The rand is a useful series for this because it is one of the most traded and most volatile emerging market currencies, and its history since 2010 includes several clear shocks, for example the dismissal of the finance minister in December 2015 and the start of the COVID-19 pandemic in March 2020.
 
+More recently, the rand swung from its weakest level in the sample in April 2025 to one of its strongest by early 2026, before the outbreak of war between the United States and Iran at the end of February 2026 brought a sudden return of large daily moves. This period falls inside the test period, so the models are evaluated on a real shock as it happened.
+
 **Research question.** *Do daily USD/ZAR returns show volatility clustering, and which conditional variance model (ARCH, GARCH or asymmetric GARCH, with normal or Student t errors) gives the most reliable one-day-ahead risk forecasts?*
 
 "Reliable" is made precise through Value-at-Risk (VaR). The one-day VaR at level $p$ is the $p$ quantile of the forecast distribution of tomorrow's return. A good model should be exceeded on close to a fraction $p$ of days, and those exceedances should not cluster.
