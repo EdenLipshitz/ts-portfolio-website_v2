@@ -58,7 +58,7 @@ month_num <- function(m) year(as.Date(m)) * 12 + month(as.Date(m))
 
 **Data:** Real-world, publicly available data. Statistics South Africa, *Tourist Accommodation* release P6410, series B64100 (stay unit nights sold, total industry), and the monthly average rand per US dollar exchange rate (FRED series EXSFUS), January 2015 to June 2026. Full source details are in @sec-data-source.
 
-**Methods:** *Regression:* a static regression with trend, seasonal dummies and COVID intervention terms, then a regression with ARIMA errors in which the intervention decay rate is chosen by profile likelihood, the seasonal form (dummies or Fourier terms) by AICc and the error model by the Box and Jenkins steps; the log exchange rate is added and forecast both ex ante and ex post. *Exponential smoothing:* ETS on the raw training data, then the full family of exponential smoothing methods on a series in which the COVID window is replaced by regression-based imputed values, with my own Holt–Winters code as a check. All models are diagnosed (Ljung and Box) and compared with the seasonal naive benchmark and the Project 1 SARIMA on the July 2024 to June 2026 test set and by rolling-origin cross-validation.
+**Methods:** *Regression:* a static regression with trend, seasonal dummies and COVID intervention terms, then a regression with ARIMA errors in which the intervention decay rate is chosen by profile likelihood, the seasonal form (dummies or Fourier terms) by AICc and the error model by the Box and Jenkins steps; the log exchange rate is added and forecast both ex ante and ex post. *Exponential smoothing:* ETS on the raw training data, then the full family of exponential smoothing methods on a series in which the COVID window is replaced by regression-based imputed values, with my own Holt–Winters code as a check, and, as a further check, the same models fitted to the post-COVID years only. All models are diagnosed (Ljung and Box) and compared with the seasonal naive benchmark and the Project 1 SARIMA on the July 2024 to June 2026 test set and by rolling-origin cross-validation.
 
 **Key findings:** A static regression fits the training data closely (adjusted $R^2$ = 0.965), but its errors are strongly autocorrelated, so its standard errors and intervals cannot be trusted. Letting the errors follow an ARIMA(2,1,1) process fixes this and describes the COVID shock with five parameters (a decaying shock with a half-life of about 2.5 months, two pulses and a level shift), giving a test RMSE of 98.8 against 101.6 for the Project 1 SARIMA. The exchange rate does not improve realistic forecasts. Exponential smoothing breaks on the raw data, where the level smoothing parameter goes to 1, but works once the COVID window is imputed: the damped Holt–Winters model was the most accurate model on the test set (RMSE 72.5), while the Project 1 SARIMA remained the best in rolling-origin cross-validation. Details are in @sec-findings.
 
@@ -490,7 +490,7 @@ This is the exponential smoothing version of the problem Project 1 had with SARI
 
 ## Imputing the COVID window with a regression {#sec-impute}
 
-Three ways of handling the window are possible: (1) fit only to the post-COVID months, which leaves just over two years of data to estimate 12 seasonal effects; (2) remove the estimated intervention effect from Part A; or (3) replace the COVID months by values that describe what demand would have looked like without the pandemic. Option (2) does not help much: the regression explains the shock partly through its ARIMA error, so the "adjusted" series still contains most of the recovery dynamics. I therefore use option (3), with a regression as the imputation model.
+Three ways of handling the window are possible: (1) fit only to the post-COVID months, which leaves just over two years of data to estimate 12 seasonal effects (tested as a check in @sec-post); (2) remove the estimated intervention effect from Part A; or (3) replace the COVID months by values that describe what demand would have looked like without the pandemic. Option (2) does not help much: the regression explains the shock partly through its ARIMA error, so the "adjusted" series still contains most of the recovery dynamics. I therefore use option (3), with a regression as the imputation model.
 
 The imputation regression is fitted only to the **non-COVID** months:
 
@@ -704,6 +704,143 @@ The seasonal models differ mainly in what they do with the trend:
 * `Damped HW` multiplies the slope by $\phi$ = `r fmt(ep("Damped HW", "phi"), 3)` each month, so its effect fades and the long-run forecast levels off. AICc `r fmt(ep("Damped HW", "AICc"))`.
 
 The AICc differences between the three seasonal models are `r if (diff(range(ets_tbl$AICc[ets_tbl$.model %in% c("ETS(A,N,A)", "Holt-Winters", "Damped HW")])) < 4) "small (less than 4), so the training data alone cannot separate them clearly" else "large enough to prefer the lowest AICc model"`. The choice matters much more for long horizons than for one-step fit, so the test set below is the real arbiter. My prior expectation, from the literature on damped trends (Gardner and McKenzie, 1985), is that a damped trend will forecast better than a linear one over two years.
+
+## Model B4: a check using the post-COVID years only {#sec-post}
+
+The imputation approach keeps all ten years of data but fills the COVID window with values that were never observed. A simpler alternative is to drop everything before April 2022 and fit exponential smoothing only to the post-COVID months. At first sight little should be lost, because exponential smoothing already gives the most weight to the latest observations. That is true for the *level*, but not for the other components here. In the models above, $\gamma$ and $\beta$ sit at or near their lower bounds, so the seasonal pattern and the slope are hardly updated at all: they stay close to their *initial* values, which are estimated from the whole series back to 2015. The early years therefore still shape the seasonal pattern and the trend, however small their weight in the level. Fitting to the post-COVID months only is the one way to let those components reflect current behaviour. The cost is data: April 2022 to June 2024 gives just `r nrow(filter(train, Month >= yearmonth("2022 Apr")))` months to estimate up to four smoothing parameters and 13 initial states.
+
+```{r}
+#| label: fit-post
+
+post_start <- yearmonth("2022 Apr")
+train_post <- train |> filter(Month >= post_start)
+ets_forms  <- c("ETS(A,N,A)", "Holt-Winters", "Damped HW")
+
+fit_post <- train_post |>
+  model(
+    `ETS(A,N,A)`   = ETS(log(nights) ~ error("A") + trend("N")  + season("A")),
+    `Holt-Winters` = ETS(log(nights) ~ error("A") + trend("A")  + season("A")),
+    `Damped HW`    = ETS(log(nights) ~ error("A") + trend("Ad") + season("A"))
+  )
+
+# Test set forecasts from both versions of each model
+fc_ets_tbl <- function(fit, label) {
+  forecast(fit, h = 24) |>
+    hilo(level = 95) |>
+    unpack_hilo(`95%`) |>
+    as_tibble() |>
+    select(Model = .model, Month, mean = .mean, lo95 = `95%_lower`, hi95 = `95%_upper`) |>
+    mutate(Data = label)
+}
+
+post_fc <- bind_rows(
+  fc_ets_tbl(fit_ets |> select(all_of(ets_forms)), "Imputed series, 2015 to 2024"),
+  fc_ets_tbl(fit_post, "Post-COVID only, 2022 to 2024")
+) |>
+  left_join(as_tibble(test) |> select(Month, actual = nights), by = "Month") |>
+  filter(!is.na(mean))
+
+sn_rmse <- train |>
+  model(SNAIVE(nights)) |>
+  forecast(h = 24) |>
+  as_tibble() |>
+  left_join(as_tibble(test) |> select(Month, actual = nights), by = "Month") |>
+  summarise(RMSE = sqrt(mean((actual - .mean)^2))) |>
+  pull(RMSE)
+
+post_acc <- post_fc |>
+  group_by(Model, Data) |>
+  summarise(RMSE = sqrt(mean((actual - mean)^2)),
+            MAPE = 100 * mean(abs(actual - mean) / actual),
+            `Cover 95%` = mean(actual >= lo95 & actual <= hi95),
+            `Mean 95% width` = mean(hi95 - lo95),
+            .groups = "drop") |>
+  mutate(Model = factor(Model, levels = ets_forms)) |>
+  arrange(Model, Data)
+
+post_par <- ets_par_tbl(fit_post) |>
+  mutate(.model = factor(.model, levels = ets_forms)) |>
+  arrange(.model)
+
+pa  <- function(m, d, col) post_acc[[col]][post_acc$Model == m & post_acc$Data == d]
+d_imp  <- "Imputed series, 2015 to 2024"
+d_post <- "Post-COVID only, 2022 to 2024"
+post_better <- ets_forms[vapply(ets_forms, function(m) isTRUE(pa(m, d_post, "RMSE") < pa(m, d_imp, "RMSE")), logical(1))]
+best_post   <- as.character(post_acc$Model[post_acc$Data == d_post][which.min(post_acc$RMSE[post_acc$Data == d_post])])
+```
+
+```{r}
+#| label: tbl-post-par
+#| tbl-cap: "Smoothing parameters of the seasonal exponential smoothing models fitted to the post-COVID months only (April 2022 to June 2024, log scale)."
+
+post_par |> rename(Model = .model) |> kable(digits = 4)
+```
+
+```{r}
+#| label: tbl-post-acc
+#| tbl-cap: "Test set accuracy (July 2024 to June 2026) of each seasonal exponential smoothing model fitted to the imputed series and to the post-COVID months only. RMSE and mean 95% interval width are in thousands of nights."
+
+post_acc |>
+  mutate(`Cover 95%` = pct(`Cover 95%`)) |>
+  kable(digits = c(0, 0, 1, 2, 0, 0), format.args = list(big.mark = ","))
+```
+
+```{r}
+#| label: fig-post-fc
+#| fig-cap: "Test set forecasts and 95% intervals from each model fitted to the imputed series (blue) and to the post-COVID months only (orange). Black: observed values."
+#| fig-height: 6.5
+
+ggplot(post_fc, aes(as.Date(Month))) +
+  geom_ribbon(aes(ymin = lo95, ymax = hi95, fill = Data), alpha = 0.15) +
+  geom_line(aes(y = mean, colour = Data), linewidth = 0.6) +
+  geom_line(data = as_tibble(test), aes(x = as.Date(Month), y = nights),
+            colour = "black", linewidth = 0.4, inherit.aes = FALSE) +
+  facet_wrap(vars(Model), ncol = 1) +
+  scale_colour_manual(values = c("steelblue4", "darkorange3")) +
+  scale_fill_manual(values = c("steelblue4", "darkorange3")) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  labs(x = NULL, y = "Nights sold (thousands)", colour = NULL, fill = NULL) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: fig-post-season
+#| fig-cap: "Seasonal effects (log scale) at the end of the training period, from the ETS(A,N,A) model fitted to the imputed series and to the post-COVID months only."
+#| fig-height: 3.2
+
+season_end <- function(fit, label) {
+  components(fit) |>
+    as_tibble() |>
+    filter(!is.na(season)) |>
+    slice_tail(n = 12) |>
+    mutate(month = month(as.Date(Month)), Data = label) |>
+    select(month, season, Data)
+}
+
+seas_cmp <- bind_rows(
+  season_end(fit_ets |> select(`ETS(A,N,A)`), d_imp),
+  season_end(fit_post |> select(`ETS(A,N,A)`), d_post)
+)
+seas_gap <- seas_cmp |>
+  pivot_wider(names_from = Data, values_from = season) |>
+  mutate(gap = abs(exp(.data[[d_post]] - .data[[d_imp]]) - 1))
+
+ggplot(seas_cmp, aes(month, season, colour = Data)) +
+  geom_hline(yintercept = 0, colour = "grey60") +
+  geom_line(linewidth = 0.6) + geom_point(size = 1.5) +
+  scale_x_continuous(breaks = 1:12, labels = month.abb) +
+  scale_colour_manual(values = c("steelblue4", "darkorange3")) +
+  labs(x = NULL, y = "Seasonal effect (log scale)", colour = NULL) +
+  theme(legend.position = "bottom")
+```
+
+**What happens with less data.** With only `r nrow(train_post)` months, each seasonal effect is effectively estimated from two or three values. Across the three post-COVID fits (@tbl-post-par), the level parameter ranges from $\hat\alpha$ = `r fmt(min(post_par$alpha, na.rm = TRUE), 3)` to `r fmt(max(post_par$alpha, na.rm = TRUE), 3)`, and the largest seasonal parameter is $\hat\gamma$ = `r fmt(max(post_par$gamma, na.rm = TRUE), 4)`. `r if (max(post_par$gamma, na.rm = TRUE) < 0.05) "As on the full series, the seasonal pattern is held essentially fixed: two years of data contain no evidence that it is changing." else "Unlike the full series, the seasonal pattern is allowed to change noticeably, which with so few observations is more likely to reflect noise than genuine change."` `r if (diff(range(post_par$alpha, na.rm = TRUE)) > 0.3) "The level parameter, in contrast, differs widely between the three forms, a sign that the short sample cannot pin down how quickly the level should adapt." else ""`
+
+**Forecast accuracy.** On the test set (@tbl-post-acc, @fig-post-fc), the best of the post-COVID fits is **`r best_post`** (RMSE `r fmt(pa(best_post, d_post, "RMSE"))`), against `r fmt(pa("Damped HW", d_imp, "RMSE"))` for the damped Holt–Winters model on the imputed series and `r fmt(sn_rmse)` for seasonal naive. `r if (length(post_better) == 0) "None of the three models improves when the earlier years are dropped." else if (length(post_better) == length(ets_forms)) "All three models improve when the earlier years are dropped." else paste0("Dropping the earlier years helps ", paste(post_better, collapse = " and "), " but not the other ", ifelse(length(post_better) == 1, "two", "one"), ", so the ranking of the three models changes with the training window.")` The ETS(A,N,A) model moves from an RMSE of `r fmt(pa("ETS(A,N,A)", d_imp, "RMSE"))` to `r fmt(pa("ETS(A,N,A)", d_post, "RMSE"))`, Holt–Winters from `r fmt(pa("Holt-Winters", d_imp, "RMSE"))` to `r fmt(pa("Holt-Winters", d_post, "RMSE"))`, and damped Holt–Winters from `r fmt(pa("Damped HW", d_imp, "RMSE"))` to `r fmt(pa("Damped HW", d_post, "RMSE"))`. With two years of data, the trend each model estimates comes from a very short stretch of the recovery, so which model forecasts best depends heavily on how that short-run slope happens to continue.
+
+**Seasonal pattern.** `r if (max(seas_gap$gap) < 0.05) paste0("The seasonal effects learned from the post-COVID months alone are close to those from the full imputed series (@fig-post-season): the largest difference in any month is ", pct(max(seas_gap$gap), 1), ". This confirms, from a different angle, the finding from Project 1 that the seasonal shape survived COVID unchanged, and it means that the long history is not distorting the seasonal pattern. Its value lies in pinning down the level and the trend, which is exactly where the short-window fits are least stable.") else paste0("The seasonal effects learned from the post-COVID months alone differ from those of the full imputed series by up to ", pct(max(seas_gap$gap), 1), " in a single month (@fig-post-season). With only two or three observations behind each month, part of this difference is likely to be noise rather than a genuine change in the seasonal shape, which Project 1 found to be very stable.")`
+
+**Conclusion of the check.** Using only the post-COVID years avoids imputation entirely, and `r if (pa(best_post, d_post, "RMSE") < sn_rmse) "for some model forms it forecasts well" else "yet none of the forms even beats the seasonal naive benchmark"`. But the results are fragile: with so little data the outcome depends on the choice of trend, and there is no way to tell in advance which choice will work. The imputed series gives the models enough history to estimate the seasonal pattern and the trend reliably, which is why it remains the main approach in this project.
 
 # Forecast evaluation
 
@@ -970,7 +1107,8 @@ Across the two projects the same series has now been forecast with five treatmen
 4. **Exponential smoothing breaks on the raw data.** With the COVID months included, the level smoothing parameter goes to 1 and, on the log scale, AICc even drops the seasonal component.
 5. **Regression imputation rescues exponential smoothing.** On the imputed series the seasonal models pass the diagnostics, and `r best_ets` reached a test RMSE of `r fmt(rg(best_ets, "RMSE"))`. The trend assumption (none, linear or damped) is what separates the seasonal models over a two-year horizon.
 6. **My own Holt–Winters code reproduces `ETS()`.** The SSE agrees to `r fmt(abs(own_opt$value - fable_sse) / fable_sse * 100, 2)`% and both put $\beta$ and $\gamma$ at the boundary, confirming a fixed seasonal pattern and slope.
-7. **Overall,** the best model on the test set was `r best_all`, the best that also passed the diagnostics was `r best_cand`, and the best in cross-validation was `r cv_best`. `r if (cv_best == "SARIMA (Project 1)") paste0("Among the Section 2 models, ", cv_overall$Model[cv_overall$Model != "SARIMA (Project 1)"][1], " was the most accurate in cross-validation, so the Project 1 SARIMA remains a very strong benchmark: regression and exponential smoothing match it, but only beat it clearly on one of the two evaluations.") else ""`
+7. **Using only the post-COVID years** (@sec-post) avoids imputation, but leaves just `r nrow(train_post)` months. The best exponential smoothing model fitted to that window was `r best_post` (test RMSE `r fmt(pa(best_post, d_post, "RMSE"))`), against `r fmt(pa("Damped HW", d_imp, "RMSE"))` for damped Holt–Winters on the imputed series. `r post_rng <- range(post_acc$RMSE[post_acc$Data == d_post]); if (diff(post_rng) > 20) paste0('Across the three trend forms the post-COVID RMSE ranged from ', fmt(post_rng[1]), ' to ', fmt(post_rng[2]), ', so with so little data the result depends heavily on the choice of trend.') else 'The three trend forms gave similar results on this window.'`
+8. **Overall,** the best model on the test set was `r best_all`, the best that also passed the diagnostics was `r best_cand`, and the best in cross-validation was `r cv_best`. `r if (cv_best == "SARIMA (Project 1)") paste0("Among the Section 2 models, ", cv_overall$Model[cv_overall$Model != "SARIMA (Project 1)"][1], " was the most accurate in cross-validation, so the Project 1 SARIMA remains a very strong benchmark: regression and exponential smoothing match it, but only beat it clearly on one of the two evaluations.") else ""`
 
 ## Issues and limitations
 
