@@ -23,32 +23,6 @@ cols <- c("#1b9e77", "#d95f02", "#7570b3")
 f2 <- function(x, d = 2) formatC(x, format = "f", digits = d)
 ```
 
-## Overview of the key concepts
-
-A state-space model has two equations: a **state equation** for the hidden state, and an **observation equation** for what we actually see.
-
-$$
-Y_t = F\theta_t + v_t, \quad v_t \sim N(0, V), \qquad \theta_t = G\theta_{t-1} + w_t, \quad w_t \sim N(0, W)
-$$
-
-Lots of familiar models fit this form. An AR(2) is written by putting $(x_t, x_{t-1})$ into the state vector, as in the notes. The linear growth model has a local level $\mu_t$ and a local trend $\beta_t$ that both change over time. It doesn't need to be stationary, but its second differences are.
-
-The Kalman filter runs two steps at every time point. It **predicts** the state, $\theta_t \mid y_{1:t-1} \sim N(a_t, R_t)$, and the next observation, $y_t \mid y_{1:t-1} \sim N(f_t, Q_t)$. Then, once $y_t$ comes in, it **updates** to the filtered state $\theta_t \mid y_{1:t} \sim N(m_t, C_t)$:
-
-$$
-a_t = G_t m_{t-1}, \quad R_t = G_t C_{t-1} G_t' + W, \qquad f_t = F_t a_t, \quad Q_t = F_t R_t F_t' + V
-$$
-
-$$
-m_t = a_t + K_t e_t, \quad C_t = R_t - K_t F_t R_t, \qquad K_t = R_t F_t' Q_t^{-1}, \quad e_t = y_t - f_t
-$$
-
-The one-step predictions $f_t$ are the **fitted values**, and the $m_t$ are the **filtered** values. If $y_t$ is missing, the gain is $K_t = 0$, so $m_t = a_t$ and $C_t = R_t$. Forecasting works the same way, by adding `NA`s to the end of $y$. The prediction errors also give the log-likelihood, which is what we maximise to estimate $V$ and $W$:
-
-$$
-\ell(\phi) = -\frac{1}{2}\sum_{t=1}^n \log|Q_t| - \frac{1}{2}\sum_{t=1}^n (y_t - f_t)' Q_t^{-1} (y_t - f_t)
-$$
-
 ## Worked exercises
 
 ### Question 1: Simulation and Kalman filter
