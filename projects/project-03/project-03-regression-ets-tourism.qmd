@@ -60,7 +60,7 @@ month_num <- function(m) year(as.Date(m)) * 12 + month(as.Date(m))
 
 **Methods:** *Regression:* a static regression with trend, seasonal dummies and COVID intervention terms, then a regression with ARIMA errors in which the intervention decay rate is chosen by profile likelihood, the seasonal form (dummies or Fourier terms) by AICc and the error model by the Box and Jenkins steps; the log exchange rate is added and forecast both ex ante and ex post. *Exponential smoothing:* ETS on the raw training data, then the full family of exponential smoothing methods on a series in which the COVID window is replaced by regression-based imputed values, with my own Holt–Winters code as a check. All models are diagnosed (Ljung and Box) and compared with the seasonal naive benchmark and the Project 1 SARIMA on the July 2024 to June 2026 test set and by rolling-origin cross-validation.
 
-**Key findings:** See @sec-findings.
+**Key findings:** A static regression fits the training data closely (adjusted $R^2$ = 0.965), but its errors are strongly autocorrelated, so its standard errors and intervals cannot be trusted. Letting the errors follow an ARIMA(2,1,1) process fixes this and describes the COVID shock with five parameters (a decaying shock with a half-life of about 2.5 months, two pulses and a level shift), giving a test RMSE of 98.8 against 101.6 for the Project 1 SARIMA. The exchange rate does not improve realistic forecasts. Exponential smoothing breaks on the raw data, where the level smoothing parameter goes to 1, but works once the COVID window is imputed: the damped Holt–Winters model was the most accurate model on the test set (RMSE 72.5), while the Project 1 SARIMA remained the best in rolling-origin cross-validation. Details are in @sec-findings.
 
 **What I would do differently:** Add noise to the imputed COVID values (multiple imputation) so that the exponential smoothing models do not treat them as exact, and estimate the intervention decay rate jointly with the other regression parameters rather than on a grid.
 
@@ -90,6 +90,7 @@ A second question is whether the exchange rate helps. A weaker rand makes South 
 | **Accommodation data** | Statistics South Africa (Stats SA), *Tourist Accommodation*, statistical release P6410 (monthly), file `tourist_data.xlsx`, series B64100 (stay units nights sold, total industry, actual figures, thousands). Available from <https://www.statssa.gov.za/?page_id=1854&PPN=P6410> |
 | **Exchange rate** | Board of Governors of the Federal Reserve System (US), *South African Rand to U.S. Dollar Spot Exchange Rate* (EXSFUS), monthly average of daily rates, rand per US dollar, via FRED: <https://fred.stlouisfed.org/series/EXSFUS>. Saved as `usdzar_monthly_fred.csv` |
 | **Period analysed** | January 2015 to June 2026 |
+| **Date downloaded** | Stats SA file: 20 August 2026 (the same file as Project 1) |
 | **Licence and privacy** | Public, aggregated official statistics; no personal information, so POPIA does not apply |
 :::
 
@@ -144,7 +145,7 @@ nights_sold <- nights_sold |>
   left_join(zar, by = "Month") |>
   mutate(log_zar = log(zar))
 
-sum(is.na(nights_sold$zar))   # should be 0
+stopifnot(!anyNA(nights_sold$zar))   # every month has an exchange rate
 ```
 
 ```{r}
@@ -257,7 +258,7 @@ $$
 \log y_t = \sum_{j=2}^{12} \gamma_j M_{jt} + \omega D_t(\delta) + \kappa_1 P^{\text{Mar20}}_t + \kappa_2 P^{\text{May20}}_t + \lambda S_t + \eta_t, \qquad (1 - L)\,\phi(L)\,\eta_t = \theta(L)\,\varepsilon_t .
 $$
 
-Two choices from the static model are revisited. First, the deterministic trend is dropped in favour of a first difference in the errors: after the shock the level does not follow a straight line, and a wandering (stochastic) level is more realistic. With $d = 1$ the intercept and trend are differenced away, which is why they do not appear. Second, the seasonality is kept *deterministic* (dummies) rather than handled with a seasonal difference. In Project 1, every seasonal ARIMA model fitted with the COVID months included estimated a seasonal MA coefficient at or near -1. A seasonal MA factor $(1 - L^{12})$ that cancels the seasonal difference is the classic sign that the seasonal pattern is fixed rather than evolving, so seasonal differencing would be over-differencing.
+Two choices from the static model are revisited. First, the deterministic trend is dropped in favour of a first difference in the errors: after the shock the level does not follow a straight line, and a wandering (stochastic) level is more realistic. With $d = 1$ the intercept and trend are differenced away, which is why they do not appear. Second, the seasonality is kept *deterministic* (dummies) rather than handled with a seasonal difference. In Project 1, the airline model fitted with the COVID months included estimated a seasonal MA coefficient of -1.000. A seasonal MA factor $(1 - L^{12})$ that cancels the seasonal difference is the classic sign that the seasonal pattern is fixed rather than evolving, so that seasonal differencing is over-differencing. The seasonal plots in Project 1 point the same way, and the exponential smoothing models below confirm it independently: every seasonal ETS model puts the seasonal smoothing parameter $\gamma$ at or near its lower bound, so the seasonal pattern barely changes over ten years.
 
 ### Choosing the decay rate by profile likelihood {#sec-profile}
 
@@ -334,7 +335,7 @@ The lowest AICc belongs to the model with **`r tolower(best_seas)`**. `r if (bes
 ```{r}
 #| label: fit-reg
 
-# Steps 2 and 3: residuals from the regression part, before choosing the ARIMA errors
+# Steps 3 and 4: residuals from the regression part, before choosing the ARIMA errors
 ols <- train_reg |>
   model(TSLM(log(nights) ~ season() + decay + mar20 + may20 + step))
 ols_resid <- augment(ols)
@@ -342,13 +343,13 @@ ols_resid <- augment(ols)
 
 ```{r}
 #| label: fig-ols-resid
-#| fig-cap: "Box and Jenkins steps 2 and 3 for the error process. First differences of the residuals from the regression part, with their ACF and PACF."
+#| fig-cap: "Steps 3 and 4 of the modelling procedure for the error process: first differences of the residuals from the regression part, with their ACF and PACF."
 
 ols_resid |>
   gg_tsdisplay(difference(.resid), plot_type = "partial", lag_max = 36)
 ```
 
-Following the Box and Jenkins workflow, the regression residuals are examined before choosing the error model. Without the trend the residuals from the regression part wander, so a first difference is taken. @fig-ols-resid shows the differenced residuals with their ACF and PACF, which point to a low order ARMA structure with no seasonal spikes left (the dummies have removed the seasonality). The orders are then chosen by AICc, and the model is estimated by maximum likelihood.
+Following the seven-step modelling procedure used in Projects 1 and 2, the regression residuals are examined before choosing the error model. Without the trend the residuals from the regression part wander, so a first difference is taken. @fig-ols-resid shows the differenced residuals with their ACF and PACF, which point to a low order ARMA structure with no seasonal spikes left (the dummies have removed the seasonality). The orders are then chosen by AICc, and the model is estimated by maximum likelihood.
 
 ```{r}
 #| label: fit-reg-final
@@ -430,7 +431,7 @@ lbp <- function(m) reg_lb$lb_p[reg_lb$.model == m]
 fit_reg |> select(Reg) |> gg_tsresiduals(lag_max = 36)
 ```
 
-The Ljung and Box test on 24 lags (degrees of freedom reduced by the number of ARMA coefficients) gives p = `r pfmt(lbp("Reg"))` for the regression model and p = `r pfmt(lbp("Reg + ZAR"))` for the model with the exchange rate. `r if (lbp("Reg") > 0.05) "The innovations of the regression model are consistent with white noise and show no remaining seasonal structure, so the deterministic seasonal dummies are adequate. Compared with the static regression, the long runs in the residuals have disappeared: the ARIMA error has absorbed the autocorrelation. The model passes step 5 and can be used to forecast." else "Some autocorrelation remains in the innovations of the regression model, so by the Box and Jenkins rule it should not be used for forecasting without revisiting the error orders."`
+The Ljung and Box test on 24 lags (degrees of freedom reduced by the number of ARMA coefficients) gives p = `r pfmt(lbp("Reg"))` for the regression model and p = `r pfmt(lbp("Reg + ZAR"))` for the model with the exchange rate. `r if (lbp("Reg") > 0.05) "The innovations of the regression model are consistent with white noise and show no remaining seasonal structure, so the deterministic seasonal dummies are adequate. Compared with the static regression, the long runs in the residuals have disappeared: the ARIMA error has absorbed the autocorrelation. The model passes the residual check (step 6) and can be used to forecast." else "Some autocorrelation remains in the innovations of the regression model, so by the Box and Jenkins rule it should not be used for forecasting without revisiting the error orders."`
 
 ## Model A3: adding the exchange rate
 
@@ -515,17 +516,16 @@ impute_covid <- function(df) {
   df |>
     mutate(log_fit     = predict(fit, newdata = df),
            nights_imp  = if_else(in_win, exp(log_fit), nights)) |>
-    select(-t, -mon, -y_obs, -log_fit)
+    select(-t, -mon, -y_obs, -log_fit) |>
+    structure(imputation_fit = fit)          # keep the fitted model for reporting
 }
 
-train_imp <- impute_covid(train) |> as_tsibble(index = Month)
+train_imp_tbl <- impute_covid(train)
+imp_lm        <- attr(train_imp_tbl, "imputation_fit")
+train_imp     <- train_imp_tbl |> as_tsibble(index = Month)
 
-imp_lm <- lm(log(nights) ~ seq_along(nights) + factor(month(as.Date(Month))) +
-               pmin(pmax((month_num(Month) - month_num(covid_start) + 1) /
-                           (month_num(covid_end) - month_num(covid_start) + 2), 0), 1),
-             data = as_tibble(train) |> filter(period != "COVID window"))
 imp_r2   <- summary(imp_lm)$r.squared
-imp_ramp <- tail(coef(imp_lm), 1)
+imp_ramp <- coef(imp_lm)[["ramp"]]
 ```
 
 ```{r}
@@ -695,7 +695,7 @@ ets_tbl |>
 fit_ets |> select(`Damped HW`) |> components() |> autoplot() + labs(x = NULL)
 ```
 
-The results sort the models into two groups (@tbl-ets-family). The non-seasonal methods (SES, Holt, damped Holt) have far higher AICc values and their innovations are strongly autocorrelated (Ljung and Box p `r pfmt(max(elb("SES"), elb("Holt"), elb("Damped Holt")))`), because they leave the whole seasonal pattern in the errors. They fail step 5 immediately. The seasonal models all pass the white noise check, and the automatic selection chooses `r auto_form`.
+The results sort the models into two groups (@tbl-ets-family). The non-seasonal methods (SES, Holt, damped Holt) have far higher AICc values and their innovations are strongly autocorrelated (Ljung and Box p `r pfmt(max(elb("SES"), elb("Holt"), elb("Damped Holt")))`), because they leave the whole seasonal pattern in the errors. They fail the residual check (step 6) immediately. The seasonal models all pass the white noise check, and the automatic selection chooses `r auto_form`.
 
 The seasonal models differ mainly in what they do with the trend:
 
@@ -802,6 +802,9 @@ results |>
 #| label: acc-numbers
 #| include: false
 rg <- function(m, col) results[[col]][results$Model == m]
+zar_last <- last(train$zar)                      # June 2024, used for the ex ante forecasts
+zar_end  <- last(test$zar)                       # June 2026
+zar_drag <- exp(b_zar * log(zar_end / zar_last)) - 1
 best_all   <- as.character(results$Model[which.min(results$RMSE)])
 candidates <- results |> filter(`Passes diagnostics` %in% c("Yes", "Yes (Project 1)"))
 best_cand  <- as.character(candidates$Model[which.min(candidates$RMSE)])
@@ -837,7 +840,7 @@ fc_all |>
 
 ## Rolling-origin cross-validation
 
-A single 24-month test set gives one realisation of each model's forecast errors, so the ranking could be luck. As in Project 1, I also use an expanding window: the models are refitted at each of 13 origins from June 2024 to June 2025 and forecast 1 to 12 months ahead, and the errors are averaged by horizon. The imputation regression is refitted at every origin. To keep the computation manageable, the regression keeps $\hat\delta$ and its ARIMA error orders fixed at the values chosen above; the ETS forms are also fixed, but all parameters are re-estimated. The exchange rate model is left out, since its ex ante forecasts would need a rand forecast at every origin.
+A single 24-month test set gives one realisation of each model's forecast errors, so the ranking could be luck. As in Project 1, I also use an expanding window: the models are refitted at each of 13 origins from June 2024 to June 2025 and forecast 1 to 12 months ahead, and the errors are averaged by horizon. The imputation regression is refitted at every origin. To keep the computation manageable, the regression keeps $\hat\delta$ and its ARIMA error orders fixed at the values chosen above; the ETS forms are also fixed, but all parameters are re-estimated. The exchange rate model is left out, since its ex ante forecasts would need a rand forecast at every origin. All the origins fall inside the test period, so the cross-validation is not independent of the test set; it checks whether the ranking holds when the forecast origin moves.
 
 ```{r}
 #| label: cv
@@ -924,9 +927,9 @@ ggplot(cv_by_h, aes(h, RMSE, colour = .model)) +
 
 **Static regression.** The static regression has an RMSE of `r fmt(rg("Static regression", "RMSE"))`, `r if (beats_sn("Static regression")) "beating seasonal naive despite its autocorrelated errors" else "worse than seasonal naive"`. Its deterministic trend is estimated from the whole training period, including the gentle decline before 2020, and is extrapolated through the test period, so the forecasts drift away from the data. Its 95% intervals happen to cover `r pct(rg("Static regression", "cover95"))` of the test months, but only because the COVID months inflate the residual variance; with autocorrelated errors the interval formula itself is not valid, so this coverage cannot be relied on.
 
-**Regression with ARIMA errors.** Modelling the error process gives an RMSE of `r fmt(rg("Reg", "RMSE"))` and a MAPE of `r fmt(rg("Reg", "MAPE"), 2)`%, `r if (rg("Reg", "RMSE") < rg("SARIMA (Project 1)", "RMSE")) "better than" else "slightly worse than"` the Project 1 SARIMA. Its intervals cover `r pct(rg("Reg", "cover95"))` of the test months at the 95% level and `r pct(rg("Reg", "cover80"))` at the 80% level. By June 2024 the temporary part of the shock had died out ($\hat\delta^{\,50} \approx$ `r formatC(delta_hat^50, format = "e", digits = 1)`), so the forecasts rest on the post-COVID level and the seasonal dummies. The main advantage of this model is *interpretation*: it estimates the size, shape and persistence of the shock (@fig-intervention) instead of discarding it.
+**Regression with ARIMA errors.** Modelling the error process gives an RMSE of `r fmt(rg("Reg", "RMSE"))` and a MAPE of `r fmt(rg("Reg", "MAPE"), 2)`%, `r if (rg("Reg", "RMSE") < rg("SARIMA (Project 1)", "RMSE")) "better than" else "slightly worse than"` the Project 1 SARIMA. Its intervals cover `r pct(rg("Reg", "cover95"))` of the test months at the 95% level and `r pct(rg("Reg", "cover80"))` at the 80% level, so they are too wide: a correct 80% interval should miss about one month in five. The reason is visible in @fig-reg-resid. The intervention terms capture the collapse but not every month of the uneven recovery, so the innovations in 2020 and 2021 are several times larger than normal and inflate the estimated error variance, which then widens every forecast interval (mean width `r fmt(rg("Reg", "width95"), 0)` thousand nights against `r fmt(rg("SARIMA (Project 1)", "width95"), 0)` for the SARIMA, which ignores those months). By June 2024 the temporary part of the shock had died out ($\hat\delta^{\,50} \approx$ `r formatC(delta_hat^50, format = "e", digits = 1)`), so the forecasts rest on the post-COVID level and the seasonal dummies. The main advantage of this model is *interpretation*: it estimates the size, shape and persistence of the shock (@fig-intervention) instead of discarding it.
 
-**Exchange rate.** Adding the rand changes the RMSE to `r fmt(rg("Reg + ZAR (ex ante)", "RMSE"))` ex ante and `r fmt(rg("Reg + ZAR (ex post)", "RMSE"))` ex post. `r if (rg("Reg + ZAR (ex post)", "RMSE") < rg("Reg", "RMSE") && rg("Reg + ZAR (ex ante)", "RMSE") >= rg("Reg", "RMSE")) "The exchange rate only helps when its future values are known, which is never the case in practice, so the realistic (ex ante) model is not an improvement." else if (rg("Reg + ZAR (ex ante)", "RMSE") < rg("Reg", "RMSE")) "Even the realistic ex ante version improves on the model without the exchange rate, although with a single test period this difference should be interpreted cautiously." else "Neither version improves on the model without the exchange rate; surprisingly, the ex post version is the worse of the two, which suggests the estimated elasticity does not hold up in the test period."` A regression's forecasts are only as good as the forecasts (and the stability) of its explanatory variables.
+**Exchange rate.** Adding the rand changes the RMSE to `r fmt(rg("Reg + ZAR (ex ante)", "RMSE"))` ex ante and `r fmt(rg("Reg + ZAR (ex post)", "RMSE"))` ex post. `r if (rg("Reg + ZAR (ex post)", "RMSE") < rg("Reg", "RMSE") && rg("Reg + ZAR (ex ante)", "RMSE") >= rg("Reg", "RMSE")) "The exchange rate only helps when its future values are known, which is never the case in practice, so the realistic (ex ante) model is not an improvement." else if (rg("Reg + ZAR (ex ante)", "RMSE") < rg("Reg", "RMSE")) "Even the realistic ex ante version improves on the model without the exchange rate, although with a single test period this difference should be interpreted cautiously." else "Neither version improves on the model without the exchange rate, and the ex post version, which uses the actual exchange rate, is the worse of the two."` The reason is the path of the rand. It strengthened from R`r fmt(zar_last, 2)` per dollar in June 2024 to R`r fmt(zar_end, 2)` by June 2026, and with a positive (but insignificant) elasticity the ex post model lowers its demand forecasts by about `r pct(abs(zar_drag), 1)` by the end of the test period, while actual demand rose. The ex ante version holds the rand at its June 2024 value, so it avoids that drag. A regression's forecasts are only as good as the forecasts (and the stability) of its explanatory variables.
 
 **Exponential smoothing on the raw data.** ETS fitted with the COVID months included reaches an RMSE of `r fmt(rg("ETS raw (original scale)", "RMSE"))`, `r if (beats_sn("ETS raw (original scale)")) "only just beating" else "not beating"` seasonal naive. With $\hat\alpha = 1$ it is close to a seasonal random walk, and its 95% intervals are on average `r fmt(rg("ETS raw (original scale)", "width95"), 0)` thousand nights wide, against `r fmt(rg("Reg", "width95"), 0)` for the regression.
 
@@ -936,7 +939,7 @@ ggplot(cv_by_h, aes(h, RMSE, colour = .model)) +
 
 ```{r}
 #| label: tbl-compare
-#| tbl-cap: "How the COVID-19 break is handled across Projects 1 and 3, with test set RMSE (thousands of nights). The Project 1 COVID-kept result is taken from the Project 1 report."
+#| tbl-cap: "How the COVID-19 break is handled across Projects 1 and 3, with test set RMSE (thousands of nights) on the same July 2024 to June 2026 test set. The COVID-kept SARIMA result is taken from the Project 1 report."
 
 tibble(
   `Treatment of the COVID months` = c(
@@ -947,7 +950,7 @@ tibble(
     paste0("Imputed by regression, then exponential smoothing (", best_ets, ")")
   ),
   Model = c("SARIMA(0,1,1)(0,1,1)", "ETS", "SARIMA(0,1,1)(0,1,1)", "Reg", best_ets),
-  `Test RMSE` = c("see Project 1",
+  `Test RMSE` = c("3,243.5 (from Project 1)",
                   fmt(c(rg("ETS raw (original scale)", "RMSE"),
                         rg("SARIMA (Project 1)", "RMSE"),
                         rg("Reg", "RMSE"), rg(best_ets, "RMSE"))))
@@ -963,7 +966,7 @@ Across the two projects the same series has now been forecast with five treatmen
 
 1. **A static regression is not enough.** Trend, seasonal dummies and intervention terms give an adjusted $R^2$ of `r fmt(static_glance$adj_r_squared, 3)`, but the residuals are strongly autocorrelated (Durbin–Watson `r fmt(dw_static, 2)`), so the standard errors and intervals cannot be trusted. Its test RMSE was `r fmt(rg("Static regression", "RMSE"))`.
 2. **Regression with ARIMA errors fixes this.** With deterministic seasonal dummies (preferred to Fourier terms by AICc), a decaying intervention with $\hat\delta$ = `r fmt(delta_hat, 2)` (half-life about `r fmt(log(0.5) / log(delta_hat), 1)` months), two pulses and a level shift, the innovations are white noise (Ljung and Box p = `r pfmt(lbp("Reg"))`), and the test RMSE is `r fmt(rg("Reg", "RMSE"))` against `r fmt(rg("SARIMA (Project 1)", "RMSE"))` for the Project 1 SARIMA. The shock is described with five parameters instead of 25 deleted months. The post-COVID level is estimated (by the imputation regression) to be `r pct(1 - exp(imp_ramp), 0)` below the pre-COVID path.
-3. **The exchange rate** had an estimated elasticity of `r fmt(b_zar, 3)` (p `r pfmt(p_zar)`) and `r if (rg("Reg + ZAR (ex ante)", "RMSE") < rg("Reg", "RMSE")) "improved" else "did not improve"` the realistic (ex ante) forecasts.
+3. **The exchange rate** had an estimated elasticity of `r fmt(b_zar, 3)` (p `r pfmt(p_zar)`) and `r if (rg("Reg + ZAR (ex ante)", "RMSE") < rg("Reg", "RMSE")) "improved" else "did not improve"` the realistic (ex ante) forecasts. Using the actual exchange rate made the forecasts worse, because the rand strengthened over the test period while demand rose.
 4. **Exponential smoothing breaks on the raw data.** With the COVID months included, the level smoothing parameter goes to 1 and, on the log scale, AICc even drops the seasonal component.
 5. **Regression imputation rescues exponential smoothing.** On the imputed series the seasonal models pass the diagnostics, and `r best_ets` reached a test RMSE of `r fmt(rg(best_ets, "RMSE"))`. The trend assumption (none, linear or damped) is what separates the seasonal models over a two-year horizon.
 6. **My own Holt–Winters code reproduces `ETS()`.** The SSE agrees to `r fmt(abs(own_opt$value - fable_sse) / fable_sse * 100, 2)`% and both put $\beta$ and $\gamma$ at the boundary, confirming a fixed seasonal pattern and slope.
@@ -981,6 +984,21 @@ Across the two projects the same series has now been forecast with five treatmen
 ## What I would do differently
 
 I would use multiple imputation for the COVID window so that the exponential smoothing intervals reflect the uncertainty in the imputed values, estimate $\delta$ jointly with the other regression parameters by maximising the likelihood directly, and try a lagged exchange rate. A cleaner solution to both problems is a model that can skip the missing months without imputing them and that has the regression and smoothing ideas built in, which is what the state space models in Project 4 provide.
+
+## Reflection and model development
+
+Project 1 left me with one clear problem: the COVID collapse was the biggest obstacle to forecasting accommodation demand, and the best I could do with SARIMA was to treat those 25 months as missing. That felt unsatisfying, because those months contain real information about how demand behaves under a shock. Section 2 of the course introduced two approaches that handle this very differently, time series regression and exponential smoothing, so I wanted to see whether *modelling* the shock, rather than deleting it, would give better forecasts or at least a better understanding of what happened. Adding the exchange rate was a natural extension, since it linked the project to the rand I was modelling in Project 2.
+
+The project changed shape considerably along the way. My first versions were framed around "modelling the COVID shock" and combined a single ETS model, a regression with intervention terms and a basic structural model fitted with the Kalman filter. As the portfolio came together, I realised this mixed topics from different parts of the course, and that the state space material belonged in Project 4, where it could be developed properly. I refocused this project on regression and exponential smoothing alone, which gave me room to go much deeper into each one. It also let me address a weakness I had listed in my own earlier draft, that everything rested on a single test set, by adding rolling-origin cross-validation.
+
+On the regression side, I deliberately started with the simplest possible model, a static regression with a trend, seasonal dummies and intervention terms. Its adjusted $R^2$ of 0.965 looked excellent, but the residuals drifted in long runs and the Durbin–Watson statistic was 0.53. That was the moment the lectures' warning about regression on time series became concrete for me: a good in-sample fit can hide errors that make every standard error and interval unreliable. Letting the errors follow an ARIMA process fixed this, and each remaining decision came from the data. I replaced the deterministic trend with a first difference because the post-COVID level clearly did not follow a straight line. I kept seasonal dummies rather than Fourier terms because the sharp December peak needs many harmonics, which AICc confirmed. And because the decay rate enters the model non-linearly, I chose it by profiling the AICc over a grid. The most subtle lesson was in interpreting the result. With a unit root in the errors, the level shift coefficient is not the gap between the pre- and post-COVID levels, because part of the recovery is carried by the error process. I only understood this properly once the imputation regression gave a very different estimate of that gap.
+
+Exponential smoothing taught me the opposite lesson about COVID. Fitted to the raw data, the level smoothing parameter went straight to 1, and on the log scale the model even dropped the seasonal component altogether. Unlike ARIMA, exponential smoothing cannot skip missing months, so I had to decide what to put in the gap. I chose to impute the window with a regression fitted only to the non-COVID months, which carries the seasonal pattern across the gap with a smooth transition between the two levels. Writing the Holt–Winters recursions myself was the most useful part of this section. It reproduced `ETS()` almost exactly, and it showed me something I would have missed by only calling the function: the 13 initial states are parameters too, and they dominate the estimation.
+
+The results did not always agree with each other, and working out why was the most valuable part of the project. AICc preferred the undamped Holt–Winters model, but on the test set it was one of the worst, because it extrapolated a fixed downward slope for two full years, while the damped version, which lets the slope fade, was the best model of all. The test set and the cross-validation also disagreed: damped Holt–Winters won on the test set, but the Project 1 SARIMA won in cross-validation. This showed me that in-sample criteria measure one-step fit, while forecasting over two years depends mostly on how the trend is extrapolated, and that a single test set is not enough to rank models. The exchange rate gave a similar lesson. Its elasticity was insignificant, and using the *actual* exchange rate made the forecasts worse, because the rand strengthened over the test period while demand rose. A regression's forecasts are only as good as the stability of the relationships it relies on.
+
+Going forward, the main weakness I would address is that the imputed COVID months are treated as exact data. They contain no noise, which makes the exponential smoothing intervals too narrow; multiple imputation would fix this. More fundamentally, both approaches in this project needed a workaround for the missing months, either intervention terms or imputation. A state space model can skip missing observations directly while keeping the regression and smoothing ideas built in, which is exactly what Project 4 takes up.
+
 
 # References {.unnumbered}
 
