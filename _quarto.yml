@@ -70,11 +70,9 @@ website:
           - text: "Section 2"
           - href: tutorials/section-2/05-exponential-smoothing-exercise.qmd
             text: "Exponential Smoothing Exercise"
-          - href: tutorials/section-2/06-state-space-model-exercise.qmd
-            text: "State Space Model Exercise"
-          - href: tutorials/section-2/07-kalman-filter-exercise.qmd
-            text: "Kalman Filter Exercise"
-          - href: tutorials/section-2/08-hidden-markov-model-exercise.qmd
+          - href: tutorials/section-2/06-state-space-kalman-filter.qmd
+            text: "State Space Model and Kalman Filter Exercise"
+          - href: tutorials/section-2/07-hidden-markov-model-exercise.qmd
             text: "Hidden Markov Model Exercise"
     right:
       - href: reflective-commentary.qmd

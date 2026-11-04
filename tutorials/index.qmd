@@ -48,21 +48,14 @@ Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and thei
 :::
 ::: {.g-col-12 .g-col-md-6}
 ::: {.portfolio-card}
-### [State Space Model Exercise](section-2/06-state-space-model-exercise.qmd){.stretched-link}
+### [State Space Model and Kalman Filter Exercise](section-2/06-state-space-kalman-filter.qmd){.stretched-link}
 
-Local level, linear growth and basic structural models written in state-space form.
+Writing models in state-space form, coding the Kalman filter from first principles, estimating variances by maximum likelihood, forecasting with missing values, and regression as a Kalman filter.
 :::
 :::
 ::: {.g-col-12 .g-col-md-6}
 ::: {.portfolio-card}
-### [Kalman Filter Exercise](section-2/07-kalman-filter-exercise.qmd){.stretched-link}
-
-The Kalman filter and smoother, the likelihood from the prediction error decomposition, and missing observations.
-:::
-:::
-::: {.g-col-12 .g-col-md-6}
-::: {.portfolio-card}
-### [Hidden Markov Model Exercise](section-2/08-hidden-markov-model-exercise.qmd){.stretched-link}
+### [Hidden Markov Model Exercise](section-2/07-hidden-markov-model-exercise.qmd){.stretched-link}
 
 Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm.
 :::

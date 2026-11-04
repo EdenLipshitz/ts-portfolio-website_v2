@@ -1,0 +1,15 @@
+{
+  "hash": "4745ae3f8194c80e8ac43f9a996d750c",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Hidden Markov Model Exercise\"\nsubtitle: \"Section 2: Exponential smoothing, state-space and hidden Markov models\"\n---\n\n::: {.callout-note appearance=\"simple\"}\n**Topics covered:** Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm.\n:::\n\n## Overview of the key concepts\n\n*Summarise the main ideas of this session in your own words.*\n\n## Worked exercises\n\n### Exercises from the chapter\n\n1. Two-state Poisson HMM: compute the probability that the first three observations are 0, 2, 1, by enumerating state sequences and by the matrix formula.\n2. Show that the HMM likelihood reduces to the independent mixture likelihood when the Markov chain is degenerate.\n3. Bernoulli HMM: forward probabilities, likelihood, forecast distribution, Viterbi path and state prediction.\n\n## Implementation in R\n\n*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*\n\n\n::: {.cell}\n\n```{.r .cell-code}\n# your code here\n```\n:::\n\n\n## Reflection\n\n**What was most challenging:**\n\n**What I now understand:**\n\n**Advantages and limitations of the methods:**\n\n**Links:** related projects and journal entries.\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
