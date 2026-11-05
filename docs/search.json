@@ -1157,9 +1157,9 @@
   {
     "objectID": "tutorials/section-1/04-spectral-analysis-lab.html",
     "href": "tutorials/section-1/04-spectral-analysis-lab.html",
-    "title": "Spectral Analysis Lab",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
     "section": "",
-    "text": "Topics covered: Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models."
+    "text": "Spectral analysis breaks a time series up into waves of different lengths and tells us which wave is the strongest, much like a music equaliser shows which notes are loudest in a song."
   },
   {
     "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#overview-of-the-key-concepts",
@@ -1209,5 +1209,54 @@
     "title": "State Space Models and Kalman Filter",
     "section": "Reflection",
     "text": "Reflection\nWhat was most challenging: Getting the indices for \\(G_t\\) right in Question 1. The KF() function in the notes has constant \\(F\\) and \\(G\\), so it doesn’t matter there, but with time-varying matrices the prediction for \\(\\theta_{t+1}\\) has to use \\(G_{t+1}\\). In Question 2, I had to realise that \\(x_t\\) is just an AR(2), so the starting variances come from the usual AR(2) formulas. For Question 4, the hardest part was storing the \\(2 \\times 2\\) matrices, since the numeric vectors from the notes only work when the state is one number.\nWhat I now understand: The difference between filtered values and one-step predictions. In Question 1 the one-step predictions were nearly flat, but the filtered values followed the state closely, because the update step uses \\(y_t\\). Question 2 showed me how much observation noise can hide: with \\(\\sigma_v = 10\\) the ACF and PACF of \\(y_t\\) showed nothing, even though \\(x_t\\) has a strong cycle underneath. I also hadn’t realised that linear regression is just a Kalman filter with \\(W = 0\\), and that the linear growth model differenced twice is an MA(2), so it behaves like an ARIMA(0,2,2).\nAdvantages and limitations of the methods:\n\nAdvantages: The state-space form separates the process we care about from the measurement noise, and covers ARIMA, regression and structural models in one framework. The Kalman filter is a short loop that gives the filtered states, the fitted values, the likelihood and the forecasts all at once, and missing values and forecasts need no extra code. It also makes it easy to let parameters change over time.\nLimitations: The Kalman filter only works for linear Gaussian models. The likelihood can be flat or have more than one maximum, so starting values need to be checked, and when the noise is large the state variances are hard to estimate (as with \\(\\hat W\\) in Question 1). The results also depend on the prior for \\(\\theta_0\\), especially early in the series.\n\nLinks: Project 4: Kalman filter."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#the-idea-in-one-sentence",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#the-idea-in-one-sentence",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "",
+    "text": "Spectral analysis breaks a time series up into waves of different lengths and tells us which wave is the strongest, much like a music equaliser shows which notes are loudest in a song.\n\n\n\n\n\n\n\nTerm\nIn plain words\n\n\n\n\nPeriod\nHow long one full wave takes (e.g. 12 months).\n\n\nFrequency\nHow many waves fit into one time step. Frequency = 1 / period, so a 12-month wave has frequency 1/12 ≈ 0.083 per month.\n\n\nHarmonic\nOne wave: \\(A\\cos(2\\pi t/p) + B\\sin(2\\pi t/p)\\). Using both cos and sin lets the wave peak in any month.\n\n\nAmplitude\nHow tall the wave is: \\(\\sqrt{A^2 + B^2}\\).\n\n\nPeriodogram\nA bar chart with one bar per frequency. A tall bar means a lot of the series’ ups and downs come from that wave.\n\n\nDominant period\nThe period of the tallest bar.\n\n\nSignal / noise\nSignal = the strong wave(s). Noise = whatever is left over.\n\n\nNyquist frequency\nThe fastest wave the data can show: frequency 0.5, a period of 2 observations (2 months here). Faster waves (e.g. day-to-night temperature swings) cannot be seen in monthly data. They get folded back in and show up as a fake slower wave, which is called aliasing."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#dataset",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#dataset",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "1. Dataset",
+    "text": "1. Dataset\nnottem (comes with R): average monthly air temperature in Nottingham, England, in °F, from 1920 to 1939 (240 months)."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#what-i-expected",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#what-i-expected",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "2. What I expected",
+    "text": "2. What I expected\nSummer is warm and winter is cold every year, so I expected one big bar at a period of 12 months and very little anywhere else. I also expected the wave to peak in July and bottom out in January, and that the cycle would not change over the 20 years.\nPreparing the series. A trend would pile up at the lowest frequencies and could hide the real peak, so a trending series should be detrended or differenced first. Over the 20 years, nottem rises only about 1.5°F, which is tiny next to the seasonal swing, so I left it as it is (detrend = FALSE).\nWatch the units (the ts() catch). nottem is stored as a ts with frequency = 12, so spec.pgram(nottem) measures frequency in cycles per year, and the seasonal peak shows up at 1. I pass as.numeric(x) instead, which gives cycles per month, so the peak shows up at 1/12 and 1/frequency is the period in months.\n\n\nCode\nx &lt;- nottem\nt &lt;- 1:length(x)\n\nP &lt;- spec.pgram(as.numeric(x), taper = 0, detrend = FALSE, plot = FALSE)\ntop &lt;- order(P$spec, decreasing = TRUE)[1:3]\nknitr::kable(data.frame(period_months = round(1 / P$freq[top], 1),\n                        share_of_variation = paste0(round(100 * P$spec[top] / sum(P$spec), 1), \"%\")),\n             caption = \"The three tallest bars in the periodogram\")\n\n\n\nThe three tallest bars in the periodogram\n\n\nperiod_months\nshare_of_variation\n\n\n\n\n12\n91.2%\n\n\n6\n1.5%\n\n\n20\n0.5%\n\n\n\n\n\nThe tallest bar is at 12 months and holds 91% of all the variation. The next one (6 months) holds only 1.5%. So the dominant period is 12 months, as expected.\nLink to the ACF. The ACF tells the same story in the time domain. It is about −0.88 at lag 6 (summer vs winter) and about +0.88, +0.87 and +0.81 at lags 12, 24 and 36. The periodogram sums all of that up as one number: a 12-month period."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#fitting-the-harmonic",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#fitting-the-harmonic",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "3. Fitting the harmonic",
+    "text": "3. Fitting the harmonic\n\n\nCode\nfit &lt;- lm(x ~ cos(2 * pi * t / 12) + sin(2 * pi * t / 12))\nb &lt;- coef(fit)\namp       &lt;- sqrt(b[2]^2 + b[3]^2)\npeak_mon  &lt;- (atan2(b[3], b[2]) / (2 * pi) * 12) %% 12   # t = 1 is January\nround(c(mean = unname(b[1]), amplitude = unname(amp), peak_month = unname(peak_mon), R2 = summary(fit)$r.squared), 2)\n\n\n      mean  amplitude peak_month         R2 \n     49.04      11.56       7.23       0.91 \n\n\nThe fitted wave has a mean of 49°F and goes 11.6°F above and below it. It peaks at month 7.2 (late July) and bottoms out in late January. This one wave explains 91% of the variation, the same 91% the periodogram showed.\nDoes the cycle change? The dominant period is 12 months in 1920–29 and again in 1930–39, so here the wave stays the same."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#separating-signal-and-noise",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#separating-signal-and-noise",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "4. Separating signal and noise",
+    "text": "4. Separating signal and noise\n\n\nCode\nsignal &lt;- ts(fitted(fit), start = 1920, frequency = 12)\nnoise  &lt;- ts(resid(fit),  start = 1920, frequency = 12)\nc(sd_signal = sd(signal), sd_noise = sd(noise))\n\n\nsd_signal  sd_noise \n 8.189312  2.533754 \n\n\nSignal = the fitted 12-month wave. Noise = actual − wave, which is the “this month was warmer or colder than usual” part. The noise is about a third as variable as the signal."
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#three-plots",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#three-plots",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "5. Three plots",
+    "text": "5. Three plots\n\n\nCode\npar(mfrow = c(3, 1), mar = c(4, 4, 2.5, 1))\n\n# (a) periodogram\nplot(1 / P$freq, P$spec, type = \"h\", lwd = 2, log = \"x\", xlab = \"Period (months, log scale)\",\n     ylab = \"Periodogram\", main = \"(a) One wave dominates: 12 months\")\n\n# (b) data, signal, and a forecast checked against held-out data\ntrain &lt;- window(x, end = c(1937, 12)); tt &lt;- 1:length(train)\nfit_tr &lt;- lm(train ~ cos(2 * pi * tt / 12) + sin(2 * pi * tt / 12))\nfc &lt;- ts(predict(fit_tr, newdata = data.frame(tt = 217:240)), start = 1938, frequency = 12)\nplot(x, col = \"grey50\", ylab = \"Temperature (deg F)\", main = \"(b) Data, 12-month wave and 1938-39 forecast\")\nlines(window(signal, end = c(1937, 12)), col = \"steelblue\", lwd = 2)\nlines(fc, col = \"darkorange\", lwd = 2, lty = 2)\nlegend(\"bottomleft\", c(\"data\", \"signal\", \"forecast (fit on 1920-37)\"),\n       col = c(\"grey50\", \"steelblue\", \"darkorange\"), lty = c(1, 1, 2), lwd = c(1, 2, 2),\n       bty = \"n\", horiz = TRUE, cex = 0.9)\n\n# (c) noise\nplot(noise, ylab = \"deg F\", main = \"(c) Noise: warmer or colder than a typical month\")\nabline(h = 0, lty = 2)\n\n\n\n\n\n\n\n\n\nCode\nrmse &lt;- c(wave = sqrt(mean((window(x, start = 1938) - fc)^2)),\n          mean_only = sqrt(mean((window(x, start = 1938) - mean(train))^2)))"
+  },
+  {
+    "objectID": "tutorials/section-1/04-spectral-analysis-lab.html#interpretation",
+    "href": "tutorials/section-1/04-spectral-analysis-lab.html#interpretation",
+    "title": "Spectral Analysis: Finding the Seasons in Nottingham’s Weather",
+    "section": "6. Interpretation",
+    "text": "6. Interpretation\n\nDominant period: 12 months. The periodogram has one tall bar, which is the seasons. The 6-month bar is small and only adjusts the shape (e.g. winters slightly flatter than summers).\nSignal vs noise. A single wave explains 91% of the variation. The other 9% is month-to-month weather luck, like a cold March or a hot August (plot c).\nForecasting. Because the period stays fixed, forecasting is simple: carry the wave forward. Fitted on 1920–37 and used to predict 1938–39, it is off by about 2.2°F on average. Predicting the overall mean every month is off by 7.8°F.\nWhen would it go wrong? If the cycle length drifted (e.g. the sunspot cycle, which moves between about 9 and 14 years), the bar would spread over several neighbouring periods and a fixed wave would slowly fall out of step."
   }
 ]

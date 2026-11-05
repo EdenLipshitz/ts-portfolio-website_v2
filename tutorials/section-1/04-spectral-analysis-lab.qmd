@@ -1,35 +1,111 @@
 ---
-title: "Spectral Analysis Lab"
-subtitle: "Section 1: Time series foundations, ARIMA and volatility models"
+title: "Spectral Analysis: Finding the Seasons in Nottingham's Weather"
+format:
+  html:
+    code-fold: true
+    toc: false
+execute:
+  warning: false
+  message: false
 ---
 
-::: {.callout-note appearance="simple"}
-**Topics covered:** Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models.
-:::
+Spectral analysis breaks a time series up into waves of different lengths and tells us **which wave is the strongest**, much like a music equaliser shows which notes are loudest in a song.
 
-## Overview of the key concepts
+| Term | In plain words |
+|---|---|
+| **Period** | How long one full wave takes (e.g. 12 months). |
+| **Frequency** | How many waves fit into one time step. Frequency = 1 / period, so a 12-month wave has frequency 1/12 ≈ 0.083 per month. |
+| **Harmonic** | One wave: $A\cos(2\pi t/p) + B\sin(2\pi t/p)$. Using both cos and sin lets the wave peak in any month. |
+| **Amplitude** | How tall the wave is: $\sqrt{A^2 + B^2}$. |
+| **Periodogram** | A bar chart with one bar per frequency. A tall bar means a lot of the series' ups and downs come from that wave. |
+| **Dominant period** | The period of the tallest bar. |
+| **Signal / noise** | Signal = the strong wave(s). Noise = whatever is left over. |
+| **Nyquist frequency** | The fastest wave the data can show: frequency 0.5, a period of 2 observations (2 months here). Faster waves (e.g. day-to-night temperature swings) cannot be seen in monthly data. They get folded back in and show up as a fake slower wave, which is called **aliasing**. |
 
-*Summarise the main ideas of this session in your own words.*
+## 1. Dataset
 
-## Worked exercises
+`nottem` (comes with R): average monthly air temperature in Nottingham, England, in °F, from 1920 to 1939 (240 months).
 
-*Add the exercise questions and your worked solutions here. Handwritten pages can be scanned and linked as images.*
+## 2. What I expected
 
-## Implementation in R
+Summer is warm and winter is cold every year, so I expected **one big bar at a period of 12 months** and very little anywhere else. I also expected the wave to peak in July and bottom out in January, and that the cycle would not change over the 20 years.
 
-*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*
+**Preparing the series.** A trend would pile up at the lowest frequencies and could hide the real peak, so a trending series should be detrended or differenced first. Over the 20 years, `nottem` rises only about 1.5°F, which is tiny next to the seasonal swing, so I left it as it is (`detrend = FALSE`).
+
+**Watch the units (the `ts()` catch).** `nottem` is stored as a `ts` with `frequency = 12`, so `spec.pgram(nottem)` measures frequency in cycles per *year*, and the seasonal peak shows up at 1. I pass `as.numeric(x)` instead, which gives cycles per *month*, so the peak shows up at 1/12 and 1/frequency is the period in months.
 
 ```{r}
-#| eval: false
-# your code here
+x <- nottem
+t <- 1:length(x)
+
+P <- spec.pgram(as.numeric(x), taper = 0, detrend = FALSE, plot = FALSE)
+top <- order(P$spec, decreasing = TRUE)[1:3]
+knitr::kable(data.frame(period_months = round(1 / P$freq[top], 1),
+                        share_of_variation = paste0(round(100 * P$spec[top] / sum(P$spec), 1), "%")),
+             caption = "The three tallest bars in the periodogram")
 ```
 
-## Reflection
+The tallest bar is at **12 months** and holds **91% of all the variation**. The next one (6 months) holds only 1.5%. So the dominant period is 12 months, as expected.
 
-**What was most challenging:**
+**Link to the ACF.** The ACF tells the same story in the time domain. It is about −0.88 at lag 6 (summer vs winter) and about +0.88, +0.87 and +0.81 at lags 12, 24 and 36. The periodogram sums all of that up as one number: a 12-month period.
 
-**What I now understand:**
+## 3. Fitting the harmonic
 
-**Advantages and limitations of the methods:**
+```{r}
+fit <- lm(x ~ cos(2 * pi * t / 12) + sin(2 * pi * t / 12))
+b <- coef(fit)
+amp       <- sqrt(b[2]^2 + b[3]^2)
+peak_mon  <- (atan2(b[3], b[2]) / (2 * pi) * 12) %% 12   # t = 1 is January
+round(c(mean = unname(b[1]), amplitude = unname(amp), peak_month = unname(peak_mon), R2 = summary(fit)$r.squared), 2)
+```
 
-**Links:** related projects and journal entries.
+The fitted wave has a mean of **49°F** and goes **11.6°F above and below it**. It peaks at month 7.2 (**late July**) and bottoms out in late January. This one wave explains **91%** of the variation, the same 91% the periodogram showed.
+
+Does the cycle change? The dominant period is 12 months in 1920–29 and again in 1930–39, so here the wave stays the same.
+
+## 4. Separating signal and noise
+
+```{r}
+signal <- ts(fitted(fit), start = 1920, frequency = 12)
+noise  <- ts(resid(fit),  start = 1920, frequency = 12)
+c(sd_signal = sd(signal), sd_noise = sd(noise))
+```
+
+Signal = the fitted 12-month wave. Noise = actual − wave, which is the "this month was warmer or colder than usual" part. The noise is about a third as variable as the signal.
+
+## 5. Three plots
+
+```{r}
+#| fig-height: 8
+#| fig-width: 8
+par(mfrow = c(3, 1), mar = c(4, 4, 2.5, 1))
+
+# (a) periodogram
+plot(1 / P$freq, P$spec, type = "h", lwd = 2, log = "x", xlab = "Period (months, log scale)",
+     ylab = "Periodogram", main = "(a) One wave dominates: 12 months")
+
+# (b) data, signal, and a forecast checked against held-out data
+train <- window(x, end = c(1937, 12)); tt <- 1:length(train)
+fit_tr <- lm(train ~ cos(2 * pi * tt / 12) + sin(2 * pi * tt / 12))
+fc <- ts(predict(fit_tr, newdata = data.frame(tt = 217:240)), start = 1938, frequency = 12)
+plot(x, col = "grey50", ylab = "Temperature (deg F)", main = "(b) Data, 12-month wave and 1938-39 forecast")
+lines(window(signal, end = c(1937, 12)), col = "steelblue", lwd = 2)
+lines(fc, col = "darkorange", lwd = 2, lty = 2)
+legend("bottomleft", c("data", "signal", "forecast (fit on 1920-37)"),
+       col = c("grey50", "steelblue", "darkorange"), lty = c(1, 1, 2), lwd = c(1, 2, 2),
+       bty = "n", horiz = TRUE, cex = 0.9)
+
+# (c) noise
+plot(noise, ylab = "deg F", main = "(c) Noise: warmer or colder than a typical month")
+abline(h = 0, lty = 2)
+
+rmse <- c(wave = sqrt(mean((window(x, start = 1938) - fc)^2)),
+          mean_only = sqrt(mean((window(x, start = 1938) - mean(train))^2)))
+```
+
+## 6. Interpretation
+
+- **Dominant period: 12 months.** The periodogram has one tall bar, which is the seasons. The 6-month bar is small and only adjusts the shape (e.g. winters slightly flatter than summers).
+- **Signal vs noise.** A single wave explains 91% of the variation. The other 9% is month-to-month weather luck, like a cold March or a hot August (plot c).
+- **Forecasting.** Because the period stays fixed, forecasting is simple: carry the wave forward. Fitted on 1920–37 and used to predict 1938–39, it is off by about `r round(rmse[1], 1)`°F on average. Predicting the overall mean every month is off by `r round(rmse[2], 1)`°F.
+- **When would it go wrong?** If the cycle length drifted (e.g. the sunspot cycle, which moves between about 9 and 14 years), the bar would spread over several neighbouring periods and a fixed wave would slowly fall out of step.
