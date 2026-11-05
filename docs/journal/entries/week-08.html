@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Regression: GAMMs, GARMA and VAR Models">
 
 <title>Week 08 – Time Series Portfolio</title>
 <style>
@@ -288,17 +288,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -310,7 +301,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    <em>Regression: GAMMs, GARMA and VAR Models</em>
   </div>
 </div>
 
@@ -327,25 +318,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Session or topic covered: Regression: GAMMs, GARMA and VAR Models</strong></p>
+<p>Overall, I found the regression week manageable when working through examples, because they helped me connect the theoretical concepts to how they are actually implemented. The more advanced models towards the end of the week were much harder for me. My difficulty was not the mathematical notation itself, but building an intuition for how the models work, when they would be appropriate, and what problem each one was designed to solve. I realised that I could follow the steps in an example without really understanding why the model was set up that way. To deal with this, I spent extra time breaking down the model equations, looking for intuitive explanations, using visual representations, and relating each of the more complex models back to methods I already understood.</p>
+<p>Generalised additive mixed models (GAMMs) were particularly challenging because I couldn’t see how the different components of the model work together. I wanted to understand how the model uses smooth functions to capture non-linear relationships while also accounting for random effects, and why both are needed in the same model. To work through this, I broke the model down into its pieces and made sure I understood the purpose of each one before thinking about how they combine. What I now understand is that each part fixes a different shortcoming of ordinary linear regression. The smooth functions mean the relationship between a variable and the response doesn’t have to be a straight line, so the data decides the shape of the curve. The random effects are there because observations from the same group or individual are related to each other, so treating them as independent would overstate how much information we have. A GAMM is therefore the right choice over a standard linear regression when the relationship is not linear and the observations come in groups or repeated measures, and it can handle both of those at the same time.</p>
+<p>With generalised autoregressive moving average (GARMA) models, my main difficulty was understanding how the regression part interacts with the autoregressive and moving average structure. I was familiar with regression and with modelling dependence over time separately, but I struggled to see how they combine in one model. I focused on breaking down the notation and identifying the role of each component, using what I already knew about regression and ARMA models as a starting point. What I now understand is that the two parts answer different questions. The regression part explains the series using outside information, while the ARMA part picks up the dependence over time that the explanatory variables don’t account for. Treating these as separate problems would leave autocorrelation in the regression errors, which is exactly the kind of leftover pattern that tells us a model has missed something. So a GARMA is useful whenever we have explanatory variables but the series still depends on its own past once those variables are included. Where I still need practice is in selecting and interpreting these models on real data.</p>
+<p>I also found vector autoregressive (VAR) models challenging, especially the idea of modelling several time series jointly. At first it was hard to interpret the idea that the current value of each variable can depend on the past values of several variables, rather than only on its own history. I wanted to understand how this differs from fitting separate autoregressive models to each series. What helped was thinking of a VAR as a system of connected equations, one for each variable, where each equation includes lagged values of all the variables in the system. Thinking about electricity demand and electricity generation made this concrete for me: a change in demand today is likely to be followed by a change in generation, and the two series influence each other over time. Separate AR models would each only look at their own past and would miss that link completely. What I now understand is that VAR models are the right tool when the relationships and dynamic interactions between several time series are themselves of interest, not just each series on its own.</p>
+<p>Working through these models taught me that understanding a model involves more than recognising its equation or being able to run it in R. I need to understand what problem it is designed to solve, why its extra complexity is justified, and what each of its components means in the context of the data. A good test I now use is whether I can say what would go wrong if I used the simpler model instead: a straight line where the relationship curves, independent errors where observations are grouped or autocorrelated, or separate models where series affect each other. Breaking the models down, connecting them to methods I already understood, and using practical examples helped me build this intuition. Going forward, I want to become more confident in identifying when these advanced models are appropriate, interpreting their results, and explaining why I would choose one modelling approach over another.</p>
+<p><strong>Links:</strong> <a href="../../projects/project-03/project-03-regression-ets-tourism.html">Project 3: Regression and Exponential Smoothing</a></p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -801,22 +784,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 08"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*Regression: GAMMs, GARMA and VAR Models*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered: Regression: GAMMs, GARMA and VAR Models**</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>Overall, I found the regression week manageable when working through examples, because they helped me connect the theoretical concepts to how they are actually implemented. The more advanced models towards the end of the week were much harder for me. My difficulty was not the mathematical notation itself, but building an intuition for how the models work, when they would be appropriate, and what problem each one was designed to solve. I realised that I could follow the steps in an example without really understanding why the model was set up that way. To deal with this, I spent extra time breaking down the model equations, looking for intuitive explanations, using visual representations, and relating each of the more complex models back to methods I already understood.</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>Generalised additive mixed models (GAMMs) were particularly challenging because I couldn't see how the different components of the model work together. I wanted to understand how the model uses smooth functions to capture non-linear relationships while also accounting for random effects, and why both are needed in the same model. To work through this, I broke the model down into its pieces and made sure I understood the purpose of each one before thinking about how they combine. What I now understand is that each part fixes a different shortcoming of ordinary linear regression. The smooth functions mean the relationship between a variable and the response doesn't have to be a straight line, so the data decides the shape of the curve. The random effects are there because observations from the same group or individual are related to each other, so treating them as independent would overstate how much information we have. A GAMM is therefore the right choice over a standard linear regression when the relationship is not linear and the observations come in groups or repeated measures, and it can handle both of those at the same time.</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>With generalised autoregressive moving average (GARMA) models, my main difficulty was understanding how the regression part interacts with the autoregressive and moving average structure. I was familiar with regression and with modelling dependence over time separately, but I struggled to see how they combine in one model. I focused on breaking down the notation and identifying the role of each component, using what I already knew about regression and ARMA models as a starting point. What I now understand is that the two parts answer different questions. The regression part explains the series using outside information, while the ARMA part picks up the dependence over time that the explanatory variables don't account for. Treating these as separate problems would leave autocorrelation in the regression errors, which is exactly the kind of leftover pattern that tells us a model has missed something. So a GARMA is useful whenever we have explanatory variables but the series still depends on its own past once those variables are included. Where I still need practice is in selecting and interpreting these models on real data.</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>I also found vector autoregressive (VAR) models challenging, especially the idea of modelling several time series jointly. At first it was hard to interpret the idea that the current value of each variable can depend on the past values of several variables, rather than only on its own history. I wanted to understand how this differs from fitting separate autoregressive models to each series. What helped was thinking of a VAR as a system of connected equations, one for each variable, where each equation includes lagged values of all the variables in the system. Thinking about electricity demand and electricity generation made this concrete for me: a change in demand today is likely to be followed by a change in generation, and the two series influence each other over time. Separate AR models would each only look at their own past and would miss that link completely. What I now understand is that VAR models are the right tool when the relationships and dynamic interactions between several time series are themselves of interest, not just each series on its own.</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>Working through these models taught me that understanding a model involves more than recognising its equation or being able to run it in R. I need to understand what problem it is designed to solve, why its extra complexity is justified, and what each of its components means in the context of the data. A good test I now use is whether I can say what would go wrong if I used the simpler model instead: a straight line where the relationship curves, independent errors where observations are grouped or autocorrelated, or separate models where series affect each other. Breaking the models down, connecting them to methods I already understood, and using practical examples helped me build this intuition. Going forward, I want to become more confident in identifying when these advanced models are appropriate, interpreting their results, and explaining why I would choose one modelling approach over another.</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>**Links:** <span class="co">[</span><span class="ot">Project 3: Regression and Exponential Smoothing</span><span class="co">](../../projects/project-03/project-03-regression-ets-tourism.qmd)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

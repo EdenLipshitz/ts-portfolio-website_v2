@@ -1,9 +1,9 @@
 ---
 title: "Week 03"
-description: "Residuals, Train and Test Samples and Validation"
+description: "*Residuals, Train and Test Samples and Validation*"
 ---
 
-**Session or topic covered:Residuals, Train and Test Samples and Validation**
+**Session or topic covered: Residuals, Train and Test Samples and Validation**
 
 I actually really enjoyed the start of this weeks material. I found the concepts generally quite standard for a statistical anlysis and I could start visualizing a bit more clearly how a project or genuine analysis could shape. 
 
@@ -13,3 +13,4 @@ One thing I found particularly interesting was the idea of temporal ordering in 
 
 I initially found rolling-origin evaluation quite confusing, but it helped once I thought of it as repeatedly pretending to be at different points in the past. Instead of having one fixed train/test split, we move the forecasting point forward through time, each time using only the data that would have been available at that point to predict what comes next. For example, we could use January–June to predict July, then January–July to predict August, and so on. I used an LLM to visually understand how the validation metjods could work and this immediatley helped to understand it in a bit of a different and intuitive way. We then look at all the forecast errors together. I like the intuition that we are essentially asking, if I had been making forecasts at different points in time, how well would my model have performed? This gives us a more reliable picture of forecasting accuracy than relying on just one train/test split.
 
+**Links:** [Time Series Analysis Part 1: Exercise 1](../../tutorials/section-1/02-tsa-part1-exercise-1.qmd) · [Project 1: ARIMA and SARIMA](../../projects/project-01/project-01-sarima-tourism.qmd) · [Project 3: Regression and Exponential Smoothing](../../projects/project-03/project-03-regression-ets-tourism.qmd)

@@ -1,18 +1,47 @@
 ---
 title: "Week 09"
-description: "*[Session or topic covered this week]*"
+description: "*State Space Models*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
 
-## What I did
+**Session or topic covered: State Space Models**
 
-## What I learned
+This week we covered state space models and how they can be used to represent time series data. The main idea is that an observed time series can be broken down into an underlying signal and random noise. The signal is represented by a set of state variables that describe the state of the system at time $t$. These state variables are often not directly observable, so we only see noisy measurements of the underlying process. Examples include an underlying population level in medicine or ecology, the true demand level in economics, or the level and trend of a time series.
 
-## Difficulties or open questions
+A state space model has two main equations. The observation equation describes how the observed data are generated from the underlying state, and the state equation describes how the state evolves over time. In the general linear form these are
 
-## What to do next
+$$
+Y_t = F\theta_t + v_t, \qquad \theta_t = G\theta_{t-1} + w_t.
+$$
 
-**Links:** *[related tutorials and projects]*
+Here $\theta_t$ is the state vector, $F$ determines how the state variables contribute to the observation, and $G$ describes how the previous state contributes to the current state. The terms $v_t$ and $w_t$ are the observation and state errors, with covariance matrices $V$ and $W$, and in linear Gaussian state space models both are assumed to be normally distributed. The state follows a Markov structure, meaning the current state depends on the previous state rather than directly on the entire history of the process.
+
+One of the main things I had to work through this week was the distinction between the state and the observation. At first I thought of the state simply as the true value of the quantity we want to estimate. I now understand that it is more precisely a description of the state of the system at a particular time. It can contain several components, such as the level, slope and seasonal effect, rather than just one underlying value. The state is not necessarily known exactly, and the model uses the observed data to make inferences about it.
+
+I also spent time understanding how the transition matrix $G$ works. I had been thinking of $G$ as some kind of estimate of the previous state, but it actually describes how each component of the previous state vector feeds into the current state vector. This became clearer when I worked through the state space form of an AR(2) model. The original model is
+
+$$
+y_t = \alpha + \phi_1 y_{t-1} + \phi_2 y_{t-2} + e_t.
+$$
+
+By defining the state vector and transition matrix as
+
+$$
+\theta_t = \begin{pmatrix} y_t \\ y_{t-1} \end{pmatrix}, \qquad
+G = \begin{pmatrix} \phi_1 & \phi_2 \\ 1 & 0 \end{pmatrix},
+$$
+
+we can write the model in state space form. The first row of $G$ reproduces the AR(2) relationship, because it combines $y_{t-1}$ and $y_{t-2}$ with weights $\phi_1$ and $\phi_2$ to give the new $y_t$. The second row just carries the previous observation forward, so $y_{t-1}$ moves into the second slot of the new state vector, ready to be used as the lag-2 value at the next step. Working through this showed me that writing a model in state space form is really about choosing a sensible state vector and then building the matrices so that they reproduce the original model.
+
+We also looked at how other familiar models can be put into state space form. For the ARMA(1,1) model, the state vector includes both the deviation of the series from its mean and a term involving the random error, which allows the autoregressive and moving average parts to sit inside the state equation. An important thing I took from the AR(2) and ARMA(1,1) examples is that the state vector does not have to contain only unobserved quantities. In both representations, observed values or quantities built from the errors are included in the state vector too.
+
+Another important part of the week was structural time series models: the local level model, the local linear trend model and the basic structural model. The local level model represents the series as an underlying level plus observation noise, with the level evolving as a random walk. The local linear trend model adds a trend component, so both the level and its rate of change can evolve over time. The basic structural model adds seasonality as well, breaking the observed series into level, trend, seasonal and irregular components. Seeing them in this order helped me, because each model just adds one more component to the state.
+
+The basic structural model was particularly useful for understanding how to build a state vector out of different components of a series. For quarterly data, the state vector contains the current level, the trend, the current seasonal effect and two lagged seasonal effects. The transition matrix carries the level and trend forward and updates the seasonal components. Because the seasonal effects are constrained to sum to zero over a full year, the current seasonal effect can be written in terms of the previous three. If the four quarterly effects must add up to zero, then once I know three of them the fourth is fixed, which is why only two lagged seasonal effects need to be stored alongside the current one. Working through the matrix helped me see how the structure of the model decides the entries of the transition matrix.
+
+A key skill from this week was learning how to work out $F$ and $G$ from a given model. $F$ comes from the observation equation, by identifying which state variables contribute to the observed value and with what coefficients. $G$ comes from the state equation, by writing each component of the current state vector in terms of the components of the previous state vector, so each row of $G$ holds the coefficients from the equation for the corresponding state variable. Once I saw it this way, the matrices stopped looking like fixed formulas I had to memorise and started looking like something I could build from the structure of the model.
+
+Overall, this week helped me understand state space models as a general framework for representing a time series as an evolving underlying process plus the observations we see of it. The most challenging part was moving from the general equations to the specific matrix representations, particularly understanding where each row of the transition matrix comes from. Working through the AR(2), ARMA(1,1) and basic structural model examples showed me that the matrices are built from the relationships between the components of the state vector. I now have a clearer understanding of what the state and observation equations are for and how familiar time series models fit into the state space framework. I want to keep practising building state vectors and transition matrices so that I can derive these representations confidently on my own.
+
+**Links:** [State Space Models and Kalman Filter](../../tutorials/section-2/06-state-space-kalman-filter.qmd) · [Project 4: State Space Models](../../projects/project-04/project-04-state-space-tourism.qmd)

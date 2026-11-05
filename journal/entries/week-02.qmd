@@ -1,9 +1,28 @@
 ---
 title: "Week 02"
-description: "Stationarity and Random Walks"
+description: "*Stationarity and Random Walks*"
 ---
 
 
-**Stationary and Random Walks**
-Generally I found this weeks work quite intuitive. Generally the weeks are moving quite slowly with small amounts of theory covered everything. At first when I revised this weeks content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time-series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off. I now understand that the difference comes from how each process responds to shocks. In a random walk, shocks accumulate over time, meaning that the further ahead we forecast, the more uncertainty builds up. In a stationary AR(1) process, however, the effects of shocks gradually disappear and the process returns towards its long-run mean. Therefore, although uncertainty initially increases as the forecasting horizon grows, it eventually reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary.
 
+**Session or topic covered: Stationarity and Random Walks**
+
+Generally I found this week's work quite intuitive. The weeks are moving fairly slowly, with small amounts of theory covered at a time. When I revised this week's content, I found the concept of growing uncertainty confusing because I assumed that as we forecast further into the future, the uncertainty would simply continue increasing in the same way for all time series models. I initially struggled to understand why the prediction intervals for a random walk continue to widen indefinitely, while those of a stationary AR(1) model eventually level off.
+
+I now understand that the difference comes from how each process responds to shocks. In a random walk, $y_t = y_{t-1} + \varepsilon_t$, every shock stays in the series permanently, so the value $h$ steps ahead is today's value plus the sum of $h$ new shocks. Each shock has variance $\sigma^2$ and they are uncorrelated, so the forecast error variance is
+
+$$
+\text{Var}(y_{t+h} - \hat{y}_{t+h}) = h\sigma^2,
+$$
+
+which keeps growing in a straight line with no limit. In a stationary AR(1) process, $y_t = \phi y_{t-1} + \varepsilon_t$ with $|\phi| < 1$, the effect of a shock is multiplied by $\phi$ every period, so old shocks gradually die out and the process returns towards its long-run mean. The forecast error variance is
+
+$$
+\text{Var}(y_{t+h} - \hat{y}_{t+h}) = \sigma^2\,\frac{1 - \phi^{2h}}{1 - \phi^2},
+$$
+
+and because $\phi^{2h} \to 0$ as $h$ grows, this settles at $\sigma^2 / (1 - \phi^2)$, which is just the variance of the process itself. Putting numbers in made this concrete for me. With $\sigma^2 = 1$ and $\phi = 0.8$, the AR(1) forecast variance is 1 at one step ahead and can never go above $1 / 0.36 \approx 2.78$, so far into the future the best I can do is forecast the mean with the process's normal spread around it. A random walk with the same $\sigma^2$ already has a variance of 10 at ten steps ahead, and 100 at a hundred steps.
+
+So although uncertainty initially increases as the forecasting horizon grows, for a stationary process it reaches a finite limit. This helped me understand that forecasting further into the future does not always mean uncertainty grows without bound; it depends on whether the underlying process is stationary or non-stationary. It also made me see why a random walk is such a hard series to forecast far ahead, because its shocks never fade.
+
+**Links:** [TS Intro](../../tutorials/section-1/01-ts-intro.qmd) · [Project 1: ARIMA and SARIMA](../../projects/project-01/project-01-sarima-tourism.qmd)

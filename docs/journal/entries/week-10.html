@@ -347,7 +347,7 @@ window.Quarto = {
 </header>
 
 
-<p><strong>Session or topic covered: Kalman Filter </strong></p>
+<p><strong>Session or topic covered: Kalman Filter</strong></p>
 <p>This week was all about the Kalman filter. I worked through the lecture slides and the second half of the state space chapter, and the parts I found hardest were the three updating equations, why the intervals are called prediction intervals, and the difference between filtering and smoothing.</p>
 <p>The idea itself is simple once you see it. The Kalman filter estimates a hidden state over time by combining what the model predicts the state should be with what we actually observe. Neither is perfect: the prediction carries uncertainty and the observation carries noise, so the filter weighs the two by how much each can be trusted. A phone’s live location works this way. The GPS reading jumps around by a few metres, but your true position moves smoothly, so combining where you probably are (based on where you were a moment ago) with the noisy reading gives a better estimate than either alone.</p>
 <p>What made it click for me was thinking about it in Bayesian terms. At each time step, the prediction from the previous step is the prior, the new observation gives the likelihood, and combining them gives the posterior, which then becomes the prior for the next step:</p>
@@ -395,6 +395,7 @@ f_t \pm 1.96\sqrt{Q_t}
 \ell(\phi) = -\frac{1}{2}\sum_{t=1}^{n} \log Q_t - \frac{1}{2}\sum_{t=1}^{n} \frac{(y_t - f_t)^2}{Q_t}.
 \]</span></p>
 <p>That’s what lets <span class="math inline">\(V\)</span> and <span class="math inline">\(W\)</span> be estimated by maximum likelihood instead of assumed known, although the surface can be flat or have several peaks, so it’s worth trying different starting values. Next I want to write the filter myself from scratch, check it against <code>dlm</code> on simulated data and the Nile series, and then add the smoother and likelihood so I can estimate the variances on my own.</p>
+<p><strong>Links:</strong> <a href="../../tutorials/section-2/06-state-space-kalman-filter.html">State Space Models and Kalman Filter</a> · <a href="../../projects/project-04/project-04-state-space-tourism.html">Project 4: State Space Models</a></p>
 
 
 <!-- -->
@@ -857,7 +858,7 @@ f_t \pm 1.96\sqrt{Q_t}
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*Kalman Filter*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Session or topic covered: Kalman Filter **</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Session or topic covered: Kalman Filter**</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>This week was all about the Kalman filter. I worked through the lecture slides and the second half of the state space chapter, and the parts I found hardest were the three updating equations, why the intervals are called prediction intervals, and the difference between filtering and smoothing.</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
@@ -933,7 +934,9 @@ f_t \pm 1.96\sqrt{Q_t}
 <span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>\ell(\phi) = -\frac{1}{2}\sum_{t=1}^{n} \log Q_t - \frac{1}{2}\sum_{t=1}^{n} \frac{(y_t - f_t)^2}{Q_t}.</span>
 <span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>That's what lets $V$ and $W$ be estimated by maximum likelihood instead of assumed known, although the surface can be flat or have several peaks, so it's worth trying different starting values. Next I want to write the filter myself from scratch, check it against <span class="in">`dlm`</span> on simulated data and the Nile series, and then add the smoother and likelihood so I can estimate the variances on my own.</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>That's what lets $V$ and $W$ be estimated by maximum likelihood instead of assumed known, although the surface can be flat or have several peaks, so it's worth trying different starting values. Next I want to write the filter myself from scratch, check it against <span class="in">`dlm`</span> on simulated data and the Nile series, and then add the smoother and likelihood so I can estimate the variances on my own.</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>**Links:** <span class="co">[</span><span class="ot">State Space Models and Kalman Filter</span><span class="co">](../../tutorials/section-2/06-state-space-kalman-filter.qmd)</span> · <span class="co">[</span><span class="ot">Project 4: State Space Models</span><span class="co">](../../projects/project-04/project-04-state-space-tourism.qmd)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

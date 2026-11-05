@@ -5,7 +5,7 @@ description: "*Operators, Stationarity and White Noise*"
 
 
 
-**Session or topic covered:Operators, Stationarity and White Noise **
+**Session or topic covered: Operators, Stationarity and White Noise**
 
 This week covered operators, stationarity and white noise, and at first it felt like the most abstract week so far. When I first saw the lag operator I didn't see the point of it, because writing $Ly_t = y_{t-1}$ seemed like a complicated way of saying the previous value. It made more sense once I thought of an operator as a shortcut for moving around a time series. $L$ takes you back one period and the lead operator $F$ takes you forward one. Many real series, like GDP, inflation and exchange rates, depend on their own recent past, and operators give a clean way to describe that without writing out the value two periods ago every time.
 
@@ -22,3 +22,5 @@ $$
 y_t = \tfrac{1}{3}(\varepsilon_{t-1} + \varepsilon_t + \varepsilon_{t+1}).
 $$
 Each value is a weighted combination of three nearby shocks. The shocks are unrelated, but $y_t$ and $y_{t+1}$ share $\varepsilon_t$ and $\varepsilon_{t+1}$, so they are correlated and the result is no longer white noise. This is called filtering. I also saw why this filter is useful for smoothing but not for forecasting, because it uses $\varepsilon_{t+1}$, a future shock we would never have when making a forecast. A forecasting model can only combine current and past shocks.
+
+**Links:** [TS Intro](../../tutorials/section-1/01-ts-intro.qmd) · [Time Series Analysis Part 1: Exercise 1](../../tutorials/section-1/02-tsa-part1-exercise-1.qmd)

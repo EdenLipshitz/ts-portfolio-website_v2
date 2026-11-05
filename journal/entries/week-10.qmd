@@ -3,7 +3,7 @@ title: "Week 10"
 description: "*Kalman Filter*"
 ---
 
-**Session or topic covered: Kalman Filter **
+**Session or topic covered: Kalman Filter**
 
 This week was all about the Kalman filter. I worked through the lecture slides and the second half of the state space chapter, and the parts I found hardest were the three updating equations, why the intervals are called prediction intervals, and the difference between filtering and smoothing.
 
@@ -80,3 +80,5 @@ $$
 $$
 
 That's what lets $V$ and $W$ be estimated by maximum likelihood instead of assumed known, although the surface can be flat or have several peaks, so it's worth trying different starting values. Next I want to write the filter myself from scratch, check it against `dlm` on simulated data and the Nile series, and then add the smoother and likelihood so I can estimate the variances on my own.
+
+**Links:** [State Space Models and Kalman Filter](../../tutorials/section-2/06-state-space-kalman-filter.qmd) · [Project 4: State Space Models](../../projects/project-04/project-04-state-space-tourism.qmd)

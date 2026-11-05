@@ -1,18 +1,20 @@
 ---
 title: "Week 06"
-description: "*[Session or topic covered this week]*"
+description: "*Practical Coding: Fitting AR, MA, ARMA, ARIMA and SARIMA Models in R*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
 
-## What I did
+**Session or topic covered: Practical Coding: Fitting AR, MA, ARMA, ARIMA and SARIMA Models in R**
 
-## What I learned
+I found Week 6 particularly valuable because it gave us the opportunity to focus on practical coding and apply the concepts we had covered in lectures. Having dedicated time to work through examples in R helped me connect the theoretical material to the actual process of conducting a time series analysis. Implementing the methods myself made the material more intuitive, because I could see how the different stages of an analysis fit together, rather than focusing only on understanding the theory. This was especially useful in preparing for the projects, as it gave me the chance to practise the techniques and become more comfortable with the coding process before applying them to my own data.
 
-## Difficulties or open questions
+It was particularly helpful to work through examples of autoregressive (AR), moving average (MA) and autoregressive moving average (ARMA) models, as well as ARIMA and seasonal ARIMA models. Working with these models in code helped me understand how each approach accounts for a different kind of pattern in time series data. Implementing AR models let me explore how previous observations can help explain current values, while MA models brought in the role of past errors. ARMA models brought these two ideas together, and ARIMA models extended them by adding differencing to deal with non-stationarity.
 
-## What to do next
+The biggest thing I learned this week was that model identification is a process rather than a single step. In the practical examples, we examined the data and its ACF and PACF plots, considered which model structures were plausible, compared the candidate models using information criteria such as AICc, and then checked the residuals to see whether the fitted model had actually captured the time-dependent patterns. Working through these steps showed me that time series modelling is not simply about selecting and fitting a model. It involves a sequence of decisions, and each one needs to be justified.
 
-**Links:** *[related tutorials and projects]*
+The practical work also made the coding process feel much more manageable. Working through an example step by step meant I could focus on understanding what each function was doing and how its output related to the model, rather than feeling overwhelmed by the whole analysis at once. This helped me develop a more systematic way of working through problems, particularly when interpreting outputs or trying to understand why a particular modelling step was necessary. It reinforced for me that being able to explain the reasoning behind the code matters more than just getting it to run.
+
+Overall, Week 6 helped me consolidate my understanding of the material while building the practical skills I need for the projects. I feel more prepared to approach my project work because I have practised the modelling process and become more familiar with implementing time series methods in R. My main takeaway is that practical experience is essential for building confidence in time series analysis, particularly when applying theoretical concepts to real data. Going forward, I want to keep building my coding skills while making sure I understand and can justify the modelling decisions I make, so that my projects show not only that the methods are implemented correctly but also that I understand why they are appropriate.
+
+**Links:** [Time Series Analysis Part 1: Exercise 1](../../tutorials/section-1/02-tsa-part1-exercise-1.qmd) · [Project 1: ARIMA and SARIMA](../../projects/project-01/project-01-sarima-tourism.qmd)

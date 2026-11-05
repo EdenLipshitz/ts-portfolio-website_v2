@@ -6,7 +6,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Exponential Smoothing">
 
 <title>Week 07 – Time Series Portfolio</title>
 <style>
@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -288,17 +317,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -310,7 +330,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    <em>Exponential Smoothing</em>
   </div>
 </div>
 
@@ -327,25 +347,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Session or topic covered: Exponential Smoothing</strong></p>
+<p>This week I worked through exponential smoothing and focused on understanding how the different models build on each other. I found this topic quite challenging at first because there were a lot of equations, and I struggled to see how the equations progressed from one model to the next. I understood the general idea of giving more weight to recent observations, but I needed to spend more time making the equations intuitive for myself. This is why I added quite a few of my own explanations to my notes, as rewriting the ideas in simpler language helped me understand what the equations were actually doing.</p>
+<p>I started with simple exponential smoothing (SES), where we only estimate the level of the series. It helped me to think of the level as our current idea of where the series is, with <span class="math inline">\(\alpha\)</span> controlling how much we allow the newest observation to change that estimate. A large <span class="math inline">\(\alpha\)</span> means the level reacts quickly to each new observation, while a small <span class="math inline">\(\alpha\)</span> means it only moves a little each time. I then saw how Holt’s method extends this by adding a trend, so we are now estimating both where the series is and how it is changing, with <span class="math inline">\(\beta\)</span> controlling how quickly the trend estimate is updated. The progression made much more sense to me once I thought of it as SES = level, Holt = level + trend, and Holt-Winters = level + trend + seasonality. Each new model adds one more component to the same basic idea. I still found the actual equations difficult, especially keeping track of what each term represented, but I understand the intuition behind them much better now.</p>
+<p>The Air Passengers example was particularly useful because it made me think more critically about whether a model can give good predictions while still not being the most appropriate model for the data. Looking at the plot of Holt’s one-step-ahead predictions against the observed passenger numbers, I thought the predictions worked reasonably well because the fitted values followed the observations quite closely. However, I realised that Holt’s method was not really capturing the full structure of the data, because the series has such a clear seasonal pattern and Holt’s method has no seasonal component. The estimated <span class="math inline">\(\alpha\)</span> was very large, around <span class="math inline">\(0.9999\)</span>, while <span class="math inline">\(\beta\)</span> was extremely small, around <span class="math inline">\(0.0001\)</span>. Intuitively this makes sense. Because the model cannot represent the seasonality, the level has to react almost completely to every new observation to keep up with the large seasonal swings, while the underlying trend changes much more slowly. So the close fit was really coming from the level chasing the data, not from the model understanding the pattern, which is exactly the gap that Holt-Winters fills by adding a seasonal component.</p>
+<p>I also worked through the damped trend, which I found easier to understand intuitively. Rather than allowing the trend to continue at exactly the same rate forever, we gradually reduce its effect as we forecast further into the future. This seemed like a logical extension of Holt’s method, and it helped me understand why there are different versions of the model rather than just one exponential smoothing equation.</p>
+<p>One thing I realised I was confused about this week was the difference between the level, the fitted values and the forecasts. I now understand the level as my current smoothed estimate of where the series is. The fitted value is the prediction I made for an observation that has already happened, using only the information I had before seeing it, so it is a one-step-ahead prediction. The forecast is different because it predicts observations I have not seen yet. Thinking about it this way made it much easier for me to read the graphs: the level is my estimate of where I currently am, the fitted values show how well my model predicted the data I already have, and the forecasts are what I use to look into the future.</p>
+<p>Overall, my biggest takeaway from this week was understanding the progression of exponential smoothing models rather than memorising the individual equations. I still need to practise the equations themselves and become more comfortable explaining what each part does without having to translate it into my own words first. However, adding my own intuitive explanations helped me move from seeing a collection of complicated equations to understanding why each new model adds another component.</p>
+<p><strong>Links:</strong> <a href="../../tutorials/section-2/05-exponential-smoothing-exercise.html">Exponential Smoothing Exercise</a> · <a href="../../projects/project-03/project-03-regression-ets-tourism.html">Project 3: Regression and Exponential Smoothing</a></p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -801,22 +814,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 07"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*Exponential Smoothing*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered: Exponential Smoothing**</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>This week I worked through exponential smoothing and focused on understanding how the different models build on each other. I found this topic quite challenging at first because there were a lot of equations, and I struggled to see how the equations progressed from one model to the next. I understood the general idea of giving more weight to recent observations, but I needed to spend more time making the equations intuitive for myself. This is why I added quite a few of my own explanations to my notes, as rewriting the ideas in simpler language helped me understand what the equations were actually doing.</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>I started with simple exponential smoothing (SES), where we only estimate the level of the series. It helped me to think of the level as our current idea of where the series is, with $\alpha$ controlling how much we allow the newest observation to change that estimate. A large $\alpha$ means the level reacts quickly to each new observation, while a small $\alpha$ means it only moves a little each time. I then saw how Holt's method extends this by adding a trend, so we are now estimating both where the series is and how it is changing, with $\beta$ controlling how quickly the trend estimate is updated. The progression made much more sense to me once I thought of it as SES = level, Holt = level + trend, and Holt-Winters = level + trend + seasonality. Each new model adds one more component to the same basic idea. I still found the actual equations difficult, especially keeping track of what each term represented, but I understand the intuition behind them much better now.</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>The Air Passengers example was particularly useful because it made me think more critically about whether a model can give good predictions while still not being the most appropriate model for the data. Looking at the plot of Holt's one-step-ahead predictions against the observed passenger numbers, I thought the predictions worked reasonably well because the fitted values followed the observations quite closely. However, I realised that Holt's method was not really capturing the full structure of the data, because the series has such a clear seasonal pattern and Holt's method has no seasonal component. The estimated $\alpha$ was very large, around $0.9999$, while $\beta$ was extremely small, around $0.0001$. Intuitively this makes sense. Because the model cannot represent the seasonality, the level has to react almost completely to every new observation to keep up with the large seasonal swings, while the underlying trend changes much more slowly. So the close fit was really coming from the level chasing the data, not from the model understanding the pattern, which is exactly the gap that Holt-Winters fills by adding a seasonal component.</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>I also worked through the damped trend, which I found easier to understand intuitively. Rather than allowing the trend to continue at exactly the same rate forever, we gradually reduce its effect as we forecast further into the future. This seemed like a logical extension of Holt's method, and it helped me understand why there are different versions of the model rather than just one exponential smoothing equation.</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>One thing I realised I was confused about this week was the difference between the level, the fitted values and the forecasts. I now understand the level as my current smoothed estimate of where the series is. The fitted value is the prediction I made for an observation that has already happened, using only the information I had before seeing it, so it is a one-step-ahead prediction. The forecast is different because it predicts observations I have not seen yet. Thinking about it this way made it much easier for me to read the graphs: the level is my estimate of where I currently am, the fitted values show how well my model predicted the data I already have, and the forecasts are what I use to look into the future.</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>Overall, my biggest takeaway from this week was understanding the progression of exponential smoothing models rather than memorising the individual equations. I still need to practise the equations themselves and become more comfortable explaining what each part does without having to translate it into my own words first. However, adding my own intuitive explanations helped me move from seeing a collection of complicated equations to understanding why each new model adds another component.</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>**Links:** <span class="co">[</span><span class="ot">Exponential Smoothing Exercise</span><span class="co">](../../tutorials/section-2/05-exponential-smoothing-exercise.qmd)</span> · <span class="co">[</span><span class="ot">Project 3: Regression and Exponential Smoothing</span><span class="co">](../../projects/project-03/project-03-regression-ets-tourism.qmd)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">

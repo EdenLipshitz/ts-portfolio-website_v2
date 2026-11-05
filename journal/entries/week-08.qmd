@@ -1,18 +1,20 @@
 ---
 title: "Week 08"
-description: "*[Session or topic covered this week]*"
+description: "*Regression: GAMMs, GARMA and VAR Models*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
 
-## What I did
+**Session or topic covered: Regression: GAMMs, GARMA and VAR Models**
 
-## What I learned
+Overall, I found the regression week manageable when working through examples, because they helped me connect the theoretical concepts to how they are actually implemented. The more advanced models towards the end of the week were much harder for me. My difficulty was not the mathematical notation itself, but building an intuition for how the models work, when they would be appropriate, and what problem each one was designed to solve. I realised that I could follow the steps in an example without really understanding why the model was set up that way. To deal with this, I spent extra time breaking down the model equations, looking for intuitive explanations, using visual representations, and relating each of the more complex models back to methods I already understood.
 
-## Difficulties or open questions
+Generalised additive mixed models (GAMMs) were particularly challenging because I couldn't see how the different components of the model work together. I wanted to understand how the model uses smooth functions to capture non-linear relationships while also accounting for random effects, and why both are needed in the same model. To work through this, I broke the model down into its pieces and made sure I understood the purpose of each one before thinking about how they combine. What I now understand is that each part fixes a different shortcoming of ordinary linear regression. The smooth functions mean the relationship between a variable and the response doesn't have to be a straight line, so the data decides the shape of the curve. The random effects are there because observations from the same group or individual are related to each other, so treating them as independent would overstate how much information we have. A GAMM is therefore the right choice over a standard linear regression when the relationship is not linear and the observations come in groups or repeated measures, and it can handle both of those at the same time.
 
-## What to do next
+With generalised autoregressive moving average (GARMA) models, my main difficulty was understanding how the regression part interacts with the autoregressive and moving average structure. I was familiar with regression and with modelling dependence over time separately, but I struggled to see how they combine in one model. I focused on breaking down the notation and identifying the role of each component, using what I already knew about regression and ARMA models as a starting point. What I now understand is that the two parts answer different questions. The regression part explains the series using outside information, while the ARMA part picks up the dependence over time that the explanatory variables don't account for. Treating these as separate problems would leave autocorrelation in the regression errors, which is exactly the kind of leftover pattern that tells us a model has missed something. So a GARMA is useful whenever we have explanatory variables but the series still depends on its own past once those variables are included. Where I still need practice is in selecting and interpreting these models on real data.
 
-**Links:** *[related tutorials and projects]*
+I also found vector autoregressive (VAR) models challenging, especially the idea of modelling several time series jointly. At first it was hard to interpret the idea that the current value of each variable can depend on the past values of several variables, rather than only on its own history. I wanted to understand how this differs from fitting separate autoregressive models to each series. What helped was thinking of a VAR as a system of connected equations, one for each variable, where each equation includes lagged values of all the variables in the system. Thinking about electricity demand and electricity generation made this concrete for me: a change in demand today is likely to be followed by a change in generation, and the two series influence each other over time. Separate AR models would each only look at their own past and would miss that link completely. What I now understand is that VAR models are the right tool when the relationships and dynamic interactions between several time series are themselves of interest, not just each series on its own.
+
+Working through these models taught me that understanding a model involves more than recognising its equation or being able to run it in R. I need to understand what problem it is designed to solve, why its extra complexity is justified, and what each of its components means in the context of the data. A good test I now use is whether I can say what would go wrong if I used the simpler model instead: a straight line where the relationship curves, independent errors where observations are grouped or autocorrelated, or separate models where series affect each other. Breaking the models down, connecting them to methods I already understood, and using practical examples helped me build this intuition. Going forward, I want to become more confident in identifying when these advanced models are appropriate, interpreting their results, and explaining why I would choose one modelling approach over another.
+
+**Links:** [Project 3: Regression and Exponential Smoothing](../../projects/project-03/project-03-regression-ets-tourism.qmd)

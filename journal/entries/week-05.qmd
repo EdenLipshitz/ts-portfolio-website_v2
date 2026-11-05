@@ -1,18 +1,70 @@
 ---
 title: "Week 05"
-description: "*[Session or topic covered this week]*"
+description: "*MA, AR, ARMA, ARIMA and SARIMA Models*"
 ---
 
-**Date:** *[date of entry]*
 
-**Session or topic covered:**
 
-## What I did
+**Session or topic covered: MA, AR, ARMA, ARIMA and SARIMA Models**
 
-## What I learned
+This was the week we got stuck into the linear models: MA, AR, ARMA, ARIMA and SARIMA. Once I got comfortable with the notation, I found the models themselves quite easy to understand, because each one builds on the one before it. What I found hard was the maths behind them and keeping track of what each symbol meant. To get past that, I spent a lot of time Googling each model and looking for intuitive explanations of what the equations were actually saying, rather than just memorising them.
 
-## Difficulties or open questions
+The first thing I had to sort out was the difference between an MA model and an AR model, because at first they looked almost the same to me. An MA model is driven by past shocks (errors), not past observations. In an MA($q$) model, today's value is a weighted sum of the current shock and the previous $q$ shocks, and $\theta$ gives the weight on each one. An AR model is driven by past observations: today's value depends directly on the previous values of the series itself, with $\phi$ as the weight. The way I think about it now is that an AR model remembers where the series was, while an MA model remembers the recent surprises. Once I had that, a lot of the notation stopped looking intimidating, because I could tell straight away whether a term was a past value or a past shock. I also realised I had been mixing up the plots for the two models. For both, a negative coefficient makes the series flip back and forth between positive and negative, while a positive coefficient makes it smoother. But in an AR model, a larger $\phi$ means each value is pulled more strongly towards the previous value, whereas in an MA model $\theta$ only controls how much yesterday's shock carries into today.
 
-## What to do next
+The slide I found hardest this week was the properties of the MA(1) model, so I worked through the derivations myself. The model is
 
-**Links:** *[related tutorials and projects]*
+$$
+y_t = \mu + \varepsilon_t + \theta\varepsilon_{t-1},
+$$
+
+where the shocks $\varepsilon_t$ are white noise with mean 0 and variance $\sigma^2$. The mean is $E(y_t) = \mu + E(\varepsilon_t) + \theta E(\varepsilon_{t-1}) = \mu$, because the shocks have an expected value of zero. The variance is
+
+$$
+\text{Var}(y_t) = \text{Var}(\varepsilon_t) + \theta^2\,\text{Var}(\varepsilon_{t-1}) = (1 + \theta^2)\sigma^2,
+$$
+
+with no covariance term because the shocks are uncorrelated with each other. For the covariance at lag 1, $\text{Cov}(y_t, y_{t-1}) = \text{Cov}(\varepsilon_t + \theta\varepsilon_{t-1},\ \varepsilon_{t-1} + \theta\varepsilon_{t-2})$, and the only shock that appears in both is $\varepsilon_{t-1}$, so the covariance is $\theta\sigma^2$. Dividing the covariance by the variance gives
+
+$$
+\rho(1) = \frac{\theta}{1 + \theta^2}.
+$$
+
+At lag 2 or more, $y_t$ and $y_{t-2}$ share no shocks at all, so the covariance is zero and $\rho(h) = 0$ for $h > 1$. This made the idea of short memory much clearer to me. The autocorrelation cuts off after lag 1 because observations two periods apart have no shocks in common, not because of some rule I had to memorise.
+
+To check I understood it, I worked through the example $y_t = 5 + \varepsilon_t + 0.6\varepsilon_{t-1}$ with $\sigma^2 = 9$. The mean is 5, the variance is $(1 + 0.36) \times 9 = 12.24$, the covariance at lag 1 is $0.6 \times 9 = 5.4$, and so $\rho(1) = 5.4 / 12.24 \approx 0.44$. At first I pictured this as a curve, but the correct way to picture it is a scatter plot of each observation against the one before it. That plot shows a weak positive straight-line relationship with a correlation of about 0.44. If you plot each observation against the one two periods before, there is no relationship at all. Working through this also made me realise I had been confusing the lag with the forecast horizon, because both use the letter $h$. In the autocorrelation function, $h$ is the lag, meaning how far apart two observations are. It is not how many steps ahead we are forecasting.
+
+Another thing I had to correct was where the rule that the coefficient must be less than one applies. For an AR(1) model, $|\phi| < 1$ is what keeps the series stationary. If $\phi = 1$ it becomes a random walk, and if $|\phi| > 1$ it explodes. An MA model is always stationary, whatever the coefficients are, because it is just a finite weighted sum of white noise. But MA models have their own condition, called invertibility, and for an MA(1) it also means $|\theta| < 1$. I didn't understand why this mattered until I saw that two different values of $\theta$ can give exactly the same autocorrelation. For example, $\theta = 0.5$ gives $\rho(1) = 0.5 / 1.25 = 0.4$, and $\theta = 2$ gives $\rho(1) = 2 / 5 = 0.4$. From the data alone we couldn't tell which model is true, so we always choose the value inside the unit circle. This also keeps the estimation stable, because the model is estimated by maximum likelihood and the unobserved past shocks have to be rebuilt step by step.
+
+The partial autocorrelation function confused me at first. What helped was thinking of it as removing the intermediate links between observations so that only the direct link is left. In an AR(1) model, $y_t$ is correlated with $y_{t-2}$, but only because both are linked through $y_{t-1}$. Once the effect of $y_{t-1}$ is removed, there is no direct link left, so the PACF cuts off after lag 1. For an MA(1) it is the other way round: the ACF cuts off after lag 1 and the PACF dies away gradually. This gave me a practical way to choose between models. For an AR($p$) the ACF decays gradually and the PACF cuts off after lag $p$, for an MA($q$) the ACF cuts off after lag $q$ and the PACF decays gradually, and for an ARMA both decay gradually. Any spike outside the 95% confidence bands is treated as significant. I also learned that this is a guide rather than a strict rule, because sample ACFs are noisy, so the final choice also depends on information criteria and on checking the residuals.
+
+ARMA models made sense once I understood AR and MA separately. They simply allow both past observations and past shocks to affect today's value. That suits something like electricity demand, which carries on from day to day but also gets hit by shocks, like a cold snap, that fade after a few days. My approach is to start with the simplest model, see whether an MA part is needed, and only then consider differencing.
+
+For non-stationarity, I initially wasn't sure what the I in ARIMA stood for. It stands for integrated, and it refers to the differencing step we use when a series has no constant mean or variance over a long period. Differencing was one of the things I found most confusing this week, because I wasn't sure what it was actually for or when I was supposed to do it. At first I thought you just differenced any series that had a trend, and I kept mixing it up with lagging. I now understand that lagging just moves a value to a different time period, while differencing, $y_t - y_{t-1}$, subtracts the previous value from the current one, so instead of modelling the level of the series, we model how much it changes from one period to the next.
+
+The purpose of differencing is to make a non-stationary series stationary, so that the AR and MA ideas can actually be applied to it. A random walk made this clear to me. Each value is the previous value plus a new random shock, so the series wanders off and never returns to a fixed level. If you difference it, $y_t - y_{t-1} = \varepsilon_t$, which is just white noise, because the only thing that changes from one period to the next is the new shock. Differencing also removes a straight-line trend. If $y_t = 5 + 0.4t + \varepsilon_t$, then
+
+$$
+y_t - y_{t-1} = 0.4 + \varepsilon_t - \varepsilon_{t-1},
+$$
+
+so the trend disappears and we're left with a constant plus noise.
+
+The part I found hardest was knowing when to difference. The signs I now look for are a plot where the series wanders and does not keep returning to a constant level, an ACF that decays very slowly instead of dropping off quickly, and the unit root tests. The ADF test assumes the series has a unit root unless the data shows otherwise, and the KPSS test assumes the series is stationary unless the data shows otherwise, so if ADF fails to reject and KPSS rejects, both are pointing towards differencing. I also learned that differencing is the right fix for a stochastic trend, where the trend comes from random shocks building up over time. It is not always the right fix for a deterministic trend, which follows a fixed line. In that case it is better to fit the trend and subtract it, because differencing a fixed trend leaves $\varepsilon_t - \varepsilon_{t-1}$, which introduces a pattern into the errors that wasn't there before. For seasonality that doesn't fade, we use a seasonal difference instead, $y_t - y_{t-m}$, which compares each value to the same season one cycle earlier. With monthly data, that means comparing each month to the same month a year before. If a series has both a trend and seasonality, it may need both kinds of difference.
+
+I also had a question about whether to difference once or twice. The rule I now follow is to difference once, check whether the series looks stationary, and only difference again if it still doesn't. Almost no series needs more than two differences. The value of $d$ should be chosen from the plots and unit root tests before fitting, not by comparing AIC values, because differencing once fits the model to $n - 1$ values and differencing twice fits it to $n - 2$, so their likelihoods can't be compared. Differencing too much causes its own problems. If the variance goes up after differencing instead of down, or the lag-1 autocorrelation comes out at about $-0.5$, that's a sign I have gone one step too far. The aim is to difference just enough to make the series stationary, and no more.
+
+This also helped me with the transformation confusion I had in Week 4, where I had been mixing up transforming the data to make it normal with transforming it to stabilise the variance. The correct order when preparing a series for ARIMA is to first transform the series (for example with a log or Box-Cox transform) if its variance grows with its level, then difference it if there is a stochastic trend or fit and subtract the trend if it is deterministic, and then use seasonal differencing if there is seasonality that doesn't fade. Transforming first matters because a stable variance often means less differencing is needed.
+
+The ARIMA(1,1,1) equation confused me when it was written out on the original scale, because the coefficient on $y_{t-1}$ became $1 + \phi$ and an extra $-\phi y_{t-2}$ term appeared. That made it look like there was strong dependence at lag 2. I now understand that these terms only come from rewriting a differenced model in terms of the original values. The most helpful thing was thinking about what each part contributes to a forecast. Take $c = 1$, $\phi = 0.6$ and $\theta = 0.3$, where the last two observations were 120 and 115 and the last error was 2. Then the forecast is
+
+$$
+\hat{y} = 1 + 1.6(120) - 0.6(115) + 0.3(2) = 124.6.
+$$
+
+Intuitively, this is the last value of 120, plus a constant of 1, plus momentum of 3 (60% of the previous increase of 5), plus 0.6 from feeding back the previous forecast error. Thinking of the forecast as past level, plus past change, plus past error made the equation much easier for me to understand.
+
+The modelling workflow tied everything together. We plot the data, make the series stationary, identify candidate models from the ACF and PACF, estimate them by maximum likelihood, check the residuals, and only forecast if the residuals pass. Otherwise, we go back and try a different model. The way I understand the loop back is that if the residuals still have structure in them, there is information in the data that the model hasn't captured, and the residuals should look like white noise. The Ljung-Box test checks many lags together instead of one at a time, so it's less likely to raise a false alarm by chance. A large p-value is what we want, but it isn't proof that the model is correct. I also learned to use a QQ plot to check whether the residuals are normal, because that affects whether the prediction intervals can be trusted. I realised that cross-validation from Week 3 fits naturally into this process too, as a way of comparing the candidate models on data they haven't seen.
+
+Finally, I had wondered whether ARIMA is only for trends, and whether the models follow a strict order from AR to MA to ARMA to ARIMA to SARIMA. I now see them as building blocks. ARIMA handles dependence and trend, and SARIMA adds a seasonal part on top of that. It is written as $(p,d,q)(P,D,Q)_m$, where the second bracket uses the same ideas but at the seasonal lag $m$. With monthly data, the seasonal difference is $y_t - y_{t-12}$, which compares each month to the same month a year earlier. The airline model, SARIMA$(0,1,1)(0,1,1)_{12}$, was a good example for me of how a model with no AR terms at all can still work very well on monthly data. In practice, the best approach is to fit a few candidate models and compare which one captures the data best.
+
+**Links:** [Time Series Analysis Part 1: Exercise 1](../../tutorials/section-1/02-tsa-part1-exercise-1.qmd) · [Project 1: ARIMA and SARIMA](../../projects/project-01/project-01-sarima-tourism.qmd)
