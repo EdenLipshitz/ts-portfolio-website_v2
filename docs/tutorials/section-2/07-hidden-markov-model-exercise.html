@@ -975,12 +975,14 @@ B = \begin{pmatrix}
 </div>
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(pos, <span class="dv">2</span>, table)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">position =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">times =</span> <span class="dv">20</span>), <span class="at">letter =</span> ch2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>     [,1] [,2] [,3]
-[1,]    8   10    4
-[2,]   12   10   16</code></pre>
+<pre><code>        letter
+position  A  B  C  D  E  F
+       1  0  8 12  0  0  0
+       2 10  0  0  0 10  0
+       3  0  0  0  4  0 16</code></pre>
 </div>
 </div>
 <p>Splitting the string into blocks of three, the letters never mix between positions: position 1 is always B or C, position 2 is always A or E, position 3 is always D or F. So the string comes from a <strong>3-state</strong> chain that cycles 1 → 2 → 3 → 1 every time, and each state picks one of two letters.</p>
@@ -1076,7 +1078,7 @@ die    1    2    3    4    5    6
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fl">1e-10</span>, <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
 <span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
 <span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Roll"</span>, <span class="at">ylab =</span> <span class="st">"Outcome"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">7</span>))</span>
@@ -1103,7 +1105,7 @@ Figure&nbsp;3: 300 simulated rolls. Shaded = loaded die in use (true). Red line 
 </div>
 </div>
 </div>
-<p>Viterbi gets 77% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–75 and from 275 onwards). It misses the short loaded stretches, and also the one around rolls 165–190, which happened to have few 6s. A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</p>
+<p>Viterbi gets 77% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–80 and from 275 onwards) and the end of the one around 230–255. It misses the short loaded stretches, and also the one around rolls 165–190, where only 9 of the 28 rolls were 6s (much less than the expected half). A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</p>
 </section>
 <section id="question-7-two-state-bernoulli-hmm" class="level2">
 <h2 class="anchored" data-anchor-id="question-7-two-state-bernoulli-hmm">Question 7: Two-state Bernoulli HMM</h2>
@@ -1971,7 +1973,7 @@ Figure&nbsp;3: 300 simulated rolls. Shaded = loaded die in use (true). Red line 
 <span id="cb61-384"><a href="#cb61-384" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb61-385"><a href="#cb61-385" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="fu">matrix</span>(ch2, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)   <span class="co"># 20 blocks of 3</span></span>
 <span id="cb61-386"><a href="#cb61-386" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pos)</span>
-<span id="cb61-387"><a href="#cb61-387" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(pos, <span class="dv">2</span>, table)</span>
+<span id="cb61-387"><a href="#cb61-387" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">position =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, <span class="at">times =</span> <span class="dv">20</span>), <span class="at">letter =</span> ch2)</span>
 <span id="cb61-388"><a href="#cb61-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb61-389"><a href="#cb61-389" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb61-390"><a href="#cb61-390" aria-hidden="true" tabindex="-1"></a>Splitting the string into blocks of three, the letters never mix between positions: position 1 is always B or C, position 2 is always A or E, position 3 is always D or F. So the string comes from a **3-state** chain that cycles 1 → 2 → 3 → 1 every time, and each state picks one of two letters.</span>
@@ -2047,7 +2049,7 @@ Figure&nbsp;3: 300 simulated rolls. Shaded = loaded die in use (true). Red line 
 <span id="cb61-466"><a href="#cb61-466" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "300 simulated rolls. Shaded = loaded die in use (true). Red line = Viterbi decoded state."</span></span>
 <span id="cb61-467"><a href="#cb61-467" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
 <span id="cb61-468"><a href="#cb61-468" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
-<span id="cb61-469"><a href="#cb61-469" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fl">1e-10</span>, <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
+<span id="cb61-469"><a href="#cb61-469" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>), <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
 <span id="cb61-470"><a href="#cb61-470" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb61-471"><a href="#cb61-471" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
 <span id="cb61-472"><a href="#cb61-472" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Roll"</span>, <span class="at">ylab =</span> <span class="st">"Outcome"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">7</span>))</span>
@@ -2059,7 +2061,7 @@ Figure&nbsp;3: 300 simulated rolls. Shaded = loaded die in use (true). Red line 
 <span id="cb61-478"><a href="#cb61-478" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(vit6<span class="sc">$</span>path <span class="sc">==</span> casino<span class="sc">$</span>die)</span>
 <span id="cb61-479"><a href="#cb61-479" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
 <span id="cb61-480"><a href="#cb61-480" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb61-481"><a href="#cb61-481" aria-hidden="true" tabindex="-1"></a>Viterbi gets <span class="in">`r round(100*mean(vit6$path == casino$die))`</span>% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–75 and from 275 onwards). It misses the short loaded stretches, and also the one around rolls 165–190, which happened to have few 6s. A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</span>
+<span id="cb61-481"><a href="#cb61-481" aria-hidden="true" tabindex="-1"></a>Viterbi gets <span class="in">`r round(100*mean(vit6$path == casino$die))`</span>% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–80 and from 275 onwards) and the end of the one around 230–255. It misses the short loaded stretches, and also the one around rolls 165–190, where only 9 of the 28 rolls were 6s (much less than the expected half). A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</span>
 <span id="cb61-482"><a href="#cb61-482" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb61-483"><a href="#cb61-483" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 7: Two-state Bernoulli HMM</span></span>
 <span id="cb61-484"><a href="#cb61-484" aria-hidden="true" tabindex="-1"></a></span>

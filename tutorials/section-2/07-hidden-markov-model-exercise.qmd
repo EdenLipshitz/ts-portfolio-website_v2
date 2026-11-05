@@ -352,7 +352,7 @@ length(ch2)
 
 pos <- matrix(ch2, ncol = 3, byrow = TRUE)   # 20 blocks of 3
 head(pos)
-apply(pos, 2, table)
+table(position = rep(1:3, times = 20), letter = ch2)
 ```
 
 Splitting the string into blocks of three, the letters never mix between positions: position 1 is always B or C, position 2 is always A or E, position 3 is always D or F. So the string comes from a **3-state** chain that cycles 1 → 2 → 3 → 1 every time, and each state picks one of two letters.
@@ -428,7 +428,7 @@ Since we know the true parameters, the Viterbi function from Question 2 can be r
 #| fig-cap: "300 simulated rolls. Shaded = loaded die in use (true). Red line = Viterbi decoded state."
 #| fig-width: 8
 #| fig-height: 4
-vit6 <- viterbi(casino$roll, 1:6, init = c(1, 0) + 1e-10, tpm = Gamma6, emmprob = emis6)
+vit6 <- viterbi(casino$roll, 1:6, init = c(1, 0), tpm = Gamma6, emmprob = emis6)
 
 plot(casino$t, casino$roll, pch = 19, cex = 0.5, las = 1,
      xlab = "Roll", ylab = "Outcome", ylim = c(0.5, 7))
@@ -440,7 +440,7 @@ lines(casino$t, ifelse(vit6$path == 2, 6.8, 0.7), type = "s", col = "red", lwd =
 mean(vit6$path == casino$die)
 ```
 
-Viterbi gets `r round(100*mean(vit6$path == casino$die))`% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–75 and from 275 onwards). It misses the short loaded stretches, and also the one around rolls 165–190, which happened to have few 6s. A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.
+Viterbi gets `r round(100*mean(vit6$path == casino$die))`% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–80 and from 275 onwards) and the end of the one around 230–255. It misses the short loaded stretches, and also the one around rolls 165–190, where only 9 of the 28 rolls were 6s (much less than the expected half). A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.
 
 ## Question 7: Two-state Bernoulli HMM
 
