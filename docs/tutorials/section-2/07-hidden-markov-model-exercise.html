@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Hidden Markov Model Exercise – Time Series Portfolio</title>
+<title>Hidden Markov Models – Time Series Portfolio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -104,6 +104,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -292,13 +321,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#overview-of-the-key-concepts" id="toc-overview-of-the-key-concepts" class="nav-link active" data-scroll-target="#overview-of-the-key-concepts">Overview of the key concepts</a></li>
-  <li><a href="#worked-exercises" id="toc-worked-exercises" class="nav-link" data-scroll-target="#worked-exercises">Worked exercises</a>
+  <li><a href="#question-1" id="toc-question-1" class="nav-link active" data-scroll-target="#question-1">Question 1</a>
   <ul class="collapse">
-  <li><a href="#exercises-from-the-chapter" id="toc-exercises-from-the-chapter" class="nav-link" data-scroll-target="#exercises-from-the-chapter">Exercises from the chapter</a></li>
+  <li><a href="#simulating-from-a-three-state-bivariate-gaussian-hmm" id="toc-simulating-from-a-three-state-bivariate-gaussian-hmm" class="nav-link" data-scroll-target="#simulating-from-a-three-state-bivariate-gaussian-hmm">Simulating from a three-state bivariate Gaussian HMM</a></li>
+  <li><a href="#plot-of-the-observations" id="toc-plot-of-the-observations" class="nav-link" data-scroll-target="#plot-of-the-observations">Plot of the observations</a></li>
+  <li><a href="#parameters-to-estimate" id="toc-parameters-to-estimate" class="nav-link" data-scroll-target="#parameters-to-estimate">Parameters to estimate</a></li>
   </ul></li>
-  <li><a href="#implementation-in-r" id="toc-implementation-in-r" class="nav-link" data-scroll-target="#implementation-in-r">Implementation in R</a></li>
-  <li><a href="#reflection" id="toc-reflection" class="nav-link" data-scroll-target="#reflection">Reflection</a></li>
+  <li><a href="#question-2" id="toc-question-2" class="nav-link" data-scroll-target="#question-2">Question 2</a>
+  <ul class="collapse">
+  <li><a href="#viterbi-algorithm" id="toc-viterbi-algorithm" class="nav-link" data-scroll-target="#viterbi-algorithm">Viterbi algorithm</a></li>
+  <li><a href="#explaining-the-result" id="toc-explaining-the-result" class="nav-link" data-scroll-target="#explaining-the-result">Explaining the result</a></li>
+  <li><a href="#comparison-with-the-true-states" id="toc-comparison-with-the-true-states" class="nav-link" data-scroll-target="#comparison-with-the-true-states">Comparison with the true states</a></li>
+  </ul></li>
+  <li><a href="#question-3" id="toc-question-3" class="nav-link" data-scroll-target="#question-3">Question 3</a>
+  <ul class="collapse">
+  <li><a href="#a-summing-over-all-state-sequences" id="toc-a-summing-over-all-state-sequences" class="nav-link" data-scroll-target="#a-summing-over-all-state-sequences">(a) Summing over all state sequences</a></li>
+  <li><a href="#b-matrix-formula" id="toc-b-matrix-formula" class="nav-link" data-scroll-target="#b-matrix-formula">(b) Matrix formula</a></li>
+  </ul></li>
+  <li><a href="#question-4" id="toc-question-4" class="nav-link" data-scroll-target="#question-4">Question 4</a></li>
+  <li><a href="#question-5" id="toc-question-5" class="nav-link" data-scroll-target="#question-5">Question 5</a>
+  <ul class="collapse">
+  <li><a href="#the-160-symbol-string-over-a-b-c" id="toc-the-160-symbol-string-over-a-b-c" class="nav-link" data-scroll-target="#the-160-symbol-string-over-a-b-c">(1) The 160-symbol string over {A, B, C}</a></li>
+  <li><a href="#the-60-symbol-string-over-a-f" id="toc-the-60-symbol-string-over-a-f" class="nav-link" data-scroll-target="#the-60-symbol-string-over-a-f">(2) The 60-symbol string over {A, …, F}</a></li>
+  </ul></li>
+  <li><a href="#question-6-the-occasionally-dishonest-casino" id="toc-question-6-the-occasionally-dishonest-casino" class="nav-link" data-scroll-target="#question-6-the-occasionally-dishonest-casino">Question 6: The Occasionally Dishonest Casino</a></li>
+  <li><a href="#question-7-two-state-bernoulli-hmm" id="toc-question-7-two-state-bernoulli-hmm" class="nav-link" data-scroll-target="#question-7-two-state-bernoulli-hmm">Question 7: Two-state Bernoulli HMM</a>
+  <ul class="collapse">
+  <li><a href="#marginal-probabilities" id="toc-marginal-probabilities" class="nav-link" data-scroll-target="#marginal-probabilities">Marginal probabilities</a></li>
+  <li><a href="#likelihood-function" id="toc-likelihood-function" class="nav-link" data-scroll-target="#likelihood-function">Likelihood function</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -307,8 +358,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Hidden Markov Model Exercise</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
-<p class="subtitle lead">Section 2: Exponential smoothing, state-space and hidden Markov models</p>
+<div class="quarto-title-block"><div><h1 class="title">Hidden Markov Models</h1><button type="button" class="btn code-tools-button dropdown-toggle" id="quarto-code-tools-menu" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi"></i> Code</button><ul class="dropdown-menu dropdown-menu-end" aria-labelelledby="quarto-code-tools-menu"><li><a id="quarto-show-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Show All Code</a></li><li><a id="quarto-hide-all-code" class="dropdown-item" href="javascript:void(0)" role="button">Hide All Code</a></li><li><hr class="dropdown-divider"></li><li><a id="quarto-view-source" class="dropdown-item" href="javascript:void(0)" role="button">View Source</a></li></ul></div></div>
 </div>
 
 
@@ -325,51 +375,794 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="callout callout-style-simple callout-note">
-<div class="callout-body d-flex">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-body-container">
-<p><strong>Topics covered:</strong> Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm.</p>
-</div>
-</div>
-</div>
-<section id="overview-of-the-key-concepts" class="level2">
-<h2 class="anchored" data-anchor-id="overview-of-the-key-concepts">Overview of the key concepts</h2>
-<p><em>Summarise the main ideas of this session in your own words.</em></p>
-</section>
-<section id="worked-exercises" class="level2">
-<h2 class="anchored" data-anchor-id="worked-exercises">Worked exercises</h2>
-<section id="exercises-from-the-chapter" class="level3">
-<h3 class="anchored" data-anchor-id="exercises-from-the-chapter">Exercises from the chapter</h3>
-<ol type="1">
-<li>Two-state Poisson HMM: compute the probability that the first three observations are 0, 2, 1, by enumerating state sequences and by the matrix formula.</li>
-<li>Show that the HMM likelihood reduces to the independent mixture likelihood when the Markov chain is degenerate.</li>
-<li>Bernoulli HMM: forward probabilities, likelihood, forecast distribution, Viterbi path and state prediction.</li>
-</ol>
-</section>
-</section>
-<section id="implementation-in-r" class="level2">
-<h2 class="anchored" data-anchor-id="implementation-in-r">Implementation in R</h2>
-<p><em>Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.</em></p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SimDesign)   <span class="co"># rmvnorm()</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
+<p>The code here builds on the course notes (Chapter 4): the scaled forward recursion from <code>pois2.hmm.ll</code> and the log-scale Viterbi loop from the genetic example.</p>
+<section id="question-1" class="level2">
+<h2 class="anchored" data-anchor-id="question-1">Question 1</h2>
+<section id="simulating-from-a-three-state-bivariate-gaussian-hmm" class="level3">
+<h3 class="anchored" data-anchor-id="simulating-from-a-three-state-bivariate-gaussian-hmm">Simulating from a three-state bivariate Gaussian HMM</h3>
+<p>First set up the transition matrix and the state distributions. <code>sigma</code> has to exist as a <span class="math inline">\(2 \times 2 \times 3\)</span> array before the slices can be filled in.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>Gamma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.1</span>, <span class="fl">0.8</span>, <span class="fl">0.1</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.8</span>), <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>sf <span class="ot">&lt;-</span> <span class="dv">10</span>    <span class="co"># scaling factor</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, m))</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">2</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">3</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The states are simulated first with <code>sample</code>, using the row of <span class="math inline">\(\Gamma\)</span> for the previous state. Then each observation is drawn from the normal distribution for its state. <span class="math inline">\(\Gamma\)</span> is symmetric, so its stationary distribution is <span class="math inline">\((1/3, 1/3, 1/3)\)</span>, and I use that for the first state.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>z[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>m, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  z[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>m, <span class="dv">1</span>, <span class="at">prob =</span> Gamma[z[t<span class="dv">-1</span>], ])</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  Y[t, ] <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> mu[z[t], ], <span class="at">sigma =</span> sigma[,,z[t]])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>z</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 1 1 1 1 1 1 1 3 3 3 3 3 3 2 2 2 2 2 2 2</code></pre>
+</div>
+</div>
 </section>
-<section id="reflection" class="level2">
-<h2 class="anchored" data-anchor-id="reflection">Reflection</h2>
-<p><strong>What was most challenging:</strong></p>
-<p><strong>What I now understand:</strong></p>
-<p><strong>Advantages and limitations of the methods:</strong></p>
-<p><strong>Links:</strong> related projects and journal entries.</p>
+<section id="plot-of-the-observations" class="level3">
+<h3 class="anchored" data-anchor-id="plot-of-the-observations">Plot of the observations</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>, <span class="st">"forestgreen"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(x[<span class="dv">1</span>]), <span class="at">ylab =</span> <span class="fu">expression</span>(x[<span class="dv">2</span>]), <span class="at">las =</span> <span class="dv">1</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(Y[<span class="sc">-</span>n, <span class="dv">1</span>], Y[<span class="sc">-</span>n, <span class="dv">2</span>], Y[<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>], Y[<span class="sc">-</span><span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>       <span class="at">length =</span> <span class="fl">0.08</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(Y, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> cols[z])</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(mu, <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> cols)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">paste</span>(<span class="st">"State"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">col =</span> cols, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-q1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-q1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="07-hidden-markov-model-exercise_files/figure-html/fig-q1-1.png" class="img-fluid figure-img" width="576">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-q1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Simulated observations coloured by true state. Arrows show the order in time.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The points cluster around the three means (crosses). Because the diagonal of <span class="math inline">\(\Gamma\)</span> is 0.8, the chain stays put for a few steps at a time, so the path mostly hops around within one cluster before jumping to another. State 3 has the largest variance in <span class="math inline">\(x_1\)</span> (30 vs 5 in <span class="math inline">\(x_2\)</span>), so it is the most spread out sideways. States 1 and 2 have the same variances but opposite correlations (<span class="math inline">\(\pm 0.5\)</span>), which is hard to see with only 7 points each.</p>
+</section>
+<section id="parameters-to-estimate" class="level3">
+<h3 class="anchored" data-anchor-id="parameters-to-estimate">Parameters to estimate</h3>
+<p>If we only had the <span class="math inline">\(Y_t\)</span>, we would need to estimate:</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Parameters</th>
+<th>Count</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transition probabilities <span class="math inline">\(\gamma_{ij}\)</span> (<span class="math inline">\(3 \times 2\)</span>, rows sum to 1)</td>
+<td>6</td>
+</tr>
+<tr class="even">
+<td>Means <span class="math inline">\(\mu_k\)</span> (<span class="math inline">\(3 \times 2\)</span>)</td>
+<td>6</td>
+</tr>
+<tr class="odd">
+<td>Covariance matrices <span class="math inline">\(\Sigma_k\)</span> (3 unique entries each, symmetric)</td>
+<td>9</td>
+</tr>
+<tr class="even">
+<td><strong>Total</strong></td>
+<td><strong>21</strong></td>
+</tr>
+</tbody>
+</table>
+<p>If the initial distribution <span class="math inline">\(\delta\)</span> is estimated too (rather than taken as the stationary distribution), that adds <span class="math inline">\(m - 1 = 2\)</span>, giving 23. This is a lot of parameters for 20 observations.</p>
+</section>
+</section>
+<section id="question-2" class="level2">
+<h2 class="anchored" data-anchor-id="question-2">Question 2</h2>
+<section id="viterbi-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="viterbi-algorithm">Viterbi algorithm</h3>
+<p>This follows the genetic example code in the notes, made general for any number of states, with the back-tracing step added. I use natural logs instead of <code>log2</code>. The path is the same either way.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"z"</span>, <span class="st">"z"</span>, <span class="st">"y"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>obsposs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>tpm <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.6</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.6</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>emmprob <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.4</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>viterbi <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, obsposs, init, tpm, emmprob) {</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(obs)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">length</span>(init)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  em <span class="ot">&lt;-</span> <span class="fu">log</span>(emmprob)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  G <span class="ot">&lt;-</span> <span class="fu">log</span>(tpm)</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  xi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> m, <span class="at">ncol =</span> n)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  o1 <span class="ot">&lt;-</span> <span class="fu">which</span>(obs[<span class="dv">1</span>] <span class="sc">==</span> obsposs)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  xi[, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(init) <span class="sc">+</span> em[, o1]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    oi <span class="ot">&lt;-</span> <span class="fu">which</span>(obs[i] <span class="sc">==</span> obsposs)</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>m) {</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>      xi[j, i] <span class="ot">&lt;-</span> <span class="fu">max</span>(xi[, i<span class="dv">-1</span>] <span class="sc">+</span> G[, j]) <span class="sc">+</span> em[j, oi]</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># back-tracing</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  S <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a>  S[n] <span class="ot">&lt;-</span> <span class="fu">which.max</span>(xi[, n])</span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> (n<span class="dv">-1</span>)<span class="sc">:</span><span class="dv">1</span>) {</span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>    S[t] <span class="ot">&lt;-</span> <span class="fu">which.max</span>(xi[, t] <span class="sc">+</span> G[, S[t<span class="sc">+</span><span class="dv">1</span>]])</span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">xi =</span> xi, <span class="at">path =</span> S)</span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>vit <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(obs, obsposs, init, tpm, emmprob)</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(vit<span class="sc">$</span>xi, <span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       [,1]   [,2]   [,3]   [,4]   [,5]   [,6]    [,7]    [,8]    [,9]   [,10]
+[1,] -1.427 -2.631 -3.835 -5.039 -6.243 -7.447  -8.651 -10.954 -13.256 -15.559
+[2,] -3.507 -4.934 -6.138 -7.342 -8.546 -9.750 -10.954 -10.771 -12.198 -13.402
+[3,] -2.408 -4.123 -5.444 -6.648 -7.852 -9.056 -10.260 -11.177 -12.604 -14.319</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>states[vit<span class="sc">$</span>path]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A" "A" "A" "A" "A" "A" "A" "B" "B" "B"</code></pre>
+</div>
+</div>
+<p>The most likely state sequence is <strong>A A A A A A A B B B</strong>.</p>
+<p>As a check, there are only <span class="math inline">\(3^{10} = 59\,049\)</span> possible paths here, so I can also score every one of them and take the best (the slow way the notes warn about).</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">expand.grid</span>(<span class="fu">rep</span>(<span class="fu">list</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="fu">length</span>(obs))))</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">match</span>(obs, obsposs)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>logjoint <span class="ot">&lt;-</span> <span class="fu">apply</span>(paths, <span class="dv">1</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(init[s[<span class="dv">1</span>]]) <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">log</span>(tpm[<span class="fu">cbind</span>(s[<span class="sc">-</span><span class="dv">10</span>], s[<span class="sc">-</span><span class="dv">1</span>])])) <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">log</span>(emmprob[<span class="fu">cbind</span>(s, o)]))</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>states[paths[<span class="fu">which.max</span>(logjoint), ]]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "A" "A" "A" "A" "A" "A" "A" "B" "B" "B"</code></pre>
+</div>
+</div>
+<p>Same answer.</p>
+</section>
+<section id="explaining-the-result" class="level3">
+<h3 class="anchored" data-anchor-id="explaining-the-result">Explaining the result</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>xi.scaled <span class="ot">&lt;-</span> <span class="fu">apply</span>(vit<span class="sc">$</span>xi, <span class="dv">2</span>, <span class="cf">function</span>(v) <span class="fu">exp</span>(v <span class="sc">-</span> <span class="fu">max</span>(v)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">exp</span>(v <span class="sc">-</span> <span class="fu">max</span>(v))))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"C"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="fu">t</span>(xi.scaled), <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> cols,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"Scaled max-path probability"</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">xaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">labels =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, obs), <span class="at">padj =</span> <span class="fl">0.5</span>)</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"right"</span>, <span class="at">legend =</span> states, <span class="at">col =</span> cols, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-q2" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-q2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="07-hidden-markov-model-exercise_files/figure-html/fig-q2-1.png" class="img-fluid figure-img" width="672">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-q2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Viterbi max-path probabilities for each state, scaled to sum to 1 at each time. The x-axis shows the observation at each time.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<ul>
+<li>State A is the state most likely to emit <code>x</code> (0.6), and A is the starting state with the highest probability. So the run of seven <code>x</code>s is decoded as A.</li>
+<li><code>z</code> is most likely from B or C (0.4 each). B is easier to reach from A (0.3 vs 0.2) and more persistent (0.6), so the two <code>z</code>s go to B.</li>
+<li><code>y</code> is emitted with probability 0.5 by B, and staying in B has probability 0.6, so the last observation is B too.</li>
+</ul>
+</section>
+<section id="comparison-with-the-true-states" class="level3">
+<h3 class="anchored" data-anchor-id="comparison-with-the-true-states">Comparison with the true states</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">obs =</span> obs, <span class="at">viterbi =</span> states[vit<span class="sc">$</span>path], <span class="at">true =</span> true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>        [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10]
+obs     "x"  "x"  "x"  "x"  "x"  "x"  "x"  "z"  "z"  "y"  
+viterbi "A"  "A"  "A"  "A"  "A"  "A"  "A"  "B"  "B"  "B"  
+true    "A"  "C"  "A"  "A"  "A"  "A"  "A"  "B"  "B"  "B"  </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(states[vit<span class="sc">$</span>path] <span class="sc">==</span> true)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.9</code></pre>
+</div>
+</div>
+<p>Viterbi gets 9 out of 10 right. It misses time 2, where the true state was C but <code>x</code> was emitted. Since C only emits <code>x</code> with probability 0.3, and a single visit to C means two unlikely transitions (A→C and C→A), the best path just stays in A. Viterbi picks the best <em>whole</em> path, so short visits to a state like this get smoothed out.</p>
+</section>
+</section>
+<section id="question-3" class="level2">
+<h2 class="anchored" data-anchor-id="question-3">Question 3</h2>
+<p><span class="math inline">\(\Gamma = \begin{pmatrix} 0.1 &amp; 0.9 \\ 0.4 &amp; 0.6 \end{pmatrix}\)</span>, <span class="math inline">\(\lambda = (1, 3)\)</span>. The chain is stationary, so <span class="math inline">\(\delta\)</span> solves <span class="math inline">\(\delta \Gamma = \delta\)</span>: <span class="math inline">\(0.9\delta_1 = 0.4\delta_2\)</span>, which gives <span class="math inline">\(\delta = (4/13, 9/13)\)</span>.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Gamma3 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>x3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="fu">solve</span>(<span class="fu">t</span>(<span class="fu">diag</span>(<span class="dv">2</span>) <span class="sc">-</span> Gamma3 <span class="sc">+</span> <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>delta</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.3076923 0.6923077</code></pre>
+</div>
+</div>
+<section id="a-summing-over-all-state-sequences" class="level3">
+<h3 class="anchored" data-anchor-id="a-summing-over-all-state-sequences">(a) Summing over all state sequences</h3>
+<p>There are <span class="math inline">\(2^3 = 8\)</span> possible state sequences. For each one,</p>
+<p><span class="math display">\[P(c_1, c_2, c_3) = \delta_{c_1} \gamma_{c_1 c_2} \gamma_{c_2 c_3}, \qquad P(0, 2, 1 \mid c_1, c_2, c_3) = p_{c_1}(0)\, p_{c_2}(2)\, p_{c_3}(1)\]</span></p>
+<p>and the probability of the observations is the sum of the products.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>seqs <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">c3 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">c2 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">c1 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)[, <span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>]</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>p.seq <span class="ot">&lt;-</span> delta[seqs<span class="sc">$</span>c1] <span class="sc">*</span> Gamma3[<span class="fu">cbind</span>(seqs<span class="sc">$</span>c1, seqs<span class="sc">$</span>c2)] <span class="sc">*</span> Gamma3[<span class="fu">cbind</span>(seqs<span class="sc">$</span>c2, seqs<span class="sc">$</span>c3)]</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>p.obs <span class="ot">&lt;-</span> <span class="fu">dpois</span>(x3[<span class="dv">1</span>], lambda[seqs<span class="sc">$</span>c1]) <span class="sc">*</span> <span class="fu">dpois</span>(x3[<span class="dv">2</span>], lambda[seqs<span class="sc">$</span>c2]) <span class="sc">*</span> <span class="fu">dpois</span>(x3[<span class="dv">3</span>], lambda[seqs<span class="sc">$</span>c3])</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>tab3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(seqs, <span class="at">P.seq =</span> p.seq, <span class="at">P.obs.given.seq =</span> p.obs, <span class="at">product =</span> p.seq <span class="sc">*</span> p.obs)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(tab3, <span class="at">digits =</span> <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<table class="caption-top table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: right;">c1</th>
+<th style="text-align: right;">c2</th>
+<th style="text-align: right;">c3</th>
+<th style="text-align: right;">P.seq</th>
+<th style="text-align: right;">P.obs.given.seq</th>
+<th style="text-align: right;">product</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.003077</td>
+<td style="text-align: right;">0.024894</td>
+<td style="text-align: right;">0.000077</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.027692</td>
+<td style="text-align: right;">0.010107</td>
+<td style="text-align: right;">0.000280</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.110769</td>
+<td style="text-align: right;">0.030321</td>
+<td style="text-align: right;">0.003359</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.166154</td>
+<td style="text-align: right;">0.012310</td>
+<td style="text-align: right;">0.002045</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.027692</td>
+<td style="text-align: right;">0.003369</td>
+<td style="text-align: right;">0.000093</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.249231</td>
+<td style="text-align: right;">0.001368</td>
+<td style="text-align: right;">0.000341</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0.166154</td>
+<td style="text-align: right;">0.004103</td>
+<td style="text-align: right;">0.000682</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.249231</td>
+<td style="text-align: right;">0.001666</td>
+<td style="text-align: right;">0.000415</td>
+</tr>
+</tbody>
+</table>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tab3<span class="sc">$</span>P.seq)    <span class="co"># check: sums to 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tab3<span class="sc">$</span>product)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.00729174</code></pre>
+</div>
+</div>
+</section>
+<section id="b-matrix-formula" class="level3">
+<h3 class="anchored" data-anchor-id="b-matrix-formula">(b) Matrix formula</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">diag</span>(<span class="fu">dpois</span>(x, lambda))</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>delta <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">0</span>) <span class="sc">%*%</span> Gamma3 <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">2</span>) <span class="sc">%*%</span> Gamma3 <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>           [,1]
+[1,] 0.00729174</code></pre>
+</div>
+</div>
+<p>Both ways give <span class="math inline">\(\Pr(X_1 = 0, X_2 = 2, X_3 = 1) \approx\)</span> 0.00729. The matrix product does the sum over the 8 paths for us: each <span class="math inline">\(\Gamma \mathbf{P}(x)\)</span> step sums over the previous state, which is why it grows linearly in <span class="math inline">\(T\)</span> and not as <span class="math inline">\(m^T\)</span>.</p>
+</section>
+</section>
+<section id="question-4" class="level2">
+<h2 class="anchored" data-anchor-id="question-4">Question 4</h2>
+<p>If the Markov chain degenerates to independent draws, then the next state does not depend on the current one, so every row of <span class="math inline">\(\Gamma\)</span> is the same, and equal to <span class="math inline">\(\delta\)</span>:</p>
+<p><span class="math display">\[\Gamma = \begin{pmatrix} \delta \\ \vdots \\ \delta \end{pmatrix} = \mathbf{1}'\delta.\]</span></p>
+<p>Substituting this into the likelihood:</p>
+<p><span class="math display">\[
+\begin{aligned}
+L_T &amp;= \delta \mathbf{P}(x_1)\,\mathbf{1}'\delta\, \mathbf{P}(x_2)\,\mathbf{1}'\delta \cdots \mathbf{1}'\delta\, \mathbf{P}(x_T)\mathbf{1}' \\
+&amp;= \big(\delta \mathbf{P}(x_1)\mathbf{1}'\big)\big(\delta \mathbf{P}(x_2)\mathbf{1}'\big)\cdots\big(\delta \mathbf{P}(x_T)\mathbf{1}'\big)
+\end{aligned}
+\]</span></p>
+<p>since each bracket <span class="math inline">\(\delta \mathbf{P}(x_j)\mathbf{1}'\)</span> is a scalar (<span class="math inline">\(1 \times m\)</span> times <span class="math inline">\(m \times m\)</span> times <span class="math inline">\(m \times 1\)</span>), and matrix multiplication is associative, so we can regroup. <span class="math inline">\(\mathbf{P}(x_j)\)</span> is diagonal, so</p>
+<p><span class="math display">\[\delta \mathbf{P}(x_j)\mathbf{1}' = \sum_{i=1}^m \delta_i\, p_i(x_j, \theta_i).\]</span></p>
+<p>Hence</p>
+<p><span class="math display">\[L_T(\theta_1, \ldots, \theta_m, \delta_1, \ldots, \delta_m) = \prod_{j=1}^{n} \sum_{i=1}^{m} \delta_i\, p_i(x_j, \theta_i),\]</span></p>
+<p>which is the independent mixture likelihood from the start of the notes.</p>
+<p>A quick numerical check with the Question 3 values, but with independent states:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>Gamma.ind <span class="ot">&lt;-</span> <span class="fu">rbind</span>(delta, delta)</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>lhs <span class="ot">&lt;-</span> delta <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">0</span>) <span class="sc">%*%</span> Gamma.ind <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">2</span>) <span class="sc">%*%</span> Gamma.ind <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>rhs <span class="ot">&lt;-</span> <span class="fu">prod</span>(<span class="fu">sapply</span>(x3, <span class="cf">function</span>(x) <span class="fu">sum</span>(delta <span class="sc">*</span> <span class="fu">dpois</span>(x, lambda))))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(lhs, rhs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.006770921 0.006770921</code></pre>
+</div>
+</div>
+</section>
+<section id="question-5" class="level2">
+<h2 class="anchored" data-anchor-id="question-5">Question 5</h2>
+<section id="the-160-symbol-string-over-a-b-c" class="level3">
+<h3 class="anchored" data-anchor-id="the-160-symbol-string-over-a-b-c">(1) The 160-symbol string over {A, B, C}</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"AABBBACABBBACAAAAAAAAABBBACAAAAABACAAAAAABBBBAC"</span>,</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>             <span class="st">"AAAAAAAAAAAABACABACAABBACAAABBBBACAAABACAAAABAC"</span>,</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>             <span class="st">"AABACAAABBACAAAABBBBACABBACAAAAAABACABACAAABACA"</span>,</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>             <span class="st">"ABBBACAAAABACABBACA"</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>ch <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(s1, <span class="st">""</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ch)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 160</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ch)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>ch
+ A  B  C 
+97 42 21 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="co"># which symbol follows which</span></span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">from =</span> <span class="fu">head</span>(ch, <span class="sc">-</span><span class="dv">1</span>), <span class="at">to =</span> <span class="fu">tail</span>(ch, <span class="sc">-</span><span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    to
+from  A  B  C
+   A 54 21 21
+   B 21 21  0
+   C 21  0  0</code></pre>
+</div>
+</div>
+<p>What stands out in the transition counts:</p>
+<ul>
+<li>Every C is followed by A and preceded by A.</li>
+<li>B is only ever followed by B or A, and that A is always followed by C (BA, AC and C all occur exactly 21 times).</li>
+<li>So the string is the same pattern repeated 21 times: <strong>a run of As, a run of Bs, one A, one C</strong>, with one extra A at the end.</li>
+</ul>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>cyc <span class="ot">&lt;-</span> <span class="fu">regmatches</span>(s1, <span class="fu">gregexpr</span>(<span class="st">"A+B+AC"</span>, s1))[[<span class="dv">1</span>]]</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(cyc)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 21</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>runA <span class="ot">&lt;-</span> <span class="fu">nchar</span>(<span class="fu">sub</span>(<span class="st">"B+AC"</span>, <span class="st">""</span>, cyc))       <span class="co"># length of A-run before the Bs</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>runB <span class="ot">&lt;-</span> <span class="fu">nchar</span>(<span class="fu">gsub</span>(<span class="st">"A|C"</span>, <span class="st">""</span>, cyc))       <span class="co"># length of the B-run</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(runA, runB)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3] [,4] [,5] [,6] [,7] [,8] [,9] [,10] [,11] [,12] [,13] [,14]
+runA    2    1    9    5    6   12    1    2    3     3     4     2     3     4
+runB    3    3    3    1    4    1    1    2    4     1     1     1     2     4
+     [,15] [,16] [,17] [,18] [,19] [,20] [,21]
+runA     1     6     1     3     2     4     1
+runB     2     1     1     1     3     1     2</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">meanA =</span> <span class="fu">mean</span>(runA), <span class="at">meanB =</span> <span class="fu">mean</span>(runB))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   meanA    meanB 
+3.571429 2.000000 </code></pre>
+</div>
+</div>
+<p>The A at the start of a block and the A just before C behave differently (one repeats, the other is always exactly one symbol and is always followed by C). That is the hidden part: the same symbol comes from two different states. So I use <strong>4 states</strong>:</p>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>State</th>
+<th>Meaning</th>
+<th>Emits</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>A-run</td>
+<td>A</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>B-run</td>
+<td>B</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>single A after the Bs</td>
+<td>A</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>end of block</td>
+<td>C</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Transition matrix.</strong> The run lengths are geometric, so the self-transition probability is estimated by (number of symbols in the state − number of times we leave it) / number of symbols. The last A has no transition after it, so it is left out.</p>
+<ul>
+<li>State 1: 75 As in the 21 A-runs, left 21 times, so <span class="math inline">\(\gamma_{11} = 54/75 = 0.72\)</span> and <span class="math inline">\(\gamma_{12} = 0.28\)</span> (mean run length <span class="math inline">\(1/0.28 \approx 3.6\)</span>).</li>
+<li>State 2: 42 Bs, left 21 times, so <span class="math inline">\(\gamma_{22} = 21/42 = 0.5\)</span> and <span class="math inline">\(\gamma_{23} = 0.5\)</span> (mean run length 2).</li>
+<li>State 3 always goes to state 4, and state 4 always goes back to state 1.</li>
+</ul>
+<p><span class="math display">\[
+\Gamma = \begin{pmatrix}
+0.72 &amp; 0.28 &amp; 0 &amp; 0 \\
+0 &amp; 0.5 &amp; 0.5 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 1 \\
+1 &amp; 0 &amp; 0 &amp; 0
+\end{pmatrix}
+\]</span></p>
+<p><strong>Emission matrix</strong> (rows = states, columns = A, B, C). Each state only ever produces one symbol in the data:</p>
+<p><span class="math display">\[
+B = \begin{pmatrix}
+1 &amp; 0 &amp; 0 \\
+0 &amp; 1 &amp; 0 \\
+1 &amp; 0 &amp; 0 \\
+0 &amp; 0 &amp; 1
+\end{pmatrix}
+\]</span></p>
+<p><strong>Initial probabilities.</strong> The string starts with an A-run, so <span class="math inline">\(\delta = (1, 0, 0, 0)\)</span>. With a single sequence there is only one start to learn from, so this is a weak estimate.</p>
+<p>A simpler 3-state model (one state per letter) can’t produce the “always A then C after the Bs” pattern: a state that emits A and can go to both B and C would allow strings like …AAC… or …BAB…, which never happen here.</p>
+</section>
+<section id="the-60-symbol-string-over-a-f" class="level3">
+<h3 class="anchored" data-anchor-id="the-60-symbol-string-over-a-f">(2) The 60-symbol string over {A, …, F}</h3>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="st">"CEFBAFCEFBAFBAFCEFCADCAFBEFCEFBEFBEFCAFCEDCAFBEDCADBAFCAFCEF"</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>ch2 <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(s2, <span class="st">""</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ch2)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 60</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="fu">matrix</span>(ch2, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)   <span class="co"># 20 blocks of 3</span></span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pos)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,] "C"  "E"  "F" 
+[2,] "B"  "A"  "F" 
+[3,] "C"  "E"  "F" 
+[4,] "B"  "A"  "F" 
+[5,] "B"  "A"  "F" 
+[6,] "C"  "E"  "F" </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(pos, <span class="dv">2</span>, table)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>     [,1] [,2] [,3]
+[1,]    8   10    4
+[2,]   12   10   16</code></pre>
+</div>
+</div>
+<p>Splitting the string into blocks of three, the letters never mix between positions: position 1 is always B or C, position 2 is always A or E, position 3 is always D or F. So the string comes from a <strong>3-state</strong> chain that cycles 1 → 2 → 3 → 1 every time, and each state picks one of two letters.</p>
+<p><strong>Transition matrix</strong> (deterministic cycle, never violated in 59 transitions):</p>
+<p><span class="math display">\[
+\Gamma = \begin{pmatrix}
+0 &amp; 1 &amp; 0 \\
+0 &amp; 0 &amp; 1 \\
+1 &amp; 0 &amp; 0
+\end{pmatrix}
+\]</span></p>
+<p><strong>Emission matrix</strong> (columns A–F), using the relative frequencies at each position out of 20:</p>
+<p><span class="math display">\[
+B = \begin{pmatrix}
+0 &amp; 0.4 &amp; 0.6 &amp; 0 &amp; 0 &amp; 0 \\
+0.5 &amp; 0 &amp; 0 &amp; 0 &amp; 0.5 &amp; 0 \\
+0 &amp; 0 &amp; 0 &amp; 0.2 &amp; 0 &amp; 0.8
+\end{pmatrix}
+\]</span></p>
+<p><strong>Initial probabilities.</strong> The string starts with C, which only state 1 emits, so <span class="math inline">\(\delta = (1, 0, 0)\)</span>.</p>
+<p>I also checked whether the letter in one position depends on the letter before it (e.g.&nbsp;whether B tends to be followed by A):</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">pos1 =</span> pos[, <span class="dv">1</span>], <span class="at">pos2 =</span> pos[, <span class="dv">2</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    pos2
+pos1 A E
+   B 4 4
+   C 6 6</code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">pos2 =</span> pos[, <span class="dv">2</span>], <span class="at">pos3 =</span> pos[, <span class="dv">3</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>    pos3
+pos2 D F
+   A 2 8
+   E 2 8</code></pre>
+</div>
+</div>
+<p>The rows are proportional (B and C are each followed by A and E equally often; A and E are each followed by D and F in a 1:4 ratio). So the letter in one position tells us nothing about the next, and independent emissions within each state fit.</p>
+</section>
+</section>
+<section id="question-6-the-occasionally-dishonest-casino" class="level2">
+<h2 class="anchored" data-anchor-id="question-6-the-occasionally-dishonest-casino">Question 6: The Occasionally Dishonest Casino</h2>
+<p>State 1 is the fair die, state 2 the loaded die.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>Gamma6 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.95</span>, <span class="fl">0.05</span>,</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.10</span>, <span class="fl">0.90</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>emis6 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">fair   =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="dv">6</span>),</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">loaded =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>, <span class="dv">5</span>), <span class="dv">5</span><span class="sc">/</span><span class="dv">10</span>))</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>sim.casino <span class="ot">&lt;-</span> <span class="cf">function</span>(n, Gamma, emis, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)) {</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  z[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span>, <span class="at">prob =</span> init)</span>
+<span id="cb51-12"><a href="#cb51-12" aria-hidden="true" tabindex="-1"></a>  x[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">1</span>, <span class="at">prob =</span> emis[z[<span class="dv">1</span>], ])</span>
+<span id="cb51-13"><a href="#cb51-13" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb51-14"><a href="#cb51-14" aria-hidden="true" tabindex="-1"></a>    z[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span>, <span class="at">prob =</span> Gamma[z[t<span class="dv">-1</span>], ])</span>
+<span id="cb51-15"><a href="#cb51-15" aria-hidden="true" tabindex="-1"></a>    x[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">1</span>, <span class="at">prob =</span> emis[z[t], ])</span>
+<span id="cb51-16"><a href="#cb51-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb51-17"><a href="#cb51-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">t =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">die =</span> z, <span class="at">roll =</span> x)</span>
+<span id="cb51-18"><a href="#cb51-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb51-19"><a href="#cb51-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-20"><a href="#cb51-20" aria-hidden="true" tabindex="-1"></a>casino <span class="ot">&lt;-</span> <span class="fu">sim.casino</span>(<span class="dv">300</span>, Gamma6, emis6)</span>
+<span id="cb51-21"><a href="#cb51-21" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(casino<span class="sc">$</span>die))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+   1    2 
+0.56 0.44 </code></pre>
+</div>
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(<span class="at">die =</span> casino<span class="sc">$</span>die, <span class="at">roll =</span> casino<span class="sc">$</span>roll), <span class="dv">1</span>), <span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>   roll
+die    1    2    3    4    5    6
+  1 0.20 0.15 0.17 0.12 0.21 0.15
+  2 0.13 0.08 0.11 0.10 0.14 0.44</code></pre>
+</div>
+</div>
+<p>The stationary distribution is <span class="math inline">\(\delta = (2/3, 1/3)\)</span>, so in the long run the loaded die is used a third of the time. In this run of 300 it was used 44%, because the loaded stretches are long (about 10 rolls on average) so a few extra ones make a big difference. When the loaded die is used, close to half the rolls are 6.</p>
+<p>Since we know the true parameters, the Viterbi function from Question 2 can be reused to see how well we can tell when the casino cheated:</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fl">1e-10</span>, <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Roll"</span>, <span class="at">ylab =</span> <span class="st">"Outcome"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">7</span>))</span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(casino<span class="sc">$</span>t <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fl">0.5</span>, casino<span class="sc">$</span>t <span class="sc">+</span> <span class="fl">0.5</span>, <span class="dv">7</span>,</span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">ifelse</span>(casino<span class="sc">$</span>die <span class="sc">==</span> <span class="dv">2</span>, <span class="fu">adjustcolor</span>(<span class="st">"grey"</span>, <span class="fl">0.5</span>), <span class="cn">NA</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(casino<span class="sc">$</span>t, <span class="fu">ifelse</span>(vit6<span class="sc">$</span>path <span class="sc">==</span> <span class="dv">2</span>, <span class="fl">6.8</span>, <span class="fl">0.7</span>), <span class="at">type =</span> <span class="st">"s"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(vit6<span class="sc">$</span>path <span class="sc">==</span> casino<span class="sc">$</span>die)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.7733333</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-q6" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-q6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="07-hidden-markov-model-exercise_files/figure-html/fig-q6-1.png" class="img-fluid figure-img" width="768">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-q6-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: 300 simulated rolls. Shaded = loaded die in use (true). Red line = Viterbi decoded state.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Viterbi gets 77% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–75 and from 275 onwards). It misses the short loaded stretches, and also the one around rolls 165–190, which happened to have few 6s. A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</p>
+</section>
+<section id="question-7-two-state-bernoulli-hmm" class="level2">
+<h2 class="anchored" data-anchor-id="question-7-two-state-bernoulli-hmm">Question 7: Two-state Bernoulli HMM</h2>
+<p><span class="math inline">\(\delta = \frac{1}{3}(1, 2)\)</span>, <span class="math inline">\(P(X_t = 1 \mid C_t = 1) = 0.5\)</span>, <span class="math inline">\(P(X_t = 1 \mid C_t = 2) = 1\)</span>.</p>
+<section id="marginal-probabilities" class="level3">
+<h3 class="anchored" data-anchor-id="marginal-probabilities">Marginal probabilities</h3>
+<p><span class="math display">\[P(X_t = 0) = \delta_1 (0.5) + \delta_2 (0) = \tfrac{1}{3} \cdot \tfrac{1}{2} = \tfrac{1}{6}\]</span></p>
+<p><span class="math display">\[P(X_t = 1) = \delta_1 (0.5) + \delta_2 (1) = \tfrac{1}{6} + \tfrac{2}{3} = \tfrac{5}{6}\]</span></p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>delta7 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>) <span class="sc">/</span> <span class="dv">3</span></span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>Gamma7 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.25</span>, <span class="fl">0.75</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>)    <span class="co"># P(X = 1 | state)</span></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>P7 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">diag</span>(<span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">1</span>) p1 <span class="cf">else</span> <span class="dv">1</span> <span class="sc">-</span> p1)</span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">P0 =</span> delta7 <span class="sc">%*%</span> <span class="fu">P7</span>(<span class="dv">0</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">P1 =</span> delta7 <span class="sc">%*%</span> <span class="fu">P7</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>       P0        P1 
+0.1666667 0.8333333 </code></pre>
+</div>
+</div>
+</section>
+<section id="likelihood-function" class="level3">
+<h3 class="anchored" data-anchor-id="likelihood-function">Likelihood function</h3>
+<p>Same structure as <code>pois2.hmm.ll</code> in the notes. The chain is stationary (<span class="math inline">\(\delta\Gamma = \delta\)</span>), so starting with <code>phi &lt;- delta</code> and multiplying by <code>tpm</code> already at <span class="math inline">\(t = 1\)</span> makes no difference.</p>
+<div class="cell">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>bern2.hmm.lik <span class="ot">&lt;-</span> <span class="cf">function</span>(x, delta, tpm, p1) {</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  phi <span class="ot">&lt;-</span> delta</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  ll <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>    Pi <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="cf">if</span> (x[i] <span class="sc">==</span> <span class="dv">1</span>) p1 <span class="cf">else</span> <span class="dv">1</span> <span class="sc">-</span> p1)</span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>    v <span class="ot">&lt;-</span> phi <span class="sc">%*%</span> tpm <span class="sc">%*%</span> Pi</span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>    u <span class="ot">&lt;-</span> v <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>    ll <span class="ot">&lt;-</span> ll <span class="sc">+</span> <span class="fu">log</span>(u)</span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>    phi <span class="ot">&lt;-</span> v <span class="sc">/</span> <span class="fu">c</span>(u)</span>
+<span id="cb59-12"><a href="#cb59-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb59-13"><a href="#cb59-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-14"><a href="#cb59-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">exp</span>(ll))</span>
+<span id="cb59-15"><a href="#cb59-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb59-16"><a href="#cb59-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-17"><a href="#cb59-17" aria-hidden="true" tabindex="-1"></a>L111 <span class="ot">&lt;-</span> <span class="fu">bern2.hmm.lik</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), delta7, Gamma7, p1)</span>
+<span id="cb59-18"><a href="#cb59-18" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(L111, <span class="dv">29</span><span class="sc">/</span><span class="dv">48</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6041667 0.6041667</code></pre>
+</div>
+</div>
+<p>The function gives <span class="math inline">\(L = 29/48 \approx 0.6042\)</span> for <span class="math inline">\((1, 1, 1)\)</span>, which matches the check.</p>
 
 
 <!-- -->
 
+</section>
 </section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
@@ -824,45 +1617,497 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     }
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Hidden Markov Model Exercise"</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="an">subtitle:</span><span class="co"> "Section 2: Exponential smoothing, state-space and hidden Markov models"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>::: {.callout-note appearance="simple"}</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>**Topics covered:** Mixture models, Markov chains, the HMM likelihood, forward probabilities, state prediction and the Viterbi algorithm.</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>:::</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## Overview of the key concepts</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>*Summarise the main ideas of this session in your own words.*</span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Worked exercises</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">### Exercises from the chapter</span></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Two-state Poisson HMM: compute the probability that the first three observations are 0, 2, 1, by enumerating state sequences and by the matrix formula.</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Show that the HMM likelihood reduces to the independent mixture likelihood when the Markov chain is degenerate.</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Bernoulli HMM: forward probabilities, likelihood, forecast distribution, Viterbi path and state prediction.</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="fu">## Implementation in R</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>*Fit a model to data, or implement a method from first principles. Include predictions and prediction intervals where relevant.*</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co"># your code here</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reflection</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>**What was most challenging:**</span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>**What I now understand:**</span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a>**Advantages and limitations of the methods:**</span>
-<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a>**Links:** related projects and journal entries.</span>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb61" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Hidden Markov Models"</span></span>
+<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
+<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-7"><a href="#cb61-7" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-8"><a href="#cb61-8" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: setup</span></span>
+<span id="cb61-9"><a href="#cb61-9" aria-hidden="true" tabindex="-1"></a><span class="co">#| message: false</span></span>
+<span id="cb61-10"><a href="#cb61-10" aria-hidden="true" tabindex="-1"></a><span class="co">#| warning: false</span></span>
+<span id="cb61-11"><a href="#cb61-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(SimDesign)   <span class="co"># rmvnorm()</span></span>
+<span id="cb61-12"><a href="#cb61-12" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-13"><a href="#cb61-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-14"><a href="#cb61-14" aria-hidden="true" tabindex="-1"></a>The code here builds on the course notes (Chapter 4): the scaled forward recursion from <span class="in">`pois2.hmm.ll`</span> and the log-scale Viterbi loop from the genetic example.</span>
+<span id="cb61-15"><a href="#cb61-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-16"><a href="#cb61-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 1</span></span>
+<span id="cb61-17"><a href="#cb61-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-18"><a href="#cb61-18" aria-hidden="true" tabindex="-1"></a><span class="fu">### Simulating from a three-state bivariate Gaussian HMM</span></span>
+<span id="cb61-19"><a href="#cb61-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-20"><a href="#cb61-20" aria-hidden="true" tabindex="-1"></a>First set up the transition matrix and the state distributions. <span class="in">`sigma`</span> has to exist as a $2 \times 2 \times 3$ array before the slices can be filled in.</span>
+<span id="cb61-21"><a href="#cb61-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-24"><a href="#cb61-24" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-25"><a href="#cb61-25" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q1-setup</span></span>
+<span id="cb61-26"><a href="#cb61-26" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2026</span>)</span>
+<span id="cb61-27"><a href="#cb61-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-28"><a href="#cb61-28" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb61-29"><a href="#cb61-29" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb61-30"><a href="#cb61-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-31"><a href="#cb61-31" aria-hidden="true" tabindex="-1"></a>Gamma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.8</span>, <span class="fl">0.1</span>, <span class="fl">0.1</span>,</span>
+<span id="cb61-32"><a href="#cb61-32" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.1</span>, <span class="fl">0.8</span>, <span class="fl">0.1</span>,</span>
+<span id="cb61-33"><a href="#cb61-33" aria-hidden="true" tabindex="-1"></a>                  <span class="fl">0.1</span>, <span class="fl">0.1</span>, <span class="fl">0.8</span>), <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-34"><a href="#cb61-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-35"><a href="#cb61-35" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="dv">10</span> <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">0</span>,<span class="dv">1</span>), <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb61-36"><a href="#cb61-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-37"><a href="#cb61-37" aria-hidden="true" tabindex="-1"></a>sf <span class="ot">&lt;-</span> <span class="dv">10</span>    <span class="co"># scaling factor</span></span>
+<span id="cb61-38"><a href="#cb61-38" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">array</span>(<span class="dv">0</span>, <span class="at">dim =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">2</span>, m))</span>
+<span id="cb61-39"><a href="#cb61-39" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">1</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb61-40"><a href="#cb61-40" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">2</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="sc">-</span><span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>, <span class="dv">1</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb61-41"><a href="#cb61-41" aria-hidden="true" tabindex="-1"></a>sigma[,,<span class="dv">3</span>] <span class="ot">&lt;-</span> sf <span class="sc">*</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">1</span><span class="sc">/</span><span class="dv">2</span>), <span class="at">nrow =</span> <span class="dv">2</span>)</span>
+<span id="cb61-42"><a href="#cb61-42" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-43"><a href="#cb61-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-44"><a href="#cb61-44" aria-hidden="true" tabindex="-1"></a>The states are simulated first with <span class="in">`sample`</span>, using the row of $\Gamma$ for the previous state. Then each observation is drawn from the normal distribution for its state. $\Gamma$ is symmetric, so its stationary distribution is $(1/3, 1/3, 1/3)$, and I use that for the first state.</span>
+<span id="cb61-45"><a href="#cb61-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-48"><a href="#cb61-48" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-49"><a href="#cb61-49" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q1-simulate</span></span>
+<span id="cb61-50"><a href="#cb61-50" aria-hidden="true" tabindex="-1"></a>z <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb61-51"><a href="#cb61-51" aria-hidden="true" tabindex="-1"></a>z[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>m, <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">3</span>, <span class="dv">3</span>))</span>
+<span id="cb61-52"><a href="#cb61-52" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb61-53"><a href="#cb61-53" aria-hidden="true" tabindex="-1"></a>  z[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>m, <span class="dv">1</span>, <span class="at">prob =</span> Gamma[z[t<span class="dv">-1</span>], ])</span>
+<span id="cb61-54"><a href="#cb61-54" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-55"><a href="#cb61-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-56"><a href="#cb61-56" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> n, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb61-57"><a href="#cb61-57" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb61-58"><a href="#cb61-58" aria-hidden="true" tabindex="-1"></a>  Y[t, ] <span class="ot">&lt;-</span> <span class="fu">rmvnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> mu[z[t], ], <span class="at">sigma =</span> sigma[,,z[t]])</span>
+<span id="cb61-59"><a href="#cb61-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-60"><a href="#cb61-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-61"><a href="#cb61-61" aria-hidden="true" tabindex="-1"></a>z</span>
+<span id="cb61-62"><a href="#cb61-62" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-63"><a href="#cb61-63" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-64"><a href="#cb61-64" aria-hidden="true" tabindex="-1"></a><span class="fu">### Plot of the observations</span></span>
+<span id="cb61-65"><a href="#cb61-65" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-68"><a href="#cb61-68" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-69"><a href="#cb61-69" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-q1</span></span>
+<span id="cb61-70"><a href="#cb61-70" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Simulated observations coloured by true state. Arrows show the order in time."</span></span>
+<span id="cb61-71"><a href="#cb61-71" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 6</span></span>
+<span id="cb61-72"><a href="#cb61-72" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 5</span></span>
+<span id="cb61-73"><a href="#cb61-73" aria-hidden="true" tabindex="-1"></a>cols <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"black"</span>, <span class="st">"red"</span>, <span class="st">"forestgreen"</span>)</span>
+<span id="cb61-74"><a href="#cb61-74" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-75"><a href="#cb61-75" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Y, <span class="at">type =</span> <span class="st">"n"</span>, <span class="at">xlab =</span> <span class="fu">expression</span>(x[<span class="dv">1</span>]), <span class="at">ylab =</span> <span class="fu">expression</span>(x[<span class="dv">2</span>]), <span class="at">las =</span> <span class="dv">1</span>)</span>
+<span id="cb61-76"><a href="#cb61-76" aria-hidden="true" tabindex="-1"></a><span class="fu">arrows</span>(Y[<span class="sc">-</span>n, <span class="dv">1</span>], Y[<span class="sc">-</span>n, <span class="dv">2</span>], Y[<span class="sc">-</span><span class="dv">1</span>, <span class="dv">1</span>], Y[<span class="sc">-</span><span class="dv">1</span>, <span class="dv">2</span>],</span>
+<span id="cb61-77"><a href="#cb61-77" aria-hidden="true" tabindex="-1"></a>       <span class="at">length =</span> <span class="fl">0.08</span>, <span class="at">col =</span> <span class="st">"grey50"</span>)</span>
+<span id="cb61-78"><a href="#cb61-78" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(Y, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">col =</span> cols[z])</span>
+<span id="cb61-79"><a href="#cb61-79" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(mu, <span class="at">pch =</span> <span class="dv">4</span>, <span class="at">cex =</span> <span class="dv">2</span>, <span class="at">lwd =</span> <span class="dv">2</span>, <span class="at">col =</span> cols)</span>
+<span id="cb61-80"><a href="#cb61-80" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"topleft"</span>, <span class="at">legend =</span> <span class="fu">paste</span>(<span class="st">"State"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="at">col =</span> cols, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb61-81"><a href="#cb61-81" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-82"><a href="#cb61-82" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-83"><a href="#cb61-83" aria-hidden="true" tabindex="-1"></a>The points cluster around the three means (crosses). Because the diagonal of $\Gamma$ is 0.8, the chain stays put for a few steps at a time, so the path mostly hops around within one cluster before jumping to another. State 3 has the largest variance in $x_1$ (30 vs 5 in $x_2$), so it is the most spread out sideways. States 1 and 2 have the same variances but opposite correlations ($\pm 0.5$), which is hard to see with only 7 points each.</span>
+<span id="cb61-84"><a href="#cb61-84" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-85"><a href="#cb61-85" aria-hidden="true" tabindex="-1"></a><span class="fu">### Parameters to estimate</span></span>
+<span id="cb61-86"><a href="#cb61-86" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-87"><a href="#cb61-87" aria-hidden="true" tabindex="-1"></a>If we only had the $Y_t$, we would need to estimate:</span>
+<span id="cb61-88"><a href="#cb61-88" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-89"><a href="#cb61-89" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Parameters <span class="pp">|</span> Count <span class="pp">|</span></span>
+<span id="cb61-90"><a href="#cb61-90" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|</span></span>
+<span id="cb61-91"><a href="#cb61-91" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Transition probabilities $\gamma_{ij}$ ($3 \times 2$, rows sum to 1) <span class="pp">|</span> 6 <span class="pp">|</span></span>
+<span id="cb61-92"><a href="#cb61-92" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Means $\mu_k$ ($3 \times 2$) <span class="pp">|</span> 6 <span class="pp">|</span></span>
+<span id="cb61-93"><a href="#cb61-93" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> Covariance matrices $\Sigma_k$ (3 unique entries each, symmetric) <span class="pp">|</span> 9 <span class="pp">|</span></span>
+<span id="cb61-94"><a href="#cb61-94" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> **Total** | **21** <span class="pp">|</span></span>
+<span id="cb61-95"><a href="#cb61-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-96"><a href="#cb61-96" aria-hidden="true" tabindex="-1"></a>If the initial distribution $\delta$ is estimated too (rather than taken as the stationary distribution), that adds $m - 1 = 2$, giving 23. This is a lot of parameters for 20 observations.</span>
+<span id="cb61-97"><a href="#cb61-97" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-98"><a href="#cb61-98" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 2</span></span>
+<span id="cb61-99"><a href="#cb61-99" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-100"><a href="#cb61-100" aria-hidden="true" tabindex="-1"></a><span class="fu">### Viterbi algorithm</span></span>
+<span id="cb61-101"><a href="#cb61-101" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-102"><a href="#cb61-102" aria-hidden="true" tabindex="-1"></a>This follows the genetic example code in the notes, made general for any number of states, with the back-tracing step added. I use natural logs instead of <span class="in">`log2`</span>. The path is the same either way.</span>
+<span id="cb61-103"><a href="#cb61-103" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-106"><a href="#cb61-106" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-107"><a href="#cb61-107" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q2-setup</span></span>
+<span id="cb61-108"><a href="#cb61-108" aria-hidden="true" tabindex="-1"></a>obs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"x"</span>, <span class="st">"z"</span>, <span class="st">"z"</span>, <span class="st">"y"</span>)</span>
+<span id="cb61-109"><a href="#cb61-109" aria-hidden="true" tabindex="-1"></a>obsposs <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"x"</span>, <span class="st">"y"</span>, <span class="st">"z"</span>)</span>
+<span id="cb61-110"><a href="#cb61-110" aria-hidden="true" tabindex="-1"></a>states <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"C"</span>)</span>
+<span id="cb61-111"><a href="#cb61-111" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-112"><a href="#cb61-112" aria-hidden="true" tabindex="-1"></a>init <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>)</span>
+<span id="cb61-113"><a href="#cb61-113" aria-hidden="true" tabindex="-1"></a>tpm <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.6</span>, <span class="fl">0.3</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.6</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb61-114"><a href="#cb61-114" aria-hidden="true" tabindex="-1"></a>emmprob <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.6</span>, <span class="fl">0.2</span>, <span class="fl">0.2</span>, <span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.4</span>, <span class="fl">0.3</span>, <span class="fl">0.3</span>, <span class="fl">0.4</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">3</span>)</span>
+<span id="cb61-115"><a href="#cb61-115" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-116"><a href="#cb61-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-119"><a href="#cb61-119" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-120"><a href="#cb61-120" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q2-viterbi</span></span>
+<span id="cb61-121"><a href="#cb61-121" aria-hidden="true" tabindex="-1"></a>viterbi <span class="ot">&lt;-</span> <span class="cf">function</span>(obs, obsposs, init, tpm, emmprob) {</span>
+<span id="cb61-122"><a href="#cb61-122" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(obs)</span>
+<span id="cb61-123"><a href="#cb61-123" aria-hidden="true" tabindex="-1"></a>  m <span class="ot">&lt;-</span> <span class="fu">length</span>(init)</span>
+<span id="cb61-124"><a href="#cb61-124" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-125"><a href="#cb61-125" aria-hidden="true" tabindex="-1"></a>  em <span class="ot">&lt;-</span> <span class="fu">log</span>(emmprob)</span>
+<span id="cb61-126"><a href="#cb61-126" aria-hidden="true" tabindex="-1"></a>  G <span class="ot">&lt;-</span> <span class="fu">log</span>(tpm)</span>
+<span id="cb61-127"><a href="#cb61-127" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-128"><a href="#cb61-128" aria-hidden="true" tabindex="-1"></a>  xi <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> m, <span class="at">ncol =</span> n)</span>
+<span id="cb61-129"><a href="#cb61-129" aria-hidden="true" tabindex="-1"></a>  o1 <span class="ot">&lt;-</span> <span class="fu">which</span>(obs[<span class="dv">1</span>] <span class="sc">==</span> obsposs)</span>
+<span id="cb61-130"><a href="#cb61-130" aria-hidden="true" tabindex="-1"></a>  xi[, <span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">log</span>(init) <span class="sc">+</span> em[, o1]</span>
+<span id="cb61-131"><a href="#cb61-131" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-132"><a href="#cb61-132" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb61-133"><a href="#cb61-133" aria-hidden="true" tabindex="-1"></a>    oi <span class="ot">&lt;-</span> <span class="fu">which</span>(obs[i] <span class="sc">==</span> obsposs)</span>
+<span id="cb61-134"><a href="#cb61-134" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>m) {</span>
+<span id="cb61-135"><a href="#cb61-135" aria-hidden="true" tabindex="-1"></a>      xi[j, i] <span class="ot">&lt;-</span> <span class="fu">max</span>(xi[, i<span class="dv">-1</span>] <span class="sc">+</span> G[, j]) <span class="sc">+</span> em[j, oi]</span>
+<span id="cb61-136"><a href="#cb61-136" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb61-137"><a href="#cb61-137" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-138"><a href="#cb61-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-139"><a href="#cb61-139" aria-hidden="true" tabindex="-1"></a>  <span class="co"># back-tracing</span></span>
+<span id="cb61-140"><a href="#cb61-140" aria-hidden="true" tabindex="-1"></a>  S <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb61-141"><a href="#cb61-141" aria-hidden="true" tabindex="-1"></a>  S[n] <span class="ot">&lt;-</span> <span class="fu">which.max</span>(xi[, n])</span>
+<span id="cb61-142"><a href="#cb61-142" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> (n<span class="dv">-1</span>)<span class="sc">:</span><span class="dv">1</span>) {</span>
+<span id="cb61-143"><a href="#cb61-143" aria-hidden="true" tabindex="-1"></a>    S[t] <span class="ot">&lt;-</span> <span class="fu">which.max</span>(xi[, t] <span class="sc">+</span> G[, S[t<span class="sc">+</span><span class="dv">1</span>]])</span>
+<span id="cb61-144"><a href="#cb61-144" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-145"><a href="#cb61-145" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-146"><a href="#cb61-146" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">xi =</span> xi, <span class="at">path =</span> S)</span>
+<span id="cb61-147"><a href="#cb61-147" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-148"><a href="#cb61-148" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-149"><a href="#cb61-149" aria-hidden="true" tabindex="-1"></a>vit <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(obs, obsposs, init, tpm, emmprob)</span>
+<span id="cb61-150"><a href="#cb61-150" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(vit<span class="sc">$</span>xi, <span class="dv">3</span>)</span>
+<span id="cb61-151"><a href="#cb61-151" aria-hidden="true" tabindex="-1"></a>states[vit<span class="sc">$</span>path]</span>
+<span id="cb61-152"><a href="#cb61-152" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-153"><a href="#cb61-153" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-154"><a href="#cb61-154" aria-hidden="true" tabindex="-1"></a>The most likely state sequence is **`r paste(states[vit$path], collapse = " ")`**.</span>
+<span id="cb61-155"><a href="#cb61-155" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-156"><a href="#cb61-156" aria-hidden="true" tabindex="-1"></a>As a check, there are only $3^{10} = 59\,049$ possible paths here, so I can also score every one of them and take the best (the slow way the notes warn about).</span>
+<span id="cb61-157"><a href="#cb61-157" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-160"><a href="#cb61-160" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-161"><a href="#cb61-161" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q2-bruteforce</span></span>
+<span id="cb61-162"><a href="#cb61-162" aria-hidden="true" tabindex="-1"></a>paths <span class="ot">&lt;-</span> <span class="fu">as.matrix</span>(<span class="fu">expand.grid</span>(<span class="fu">rep</span>(<span class="fu">list</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>), <span class="fu">length</span>(obs))))</span>
+<span id="cb61-163"><a href="#cb61-163" aria-hidden="true" tabindex="-1"></a>o <span class="ot">&lt;-</span> <span class="fu">match</span>(obs, obsposs)</span>
+<span id="cb61-164"><a href="#cb61-164" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-165"><a href="#cb61-165" aria-hidden="true" tabindex="-1"></a>logjoint <span class="ot">&lt;-</span> <span class="fu">apply</span>(paths, <span class="dv">1</span>, <span class="cf">function</span>(s) {</span>
+<span id="cb61-166"><a href="#cb61-166" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(init[s[<span class="dv">1</span>]]) <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">log</span>(tpm[<span class="fu">cbind</span>(s[<span class="sc">-</span><span class="dv">10</span>], s[<span class="sc">-</span><span class="dv">1</span>])])) <span class="sc">+</span> <span class="fu">sum</span>(<span class="fu">log</span>(emmprob[<span class="fu">cbind</span>(s, o)]))</span>
+<span id="cb61-167"><a href="#cb61-167" aria-hidden="true" tabindex="-1"></a>})</span>
+<span id="cb61-168"><a href="#cb61-168" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-169"><a href="#cb61-169" aria-hidden="true" tabindex="-1"></a>states[paths[<span class="fu">which.max</span>(logjoint), ]]</span>
+<span id="cb61-170"><a href="#cb61-170" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-171"><a href="#cb61-171" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-172"><a href="#cb61-172" aria-hidden="true" tabindex="-1"></a>Same answer.</span>
+<span id="cb61-173"><a href="#cb61-173" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-174"><a href="#cb61-174" aria-hidden="true" tabindex="-1"></a><span class="fu">### Explaining the result</span></span>
+<span id="cb61-175"><a href="#cb61-175" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-178"><a href="#cb61-178" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-179"><a href="#cb61-179" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-q2</span></span>
+<span id="cb61-180"><a href="#cb61-180" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "Viterbi max-path probabilities for each state, scaled to sum to 1 at each time. The x-axis shows the observation at each time."</span></span>
+<span id="cb61-181"><a href="#cb61-181" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 7</span></span>
+<span id="cb61-182"><a href="#cb61-182" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb61-183"><a href="#cb61-183" aria-hidden="true" tabindex="-1"></a>xi.scaled <span class="ot">&lt;-</span> <span class="fu">apply</span>(vit<span class="sc">$</span>xi, <span class="dv">2</span>, <span class="cf">function</span>(v) <span class="fu">exp</span>(v <span class="sc">-</span> <span class="fu">max</span>(v)) <span class="sc">/</span> <span class="fu">sum</span>(<span class="fu">exp</span>(v <span class="sc">-</span> <span class="fu">max</span>(v))))</span>
+<span id="cb61-184"><a href="#cb61-184" aria-hidden="true" tabindex="-1"></a>true <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"A"</span>, <span class="st">"C"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"A"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>, <span class="st">"B"</span>)</span>
+<span id="cb61-185"><a href="#cb61-185" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-186"><a href="#cb61-186" aria-hidden="true" tabindex="-1"></a><span class="fu">matplot</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="fu">t</span>(xi.scaled), <span class="at">type =</span> <span class="st">"b"</span>, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">col =</span> cols,</span>
+<span id="cb61-187"><a href="#cb61-187" aria-hidden="true" tabindex="-1"></a>        <span class="at">xlab =</span> <span class="st">"Time"</span>, <span class="at">ylab =</span> <span class="st">"Scaled max-path probability"</span>, <span class="at">las =</span> <span class="dv">1</span>, <span class="at">xaxt =</span> <span class="st">"n"</span>)</span>
+<span id="cb61-188"><a href="#cb61-188" aria-hidden="true" tabindex="-1"></a><span class="fu">axis</span>(<span class="dv">1</span>, <span class="at">at =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="at">labels =</span> <span class="fu">paste0</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>, obs), <span class="at">padj =</span> <span class="fl">0.5</span>)</span>
+<span id="cb61-189"><a href="#cb61-189" aria-hidden="true" tabindex="-1"></a><span class="fu">legend</span>(<span class="st">"right"</span>, <span class="at">legend =</span> states, <span class="at">col =</span> cols, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">lty =</span> <span class="dv">1</span>, <span class="at">bty =</span> <span class="st">"n"</span>)</span>
+<span id="cb61-190"><a href="#cb61-190" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-191"><a href="#cb61-191" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-192"><a href="#cb61-192" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>State A is the state most likely to emit <span class="in">`x`</span> (0.6), and A is the starting state with the highest probability. So the run of seven <span class="in">`x`</span>s is decoded as A.</span>
+<span id="cb61-193"><a href="#cb61-193" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`z`</span> is most likely from B or C (0.4 each). B is easier to reach from A (0.3 vs 0.2) and more persistent (0.6), so the two <span class="in">`z`</span>s go to B.</span>
+<span id="cb61-194"><a href="#cb61-194" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span><span class="in">`y`</span> is emitted with probability 0.5 by B, and staying in B has probability 0.6, so the last observation is B too.</span>
+<span id="cb61-195"><a href="#cb61-195" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-196"><a href="#cb61-196" aria-hidden="true" tabindex="-1"></a><span class="fu">### Comparison with the true states</span></span>
+<span id="cb61-197"><a href="#cb61-197" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-200"><a href="#cb61-200" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-201"><a href="#cb61-201" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q2-compare</span></span>
+<span id="cb61-202"><a href="#cb61-202" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(<span class="at">obs =</span> obs, <span class="at">viterbi =</span> states[vit<span class="sc">$</span>path], <span class="at">true =</span> true)</span>
+<span id="cb61-203"><a href="#cb61-203" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(states[vit<span class="sc">$</span>path] <span class="sc">==</span> true)</span>
+<span id="cb61-204"><a href="#cb61-204" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-205"><a href="#cb61-205" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-206"><a href="#cb61-206" aria-hidden="true" tabindex="-1"></a>Viterbi gets 9 out of 10 right. It misses time 2, where the true state was C but <span class="in">`x`</span> was emitted. Since C only emits <span class="in">`x`</span> with probability 0.3, and a single visit to C means two unlikely transitions (A→C and C→A), the best path just stays in A. Viterbi picks the best *whole* path, so short visits to a state like this get smoothed out.</span>
+<span id="cb61-207"><a href="#cb61-207" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-208"><a href="#cb61-208" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 3</span></span>
+<span id="cb61-209"><a href="#cb61-209" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-210"><a href="#cb61-210" aria-hidden="true" tabindex="-1"></a>$\Gamma = \begin{pmatrix} 0.1 &amp; 0.9 <span class="sc">\\</span> 0.4 &amp; 0.6 \end{pmatrix}$, $\lambda = (1, 3)$. The chain is stationary, so $\delta$ solves $\delta \Gamma = \delta$: $0.9\delta_1 = 0.4\delta_2$, which gives $\delta = (4/13, 9/13)$.</span>
+<span id="cb61-211"><a href="#cb61-211" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-214"><a href="#cb61-214" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-215"><a href="#cb61-215" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q3-setup</span></span>
+<span id="cb61-216"><a href="#cb61-216" aria-hidden="true" tabindex="-1"></a>Gamma3 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.1</span>, <span class="fl">0.9</span>, <span class="fl">0.4</span>, <span class="fl">0.6</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb61-217"><a href="#cb61-217" aria-hidden="true" tabindex="-1"></a>lambda <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">3</span>)</span>
+<span id="cb61-218"><a href="#cb61-218" aria-hidden="true" tabindex="-1"></a>x3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb61-219"><a href="#cb61-219" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-220"><a href="#cb61-220" aria-hidden="true" tabindex="-1"></a>delta <span class="ot">&lt;-</span> <span class="fu">solve</span>(<span class="fu">t</span>(<span class="fu">diag</span>(<span class="dv">2</span>) <span class="sc">-</span> Gamma3 <span class="sc">+</span> <span class="dv">1</span>), <span class="fu">rep</span>(<span class="dv">1</span>, <span class="dv">2</span>))</span>
+<span id="cb61-221"><a href="#cb61-221" aria-hidden="true" tabindex="-1"></a>delta</span>
+<span id="cb61-222"><a href="#cb61-222" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-223"><a href="#cb61-223" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-224"><a href="#cb61-224" aria-hidden="true" tabindex="-1"></a><span class="fu">### (a) Summing over all state sequences</span></span>
+<span id="cb61-225"><a href="#cb61-225" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-226"><a href="#cb61-226" aria-hidden="true" tabindex="-1"></a>There are $2^3 = 8$ possible state sequences. For each one,</span>
+<span id="cb61-227"><a href="#cb61-227" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-228"><a href="#cb61-228" aria-hidden="true" tabindex="-1"></a>$$P(c_1, c_2, c_3) = \delta_{c_1} \gamma_{c_1 c_2} \gamma_{c_2 c_3}, \qquad P(0, 2, 1 \mid c_1, c_2, c_3) = p_{c_1}(0)\, p_{c_2}(2)\, p_{c_3}(1)$$</span>
+<span id="cb61-229"><a href="#cb61-229" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-230"><a href="#cb61-230" aria-hidden="true" tabindex="-1"></a>and the probability of the observations is the sum of the products.</span>
+<span id="cb61-231"><a href="#cb61-231" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-234"><a href="#cb61-234" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-235"><a href="#cb61-235" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q3a</span></span>
+<span id="cb61-236"><a href="#cb61-236" aria-hidden="true" tabindex="-1"></a>seqs <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">c3 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">c2 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="at">c1 =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>)[, <span class="dv">3</span><span class="sc">:</span><span class="dv">1</span>]</span>
+<span id="cb61-237"><a href="#cb61-237" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-238"><a href="#cb61-238" aria-hidden="true" tabindex="-1"></a>p.seq <span class="ot">&lt;-</span> delta[seqs<span class="sc">$</span>c1] <span class="sc">*</span> Gamma3[<span class="fu">cbind</span>(seqs<span class="sc">$</span>c1, seqs<span class="sc">$</span>c2)] <span class="sc">*</span> Gamma3[<span class="fu">cbind</span>(seqs<span class="sc">$</span>c2, seqs<span class="sc">$</span>c3)]</span>
+<span id="cb61-239"><a href="#cb61-239" aria-hidden="true" tabindex="-1"></a>p.obs <span class="ot">&lt;-</span> <span class="fu">dpois</span>(x3[<span class="dv">1</span>], lambda[seqs<span class="sc">$</span>c1]) <span class="sc">*</span> <span class="fu">dpois</span>(x3[<span class="dv">2</span>], lambda[seqs<span class="sc">$</span>c2]) <span class="sc">*</span> <span class="fu">dpois</span>(x3[<span class="dv">3</span>], lambda[seqs<span class="sc">$</span>c3])</span>
+<span id="cb61-240"><a href="#cb61-240" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-241"><a href="#cb61-241" aria-hidden="true" tabindex="-1"></a>tab3 <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(seqs, <span class="at">P.seq =</span> p.seq, <span class="at">P.obs.given.seq =</span> p.obs, <span class="at">product =</span> p.seq <span class="sc">*</span> p.obs)</span>
+<span id="cb61-242"><a href="#cb61-242" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(tab3, <span class="at">digits =</span> <span class="dv">6</span>)</span>
+<span id="cb61-243"><a href="#cb61-243" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-244"><a href="#cb61-244" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tab3<span class="sc">$</span>P.seq)    <span class="co"># check: sums to 1</span></span>
+<span id="cb61-245"><a href="#cb61-245" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(tab3<span class="sc">$</span>product)</span>
+<span id="cb61-246"><a href="#cb61-246" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-247"><a href="#cb61-247" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-248"><a href="#cb61-248" aria-hidden="true" tabindex="-1"></a><span class="fu">### (b) Matrix formula</span></span>
+<span id="cb61-249"><a href="#cb61-249" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-252"><a href="#cb61-252" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-253"><a href="#cb61-253" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q3b</span></span>
+<span id="cb61-254"><a href="#cb61-254" aria-hidden="true" tabindex="-1"></a>P <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">diag</span>(<span class="fu">dpois</span>(x, lambda))</span>
+<span id="cb61-255"><a href="#cb61-255" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-256"><a href="#cb61-256" aria-hidden="true" tabindex="-1"></a>delta <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">0</span>) <span class="sc">%*%</span> Gamma3 <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">2</span>) <span class="sc">%*%</span> Gamma3 <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb61-257"><a href="#cb61-257" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-258"><a href="#cb61-258" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-259"><a href="#cb61-259" aria-hidden="true" tabindex="-1"></a>Both ways give $\Pr(X_1 = 0, X_2 = 2, X_3 = 1) \approx$ <span class="in">`r round(sum(tab3$product), 5)`</span>. The matrix product does the sum over the 8 paths for us: each $\Gamma \mathbf{P}(x)$ step sums over the previous state, which is why it grows linearly in $T$ and not as $m^T$.</span>
+<span id="cb61-260"><a href="#cb61-260" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-261"><a href="#cb61-261" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 4</span></span>
+<span id="cb61-262"><a href="#cb61-262" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-263"><a href="#cb61-263" aria-hidden="true" tabindex="-1"></a>If the Markov chain degenerates to independent draws, then the next state does not depend on the current one, so every row of $\Gamma$ is the same, and equal to $\delta$:</span>
+<span id="cb61-264"><a href="#cb61-264" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-265"><a href="#cb61-265" aria-hidden="true" tabindex="-1"></a>$$\Gamma = \begin{pmatrix} \delta <span class="sc">\\</span> \vdots <span class="sc">\\</span> \delta \end{pmatrix} = \mathbf{1}'\delta.$$</span>
+<span id="cb61-266"><a href="#cb61-266" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-267"><a href="#cb61-267" aria-hidden="true" tabindex="-1"></a>Substituting this into the likelihood:</span>
+<span id="cb61-268"><a href="#cb61-268" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-269"><a href="#cb61-269" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-270"><a href="#cb61-270" aria-hidden="true" tabindex="-1"></a>\begin{aligned}</span>
+<span id="cb61-271"><a href="#cb61-271" aria-hidden="true" tabindex="-1"></a>L_T &amp;= \delta \mathbf{P}(x_1)\,\mathbf{1}'\delta\, \mathbf{P}(x_2)\,\mathbf{1}'\delta \cdots \mathbf{1}'\delta\, \mathbf{P}(x_T)\mathbf{1}' <span class="sc">\\</span></span>
+<span id="cb61-272"><a href="#cb61-272" aria-hidden="true" tabindex="-1"></a>&amp;= \big(\delta \mathbf{P}(x_1)\mathbf{1}'\big)\big(\delta \mathbf{P}(x_2)\mathbf{1}'\big)\cdots\big(\delta \mathbf{P}(x_T)\mathbf{1}'\big)</span>
+<span id="cb61-273"><a href="#cb61-273" aria-hidden="true" tabindex="-1"></a>\end{aligned}</span>
+<span id="cb61-274"><a href="#cb61-274" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-275"><a href="#cb61-275" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-276"><a href="#cb61-276" aria-hidden="true" tabindex="-1"></a>since each bracket $\delta \mathbf{P}(x_j)\mathbf{1}'$ is a scalar ($1 \times m$ times $m \times m$ times $m \times 1$), and matrix multiplication is associative, so we can regroup. $\mathbf{P}(x_j)$ is diagonal, so</span>
+<span id="cb61-277"><a href="#cb61-277" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-278"><a href="#cb61-278" aria-hidden="true" tabindex="-1"></a>$$\delta \mathbf{P}(x_j)\mathbf{1}' = \sum_{i=1}^m \delta_i\, p_i(x_j, \theta_i).$$</span>
+<span id="cb61-279"><a href="#cb61-279" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-280"><a href="#cb61-280" aria-hidden="true" tabindex="-1"></a>Hence</span>
+<span id="cb61-281"><a href="#cb61-281" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-282"><a href="#cb61-282" aria-hidden="true" tabindex="-1"></a>$$L_T(\theta_1, \ldots, \theta_m, \delta_1, \ldots, \delta_m) = \prod_{j=1}^{n} \sum_{i=1}^{m} \delta_i\, p_i(x_j, \theta_i),$$</span>
+<span id="cb61-283"><a href="#cb61-283" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-284"><a href="#cb61-284" aria-hidden="true" tabindex="-1"></a>which is the independent mixture likelihood from the start of the notes.</span>
+<span id="cb61-285"><a href="#cb61-285" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-286"><a href="#cb61-286" aria-hidden="true" tabindex="-1"></a>A quick numerical check with the Question 3 values, but with independent states:</span>
+<span id="cb61-287"><a href="#cb61-287" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-290"><a href="#cb61-290" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-291"><a href="#cb61-291" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q4-check</span></span>
+<span id="cb61-292"><a href="#cb61-292" aria-hidden="true" tabindex="-1"></a>Gamma.ind <span class="ot">&lt;-</span> <span class="fu">rbind</span>(delta, delta)</span>
+<span id="cb61-293"><a href="#cb61-293" aria-hidden="true" tabindex="-1"></a>lhs <span class="ot">&lt;-</span> delta <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">0</span>) <span class="sc">%*%</span> Gamma.ind <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">2</span>) <span class="sc">%*%</span> Gamma.ind <span class="sc">%*%</span> <span class="fu">P</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb61-294"><a href="#cb61-294" aria-hidden="true" tabindex="-1"></a>rhs <span class="ot">&lt;-</span> <span class="fu">prod</span>(<span class="fu">sapply</span>(x3, <span class="cf">function</span>(x) <span class="fu">sum</span>(delta <span class="sc">*</span> <span class="fu">dpois</span>(x, lambda))))</span>
+<span id="cb61-295"><a href="#cb61-295" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(lhs, rhs)</span>
+<span id="cb61-296"><a href="#cb61-296" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-297"><a href="#cb61-297" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-298"><a href="#cb61-298" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 5</span></span>
+<span id="cb61-299"><a href="#cb61-299" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-300"><a href="#cb61-300" aria-hidden="true" tabindex="-1"></a><span class="fu">### (1) The 160-symbol string over {A, B, C}</span></span>
+<span id="cb61-301"><a href="#cb61-301" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-304"><a href="#cb61-304" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-305"><a href="#cb61-305" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q5-string1</span></span>
+<span id="cb61-306"><a href="#cb61-306" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">"AABBBACABBBACAAAAAAAAABBBACAAAAABACAAAAAABBBBAC"</span>,</span>
+<span id="cb61-307"><a href="#cb61-307" aria-hidden="true" tabindex="-1"></a>             <span class="st">"AAAAAAAAAAAABACABACAABBACAAABBBBACAAABACAAAABAC"</span>,</span>
+<span id="cb61-308"><a href="#cb61-308" aria-hidden="true" tabindex="-1"></a>             <span class="st">"AABACAAABBACAAAABBBBACABBACAAAAAABACABACAAABACA"</span>,</span>
+<span id="cb61-309"><a href="#cb61-309" aria-hidden="true" tabindex="-1"></a>             <span class="st">"ABBBACAAAABACABBACA"</span>)</span>
+<span id="cb61-310"><a href="#cb61-310" aria-hidden="true" tabindex="-1"></a>ch <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(s1, <span class="st">""</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb61-311"><a href="#cb61-311" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ch)</span>
+<span id="cb61-312"><a href="#cb61-312" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(ch)</span>
+<span id="cb61-313"><a href="#cb61-313" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-314"><a href="#cb61-314" aria-hidden="true" tabindex="-1"></a><span class="co"># which symbol follows which</span></span>
+<span id="cb61-315"><a href="#cb61-315" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">from =</span> <span class="fu">head</span>(ch, <span class="sc">-</span><span class="dv">1</span>), <span class="at">to =</span> <span class="fu">tail</span>(ch, <span class="sc">-</span><span class="dv">1</span>))</span>
+<span id="cb61-316"><a href="#cb61-316" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-317"><a href="#cb61-317" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-318"><a href="#cb61-318" aria-hidden="true" tabindex="-1"></a>What stands out in the transition counts:</span>
+<span id="cb61-319"><a href="#cb61-319" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-320"><a href="#cb61-320" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>Every C is followed by A and preceded by A.</span>
+<span id="cb61-321"><a href="#cb61-321" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>B is only ever followed by B or A, and that A is always followed by C (BA, AC and C all occur exactly 21 times).</span>
+<span id="cb61-322"><a href="#cb61-322" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>So the string is the same pattern repeated 21 times: **a run of As, a run of Bs, one A, one C**, with one extra A at the end.</span>
+<span id="cb61-323"><a href="#cb61-323" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-326"><a href="#cb61-326" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-327"><a href="#cb61-327" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q5-runs</span></span>
+<span id="cb61-328"><a href="#cb61-328" aria-hidden="true" tabindex="-1"></a>cyc <span class="ot">&lt;-</span> <span class="fu">regmatches</span>(s1, <span class="fu">gregexpr</span>(<span class="st">"A+B+AC"</span>, s1))[[<span class="dv">1</span>]]</span>
+<span id="cb61-329"><a href="#cb61-329" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(cyc)</span>
+<span id="cb61-330"><a href="#cb61-330" aria-hidden="true" tabindex="-1"></a>runA <span class="ot">&lt;-</span> <span class="fu">nchar</span>(<span class="fu">sub</span>(<span class="st">"B+AC"</span>, <span class="st">""</span>, cyc))       <span class="co"># length of A-run before the Bs</span></span>
+<span id="cb61-331"><a href="#cb61-331" aria-hidden="true" tabindex="-1"></a>runB <span class="ot">&lt;-</span> <span class="fu">nchar</span>(<span class="fu">gsub</span>(<span class="st">"A|C"</span>, <span class="st">""</span>, cyc))       <span class="co"># length of the B-run</span></span>
+<span id="cb61-332"><a href="#cb61-332" aria-hidden="true" tabindex="-1"></a><span class="fu">rbind</span>(runA, runB)</span>
+<span id="cb61-333"><a href="#cb61-333" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">meanA =</span> <span class="fu">mean</span>(runA), <span class="at">meanB =</span> <span class="fu">mean</span>(runB))</span>
+<span id="cb61-334"><a href="#cb61-334" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-335"><a href="#cb61-335" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-336"><a href="#cb61-336" aria-hidden="true" tabindex="-1"></a>The A at the start of a block and the A just before C behave differently (one repeats, the other is always exactly one symbol and is always followed by C). That is the hidden part: the same symbol comes from two different states. So I use **4 states**:</span>
+<span id="cb61-337"><a href="#cb61-337" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-338"><a href="#cb61-338" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> State <span class="pp">|</span> Meaning <span class="pp">|</span> Emits <span class="pp">|</span></span>
+<span id="cb61-339"><a href="#cb61-339" aria-hidden="true" tabindex="-1"></a><span class="pp">|---|---|---|</span></span>
+<span id="cb61-340"><a href="#cb61-340" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 1 <span class="pp">|</span> A-run <span class="pp">|</span> A <span class="pp">|</span></span>
+<span id="cb61-341"><a href="#cb61-341" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 2 <span class="pp">|</span> B-run <span class="pp">|</span> B <span class="pp">|</span></span>
+<span id="cb61-342"><a href="#cb61-342" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 3 <span class="pp">|</span> single A after the Bs <span class="pp">|</span> A <span class="pp">|</span></span>
+<span id="cb61-343"><a href="#cb61-343" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> 4 <span class="pp">|</span> end of block <span class="pp">|</span> C <span class="pp">|</span></span>
+<span id="cb61-344"><a href="#cb61-344" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-345"><a href="#cb61-345" aria-hidden="true" tabindex="-1"></a>**Transition matrix.** The run lengths are geometric, so the self-transition probability is estimated by (number of symbols in the state − number of times we leave it) / number of symbols. The last A has no transition after it, so it is left out.</span>
+<span id="cb61-346"><a href="#cb61-346" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-347"><a href="#cb61-347" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>State 1: 75 As in the 21 A-runs, left 21 times, so $\gamma_{11} = 54/75 = 0.72$ and $\gamma_{12} = 0.28$ (mean run length $1/0.28 \approx 3.6$).</span>
+<span id="cb61-348"><a href="#cb61-348" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>State 2: 42 Bs, left 21 times, so $\gamma_{22} = 21/42 = 0.5$ and $\gamma_{23} = 0.5$ (mean run length 2).</span>
+<span id="cb61-349"><a href="#cb61-349" aria-hidden="true" tabindex="-1"></a><span class="ss">- </span>State 3 always goes to state 4, and state 4 always goes back to state 1.</span>
+<span id="cb61-350"><a href="#cb61-350" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-351"><a href="#cb61-351" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-352"><a href="#cb61-352" aria-hidden="true" tabindex="-1"></a>\Gamma = \begin{pmatrix}</span>
+<span id="cb61-353"><a href="#cb61-353" aria-hidden="true" tabindex="-1"></a>0.72 &amp; 0.28 &amp; 0 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-354"><a href="#cb61-354" aria-hidden="true" tabindex="-1"></a>0 &amp; 0.5 &amp; 0.5 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-355"><a href="#cb61-355" aria-hidden="true" tabindex="-1"></a>0 &amp; 0 &amp; 0 &amp; 1 <span class="sc">\\</span></span>
+<span id="cb61-356"><a href="#cb61-356" aria-hidden="true" tabindex="-1"></a>1 &amp; 0 &amp; 0 &amp; 0</span>
+<span id="cb61-357"><a href="#cb61-357" aria-hidden="true" tabindex="-1"></a>\end{pmatrix}</span>
+<span id="cb61-358"><a href="#cb61-358" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-359"><a href="#cb61-359" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-360"><a href="#cb61-360" aria-hidden="true" tabindex="-1"></a>**Emission matrix** (rows = states, columns = A, B, C). Each state only ever produces one symbol in the data:</span>
+<span id="cb61-361"><a href="#cb61-361" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-362"><a href="#cb61-362" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-363"><a href="#cb61-363" aria-hidden="true" tabindex="-1"></a>B = \begin{pmatrix}</span>
+<span id="cb61-364"><a href="#cb61-364" aria-hidden="true" tabindex="-1"></a>1 &amp; 0 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-365"><a href="#cb61-365" aria-hidden="true" tabindex="-1"></a>0 &amp; 1 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-366"><a href="#cb61-366" aria-hidden="true" tabindex="-1"></a>1 &amp; 0 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-367"><a href="#cb61-367" aria-hidden="true" tabindex="-1"></a>0 &amp; 0 &amp; 1</span>
+<span id="cb61-368"><a href="#cb61-368" aria-hidden="true" tabindex="-1"></a>\end{pmatrix}</span>
+<span id="cb61-369"><a href="#cb61-369" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-370"><a href="#cb61-370" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-371"><a href="#cb61-371" aria-hidden="true" tabindex="-1"></a>**Initial probabilities.** The string starts with an A-run, so $\delta = (1, 0, 0, 0)$. With a single sequence there is only one start to learn from, so this is a weak estimate.</span>
+<span id="cb61-372"><a href="#cb61-372" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-373"><a href="#cb61-373" aria-hidden="true" tabindex="-1"></a>A simpler 3-state model (one state per letter) can't produce the "always A then C after the Bs" pattern: a state that emits A and can go to both B and C would allow strings like ...AAC... or ...BAB..., which never happen here.</span>
+<span id="cb61-374"><a href="#cb61-374" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-375"><a href="#cb61-375" aria-hidden="true" tabindex="-1"></a><span class="fu">### (2) The 60-symbol string over {A, …, F}</span></span>
+<span id="cb61-376"><a href="#cb61-376" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-379"><a href="#cb61-379" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-380"><a href="#cb61-380" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q5-string2</span></span>
+<span id="cb61-381"><a href="#cb61-381" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="st">"CEFBAFCEFBAFBAFCEFCADCAFBEFCEFBEFBEFCAFCEDCAFBEDCADBAFCAFCEF"</span></span>
+<span id="cb61-382"><a href="#cb61-382" aria-hidden="true" tabindex="-1"></a>ch2 <span class="ot">&lt;-</span> <span class="fu">strsplit</span>(s2, <span class="st">""</span>)[[<span class="dv">1</span>]]</span>
+<span id="cb61-383"><a href="#cb61-383" aria-hidden="true" tabindex="-1"></a><span class="fu">length</span>(ch2)</span>
+<span id="cb61-384"><a href="#cb61-384" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-385"><a href="#cb61-385" aria-hidden="true" tabindex="-1"></a>pos <span class="ot">&lt;-</span> <span class="fu">matrix</span>(ch2, <span class="at">ncol =</span> <span class="dv">3</span>, <span class="at">byrow =</span> <span class="cn">TRUE</span>)   <span class="co"># 20 blocks of 3</span></span>
+<span id="cb61-386"><a href="#cb61-386" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pos)</span>
+<span id="cb61-387"><a href="#cb61-387" aria-hidden="true" tabindex="-1"></a><span class="fu">apply</span>(pos, <span class="dv">2</span>, table)</span>
+<span id="cb61-388"><a href="#cb61-388" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-389"><a href="#cb61-389" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-390"><a href="#cb61-390" aria-hidden="true" tabindex="-1"></a>Splitting the string into blocks of three, the letters never mix between positions: position 1 is always B or C, position 2 is always A or E, position 3 is always D or F. So the string comes from a **3-state** chain that cycles 1 → 2 → 3 → 1 every time, and each state picks one of two letters.</span>
+<span id="cb61-391"><a href="#cb61-391" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-392"><a href="#cb61-392" aria-hidden="true" tabindex="-1"></a>**Transition matrix** (deterministic cycle, never violated in 59 transitions):</span>
+<span id="cb61-393"><a href="#cb61-393" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-394"><a href="#cb61-394" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-395"><a href="#cb61-395" aria-hidden="true" tabindex="-1"></a>\Gamma = \begin{pmatrix}</span>
+<span id="cb61-396"><a href="#cb61-396" aria-hidden="true" tabindex="-1"></a>0 &amp; 1 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-397"><a href="#cb61-397" aria-hidden="true" tabindex="-1"></a>0 &amp; 0 &amp; 1 <span class="sc">\\</span></span>
+<span id="cb61-398"><a href="#cb61-398" aria-hidden="true" tabindex="-1"></a>1 &amp; 0 &amp; 0</span>
+<span id="cb61-399"><a href="#cb61-399" aria-hidden="true" tabindex="-1"></a>\end{pmatrix}</span>
+<span id="cb61-400"><a href="#cb61-400" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-401"><a href="#cb61-401" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-402"><a href="#cb61-402" aria-hidden="true" tabindex="-1"></a>**Emission matrix** (columns A–F), using the relative frequencies at each position out of 20:</span>
+<span id="cb61-403"><a href="#cb61-403" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-404"><a href="#cb61-404" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-405"><a href="#cb61-405" aria-hidden="true" tabindex="-1"></a>B = \begin{pmatrix}</span>
+<span id="cb61-406"><a href="#cb61-406" aria-hidden="true" tabindex="-1"></a>0 &amp; 0.4 &amp; 0.6 &amp; 0 &amp; 0 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-407"><a href="#cb61-407" aria-hidden="true" tabindex="-1"></a>0.5 &amp; 0 &amp; 0 &amp; 0 &amp; 0.5 &amp; 0 <span class="sc">\\</span></span>
+<span id="cb61-408"><a href="#cb61-408" aria-hidden="true" tabindex="-1"></a>0 &amp; 0 &amp; 0 &amp; 0.2 &amp; 0 &amp; 0.8</span>
+<span id="cb61-409"><a href="#cb61-409" aria-hidden="true" tabindex="-1"></a>\end{pmatrix}</span>
+<span id="cb61-410"><a href="#cb61-410" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb61-411"><a href="#cb61-411" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-412"><a href="#cb61-412" aria-hidden="true" tabindex="-1"></a>**Initial probabilities.** The string starts with C, which only state 1 emits, so $\delta = (1, 0, 0)$.</span>
+<span id="cb61-413"><a href="#cb61-413" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-414"><a href="#cb61-414" aria-hidden="true" tabindex="-1"></a>I also checked whether the letter in one position depends on the letter before it (e.g. whether B tends to be followed by A):</span>
+<span id="cb61-415"><a href="#cb61-415" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-418"><a href="#cb61-418" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-419"><a href="#cb61-419" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q5-independence</span></span>
+<span id="cb61-420"><a href="#cb61-420" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">pos1 =</span> pos[, <span class="dv">1</span>], <span class="at">pos2 =</span> pos[, <span class="dv">2</span>])</span>
+<span id="cb61-421"><a href="#cb61-421" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(<span class="at">pos2 =</span> pos[, <span class="dv">2</span>], <span class="at">pos3 =</span> pos[, <span class="dv">3</span>])</span>
+<span id="cb61-422"><a href="#cb61-422" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-423"><a href="#cb61-423" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-424"><a href="#cb61-424" aria-hidden="true" tabindex="-1"></a>The rows are proportional (B and C are each followed by A and E equally often; A and E are each followed by D and F in a 1:4 ratio). So the letter in one position tells us nothing about the next, and independent emissions within each state fit.</span>
+<span id="cb61-425"><a href="#cb61-425" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-426"><a href="#cb61-426" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 6: The Occasionally Dishonest Casino</span></span>
+<span id="cb61-427"><a href="#cb61-427" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-428"><a href="#cb61-428" aria-hidden="true" tabindex="-1"></a>State 1 is the fair die, state 2 the loaded die.</span>
+<span id="cb61-429"><a href="#cb61-429" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-432"><a href="#cb61-432" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-433"><a href="#cb61-433" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q6-sim</span></span>
+<span id="cb61-434"><a href="#cb61-434" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6</span>)</span>
+<span id="cb61-435"><a href="#cb61-435" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-436"><a href="#cb61-436" aria-hidden="true" tabindex="-1"></a>Gamma6 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.95</span>, <span class="fl">0.05</span>,</span>
+<span id="cb61-437"><a href="#cb61-437" aria-hidden="true" tabindex="-1"></a>                   <span class="fl">0.10</span>, <span class="fl">0.90</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb61-438"><a href="#cb61-438" aria-hidden="true" tabindex="-1"></a>emis6 <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="at">fair   =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">6</span>, <span class="dv">6</span>),</span>
+<span id="cb61-439"><a href="#cb61-439" aria-hidden="true" tabindex="-1"></a>               <span class="at">loaded =</span> <span class="fu">c</span>(<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">/</span><span class="dv">10</span>, <span class="dv">5</span>), <span class="dv">5</span><span class="sc">/</span><span class="dv">10</span>))</span>
+<span id="cb61-440"><a href="#cb61-440" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-441"><a href="#cb61-441" aria-hidden="true" tabindex="-1"></a>sim.casino <span class="ot">&lt;-</span> <span class="cf">function</span>(n, Gamma, emis, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>)) {</span>
+<span id="cb61-442"><a href="#cb61-442" aria-hidden="true" tabindex="-1"></a>  z <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb61-443"><a href="#cb61-443" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb61-444"><a href="#cb61-444" aria-hidden="true" tabindex="-1"></a>  z[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span>, <span class="at">prob =</span> init)</span>
+<span id="cb61-445"><a href="#cb61-445" aria-hidden="true" tabindex="-1"></a>  x[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">1</span>, <span class="at">prob =</span> emis[z[<span class="dv">1</span>], ])</span>
+<span id="cb61-446"><a href="#cb61-446" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (t <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span>n) {</span>
+<span id="cb61-447"><a href="#cb61-447" aria-hidden="true" tabindex="-1"></a>    z[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>, <span class="dv">1</span>, <span class="at">prob =</span> Gamma[z[t<span class="dv">-1</span>], ])</span>
+<span id="cb61-448"><a href="#cb61-448" aria-hidden="true" tabindex="-1"></a>    x[t] <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="dv">1</span>, <span class="at">prob =</span> emis[z[t], ])</span>
+<span id="cb61-449"><a href="#cb61-449" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-450"><a href="#cb61-450" aria-hidden="true" tabindex="-1"></a>  <span class="fu">data.frame</span>(<span class="at">t =</span> <span class="dv">1</span><span class="sc">:</span>n, <span class="at">die =</span> z, <span class="at">roll =</span> x)</span>
+<span id="cb61-451"><a href="#cb61-451" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-452"><a href="#cb61-452" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-453"><a href="#cb61-453" aria-hidden="true" tabindex="-1"></a>casino <span class="ot">&lt;-</span> <span class="fu">sim.casino</span>(<span class="dv">300</span>, Gamma6, emis6)</span>
+<span id="cb61-454"><a href="#cb61-454" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.table</span>(<span class="fu">table</span>(casino<span class="sc">$</span>die))</span>
+<span id="cb61-455"><a href="#cb61-455" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">prop.table</span>(<span class="fu">table</span>(<span class="at">die =</span> casino<span class="sc">$</span>die, <span class="at">roll =</span> casino<span class="sc">$</span>roll), <span class="dv">1</span>), <span class="dv">2</span>)</span>
+<span id="cb61-456"><a href="#cb61-456" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-457"><a href="#cb61-457" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-458"><a href="#cb61-458" aria-hidden="true" tabindex="-1"></a>The stationary distribution is $\delta = (2/3, 1/3)$, so in the long run the loaded die is used a third of the time. In this run of 300 it was used <span class="in">`r round(100*mean(casino$die == 2))`</span>%, because the loaded stretches are long (about 10 rolls on average) so a few extra ones make a big difference. When the loaded die is used, close to half the rolls are 6.</span>
+<span id="cb61-459"><a href="#cb61-459" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-460"><a href="#cb61-460" aria-hidden="true" tabindex="-1"></a>Since we know the true parameters, the Viterbi function from Question 2 can be reused to see how well we can tell when the casino cheated:</span>
+<span id="cb61-461"><a href="#cb61-461" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-464"><a href="#cb61-464" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-465"><a href="#cb61-465" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: fig-q6</span></span>
+<span id="cb61-466"><a href="#cb61-466" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-cap: "300 simulated rolls. Shaded = loaded die in use (true). Red line = Viterbi decoded state."</span></span>
+<span id="cb61-467"><a href="#cb61-467" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-width: 8</span></span>
+<span id="cb61-468"><a href="#cb61-468" aria-hidden="true" tabindex="-1"></a><span class="co">#| fig-height: 4</span></span>
+<span id="cb61-469"><a href="#cb61-469" aria-hidden="true" tabindex="-1"></a>vit6 <span class="ot">&lt;-</span> <span class="fu">viterbi</span>(casino<span class="sc">$</span>roll, <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">init =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">0</span>) <span class="sc">+</span> <span class="fl">1e-10</span>, <span class="at">tpm =</span> Gamma6, <span class="at">emmprob =</span> emis6)</span>
+<span id="cb61-470"><a href="#cb61-470" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-471"><a href="#cb61-471" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">las =</span> <span class="dv">1</span>,</span>
+<span id="cb61-472"><a href="#cb61-472" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">"Roll"</span>, <span class="at">ylab =</span> <span class="st">"Outcome"</span>, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">7</span>))</span>
+<span id="cb61-473"><a href="#cb61-473" aria-hidden="true" tabindex="-1"></a><span class="fu">rect</span>(casino<span class="sc">$</span>t <span class="sc">-</span> <span class="fl">0.5</span>, <span class="fl">0.5</span>, casino<span class="sc">$</span>t <span class="sc">+</span> <span class="fl">0.5</span>, <span class="dv">7</span>,</span>
+<span id="cb61-474"><a href="#cb61-474" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> <span class="fu">ifelse</span>(casino<span class="sc">$</span>die <span class="sc">==</span> <span class="dv">2</span>, <span class="fu">adjustcolor</span>(<span class="st">"grey"</span>, <span class="fl">0.5</span>), <span class="cn">NA</span>), <span class="at">border =</span> <span class="cn">NA</span>)</span>
+<span id="cb61-475"><a href="#cb61-475" aria-hidden="true" tabindex="-1"></a><span class="fu">points</span>(casino<span class="sc">$</span>t, casino<span class="sc">$</span>roll, <span class="at">pch =</span> <span class="dv">19</span>, <span class="at">cex =</span> <span class="fl">0.5</span>)</span>
+<span id="cb61-476"><a href="#cb61-476" aria-hidden="true" tabindex="-1"></a><span class="fu">lines</span>(casino<span class="sc">$</span>t, <span class="fu">ifelse</span>(vit6<span class="sc">$</span>path <span class="sc">==</span> <span class="dv">2</span>, <span class="fl">6.8</span>, <span class="fl">0.7</span>), <span class="at">type =</span> <span class="st">"s"</span>, <span class="at">col =</span> <span class="st">"red"</span>, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb61-477"><a href="#cb61-477" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-478"><a href="#cb61-478" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(vit6<span class="sc">$</span>path <span class="sc">==</span> casino<span class="sc">$</span>die)</span>
+<span id="cb61-479"><a href="#cb61-479" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-480"><a href="#cb61-480" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-481"><a href="#cb61-481" aria-hidden="true" tabindex="-1"></a>Viterbi gets <span class="in">`r round(100*mean(vit6$path == casino$die))`</span>% of the states right. It picks up the loaded stretches with lots of 6s (around rolls 50–75 and from 275 onwards). It misses the short loaded stretches, and also the one around rolls 165–190, which happened to have few 6s. A few 6s close together can easily come from the fair die too, so the evidence has to build up before the path switches.</span>
+<span id="cb61-482"><a href="#cb61-482" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-483"><a href="#cb61-483" aria-hidden="true" tabindex="-1"></a><span class="fu">## Question 7: Two-state Bernoulli HMM</span></span>
+<span id="cb61-484"><a href="#cb61-484" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-485"><a href="#cb61-485" aria-hidden="true" tabindex="-1"></a>$\delta = \frac{1}{3}(1, 2)$, $P(X_t = 1 \mid C_t = 1) = 0.5$, $P(X_t = 1 \mid C_t = 2) = 1$.</span>
+<span id="cb61-486"><a href="#cb61-486" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-487"><a href="#cb61-487" aria-hidden="true" tabindex="-1"></a><span class="fu">### Marginal probabilities</span></span>
+<span id="cb61-488"><a href="#cb61-488" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-489"><a href="#cb61-489" aria-hidden="true" tabindex="-1"></a>$$P(X_t = 0) = \delta_1 (0.5) + \delta_2 (0) = \tfrac{1}{3} \cdot \tfrac{1}{2} = \tfrac{1}{6}$$</span>
+<span id="cb61-490"><a href="#cb61-490" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-491"><a href="#cb61-491" aria-hidden="true" tabindex="-1"></a>$$P(X_t = 1) = \delta_1 (0.5) + \delta_2 (1) = \tfrac{1}{6} + \tfrac{2}{3} = \tfrac{5}{6}$$</span>
+<span id="cb61-492"><a href="#cb61-492" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-495"><a href="#cb61-495" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-496"><a href="#cb61-496" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q7-marginal</span></span>
+<span id="cb61-497"><a href="#cb61-497" aria-hidden="true" tabindex="-1"></a>delta7 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>) <span class="sc">/</span> <span class="dv">3</span></span>
+<span id="cb61-498"><a href="#cb61-498" aria-hidden="true" tabindex="-1"></a>Gamma7 <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="fu">c</span>(<span class="fl">0.5</span>, <span class="fl">0.5</span>, <span class="fl">0.25</span>, <span class="fl">0.75</span>), <span class="at">byrow =</span> <span class="cn">TRUE</span>, <span class="at">ncol =</span> <span class="dv">2</span>)</span>
+<span id="cb61-499"><a href="#cb61-499" aria-hidden="true" tabindex="-1"></a>p1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.5</span>, <span class="dv">1</span>)    <span class="co"># P(X = 1 | state)</span></span>
+<span id="cb61-500"><a href="#cb61-500" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-501"><a href="#cb61-501" aria-hidden="true" tabindex="-1"></a>P7 <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">diag</span>(<span class="cf">if</span> (x <span class="sc">==</span> <span class="dv">1</span>) p1 <span class="cf">else</span> <span class="dv">1</span> <span class="sc">-</span> p1)</span>
+<span id="cb61-502"><a href="#cb61-502" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">P0 =</span> delta7 <span class="sc">%*%</span> <span class="fu">P7</span>(<span class="dv">0</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>), <span class="at">P1 =</span> delta7 <span class="sc">%*%</span> <span class="fu">P7</span>(<span class="dv">1</span>) <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>))</span>
+<span id="cb61-503"><a href="#cb61-503" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-504"><a href="#cb61-504" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-505"><a href="#cb61-505" aria-hidden="true" tabindex="-1"></a><span class="fu">### Likelihood function</span></span>
+<span id="cb61-506"><a href="#cb61-506" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-507"><a href="#cb61-507" aria-hidden="true" tabindex="-1"></a>Same structure as <span class="in">`pois2.hmm.ll`</span> in the notes. The chain is stationary ($\delta\Gamma = \delta$), so starting with <span class="in">`phi &lt;- delta`</span> and multiplying by <span class="in">`tpm`</span> already at $t = 1$ makes no difference.</span>
+<span id="cb61-508"><a href="#cb61-508" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-511"><a href="#cb61-511" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb61-512"><a href="#cb61-512" aria-hidden="true" tabindex="-1"></a><span class="co">#| label: q7-lik</span></span>
+<span id="cb61-513"><a href="#cb61-513" aria-hidden="true" tabindex="-1"></a>bern2.hmm.lik <span class="ot">&lt;-</span> <span class="cf">function</span>(x, delta, tpm, p1) {</span>
+<span id="cb61-514"><a href="#cb61-514" aria-hidden="true" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(x)</span>
+<span id="cb61-515"><a href="#cb61-515" aria-hidden="true" tabindex="-1"></a>  phi <span class="ot">&lt;-</span> delta</span>
+<span id="cb61-516"><a href="#cb61-516" aria-hidden="true" tabindex="-1"></a>  ll <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb61-517"><a href="#cb61-517" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-518"><a href="#cb61-518" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb61-519"><a href="#cb61-519" aria-hidden="true" tabindex="-1"></a>    Pi <span class="ot">&lt;-</span> <span class="fu">diag</span>(<span class="cf">if</span> (x[i] <span class="sc">==</span> <span class="dv">1</span>) p1 <span class="cf">else</span> <span class="dv">1</span> <span class="sc">-</span> p1)</span>
+<span id="cb61-520"><a href="#cb61-520" aria-hidden="true" tabindex="-1"></a>    v <span class="ot">&lt;-</span> phi <span class="sc">%*%</span> tpm <span class="sc">%*%</span> Pi</span>
+<span id="cb61-521"><a href="#cb61-521" aria-hidden="true" tabindex="-1"></a>    u <span class="ot">&lt;-</span> v <span class="sc">%*%</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>)</span>
+<span id="cb61-522"><a href="#cb61-522" aria-hidden="true" tabindex="-1"></a>    ll <span class="ot">&lt;-</span> ll <span class="sc">+</span> <span class="fu">log</span>(u)</span>
+<span id="cb61-523"><a href="#cb61-523" aria-hidden="true" tabindex="-1"></a>    phi <span class="ot">&lt;-</span> v <span class="sc">/</span> <span class="fu">c</span>(u)</span>
+<span id="cb61-524"><a href="#cb61-524" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb61-525"><a href="#cb61-525" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-526"><a href="#cb61-526" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">exp</span>(ll))</span>
+<span id="cb61-527"><a href="#cb61-527" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb61-528"><a href="#cb61-528" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-529"><a href="#cb61-529" aria-hidden="true" tabindex="-1"></a>L111 <span class="ot">&lt;-</span> <span class="fu">bern2.hmm.lik</span>(<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">1</span>), delta7, Gamma7, p1)</span>
+<span id="cb61-530"><a href="#cb61-530" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(L111, <span class="dv">29</span><span class="sc">/</span><span class="dv">48</span>)</span>
+<span id="cb61-531"><a href="#cb61-531" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb61-532"><a href="#cb61-532" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb61-533"><a href="#cb61-533" aria-hidden="true" tabindex="-1"></a>The function gives $L = 29/48 \approx 0.6042$ for $(1, 1, 1)$, which matches the check.</span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
