@@ -47,6 +47,11 @@ knitr::kable(data.frame(period_months = round(1 / P$freq[top], 1),
 
 The tallest bar is at **12 months** and holds **91% of all the variation**. The next one (6 months) holds only 1.5%. So the dominant period is 12 months, as expected.
 
+```{r}
+r <- acf(x, lag.max = 36, plot = FALSE)$acf
+round(c(lag6 = r[7], lag12 = r[13], lag24 = r[25], lag36 = r[37]), 2)
+```
+
 **Link to the ACF.** The ACF tells the same story in the time domain. It is about −0.88 at lag 6 (summer vs winter) and about +0.88, +0.87 and +0.81 at lags 12, 24 and 36. The periodogram sums all of that up as one number: a 12-month period.
 
 ## 3. Fitting the harmonic
@@ -61,6 +66,13 @@ round(c(mean = unname(b[1]), amplitude = unname(amp), peak_month = unname(peak_m
 
 The fitted wave has a mean of **49°F** and goes **11.6°F above and below it**. It peaks at month 7.2 (**late July**) and bottoms out in late January. This one wave explains **91%** of the variation, the same 91% the periodogram showed.
 
+```{r}
+# does the cycle change? dominant period in each decade
+sapply(list(`1920s` = window(x, end = c(1929, 12)), `1930s` = window(x, start = 1930)),
+       function(w) { p <- spec.pgram(as.numeric(w), taper = 0, detrend = FALSE, plot = FALSE)
+                     1 / p$freq[which.max(p$spec)] })
+```
+
 Does the cycle change? The dominant period is 12 months in 1920–29 and again in 1930–39, so here the wave stays the same.
 
 ## 4. Separating signal and noise
@@ -68,7 +80,7 @@ Does the cycle change? The dominant period is 12 months in 1920–29 and again i
 ```{r}
 signal <- ts(fitted(fit), start = 1920, frequency = 12)
 noise  <- ts(resid(fit),  start = 1920, frequency = 12)
-c(sd_signal = sd(signal), sd_noise = sd(noise))
+round(c(sd_signal = sd(signal), sd_noise = sd(noise)), 2)
 ```
 
 Signal = the fitted 12-month wave. Noise = actual − wave, which is the "this month was warmer or colder than usual" part. The noise is about a third as variable as the signal.
@@ -88,7 +100,9 @@ plot(1 / P$freq, P$spec, type = "h", lwd = 2, log = "x", xlab = "Period (months,
 train <- window(x, end = c(1937, 12)); tt <- 1:length(train)
 fit_tr <- lm(train ~ cos(2 * pi * tt / 12) + sin(2 * pi * tt / 12))
 fc <- ts(predict(fit_tr, newdata = data.frame(tt = 217:240)), start = 1938, frequency = 12)
-plot(x, col = "grey50", ylab = "Temperature (deg F)", main = "(b) Data, 12-month wave and 1938-39 forecast")
+rmse <- c(wave = sqrt(mean((window(x, start = 1938) - fc)^2)),
+          mean_only = sqrt(mean((window(x, start = 1938) - mean(train))^2)))
+plot(x, col = "grey50", xlab = "Year", ylab = "Temperature (deg F)", main = "(b) Data, 12-month wave and 1938-39 forecast")
 lines(window(signal, end = c(1937, 12)), col = "steelblue", lwd = 2)
 lines(fc, col = "darkorange", lwd = 2, lty = 2)
 legend("bottomleft", c("data", "signal", "forecast (fit on 1920-37)"),
@@ -96,16 +110,13 @@ legend("bottomleft", c("data", "signal", "forecast (fit on 1920-37)"),
        bty = "n", horiz = TRUE, cex = 0.9)
 
 # (c) noise
-plot(noise, ylab = "deg F", main = "(c) Noise: warmer or colder than a typical month")
+plot(noise, xlab = "Year", ylab = "deg F", main = "(c) Noise: warmer or colder than a typical month")
 abline(h = 0, lty = 2)
-
-rmse <- c(wave = sqrt(mean((window(x, start = 1938) - fc)^2)),
-          mean_only = sqrt(mean((window(x, start = 1938) - mean(train))^2)))
 ```
 
 ## 6. Interpretation
 
-- **Dominant period: 12 months.** The periodogram has one tall bar, which is the seasons. The 6-month bar is small and only adjusts the shape (e.g. winters slightly flatter than summers).
+- **Dominant period: 12 months.** The periodogram has one tall bar, which is the seasons. The 6-month bar is small and only adjusts the shape: December to February all sit at about 39–40°F, so winter has a flat bottom, while a single sine wave dips to a sharp low of about 37.5°F.
 - **Signal vs noise.** A single wave explains 91% of the variation. The other 9% is month-to-month weather luck, like a cold March or a hot August (plot c).
 - **Forecasting.** Because the period stays fixed, forecasting is simple: carry the wave forward. Fitted on 1920–37 and used to predict 1938–39, it is off by about `r round(rmse[1], 1)`°F on average. Predicting the overall mean every month is off by `r round(rmse[2], 1)`°F.
 - **When would it go wrong?** If the cycle length drifted (e.g. the sunspot cycle, which moves between about 9 and 14 years), the bar would spread over several neighbouring periods and a fixed wave would slowly fall out of step.
