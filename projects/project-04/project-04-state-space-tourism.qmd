@@ -628,16 +628,6 @@ What the estimates say about accommodation demand (@tbl-ssm):
 * **Damping and AR(1).** The damped trend model estimates $\phi$ = `r fmt(sv("Damped trend", "phi"), 3)`. The AR(1) component raises the log likelihood by only `r fmt(sv("Damped trend + AR(1)", "Log lik") - sv("Damped trend", "Log lik"), 2)` for two extra parameters. `r if (sv("Damped trend + AR(1)", "Level") < 0.1 * sv("Damped trend", "Level")) paste0("It also changes what the components mean: its level variance falls to ", sci(sv("Damped trend + AR(1)", "Level")), " (from ", sci(sv("Damped trend", "Level")), "), because the AR(1) term (rho = ", fmt(sv("Damped trend + AR(1)", "rho"), 2), ") takes over the month-to-month movement that the level carries in the other models. In that model the 'level' is close to a smooth damped trend, and the AR(1) term is the wandering part of demand.") else ""`
 * **Model selection.** The lowest AIC belongs to the **`r best_aic`** model, which I use for the filtering and smoothing analysis below. `r if (max(ssm_tbl$AIC) - min(ssm_tbl$AIC) < 7) "The AIC values span only a few units, so the data do not strongly distinguish between the trend specifications: with the growth rate barely moving, adding a slope buys almost nothing in one-step fit. Its effect shows up in long-horizon forecasts instead (@sec-forecast)." else ""`
 
-```{r}
-#| label: structts-check
-
-st <- StructTS(ts(y_tour, start = c(2015, 1), frequency = 12), type = "BSM")
-st_theta <- log(pmax(c(st$coef["epsilon"], st$coef["level"], st$coef["slope"], st$coef["seas"]), 1e-12))
-st_ll_mine <- -ssm_negll(st_theta, y_tour, "llt", FALSE)
-```
-
-The BSM is also available as `StructTS()` in base R. Evaluated under my likelihood, the `StructTS()` estimates have a log likelihood of `r fmt(st_ll_mine, 2)`, against `r fmt(sv("BSM", "Log lik"), 2)` at my estimates. `r if (sv("BSM", "Log lik") - st_ll_mine > 2) "Started from several points, my optimiser finds a much higher maximum. With several variances near zero the surface is flat, and a single optimiser run can stop early: the same warning the notes give for dlmMLE()." else "The two sets of estimates are close."`
-
 ## Does the seasonal pattern really change? {#sec-seasonal}
 
 The seasonal variance is small, and Project 3 concluded that the seasonal pattern hardly changes: there, every seasonal ETS model put the seasonal smoothing parameter $\gamma$ at its lower bound. So I test it directly. I refit the selected model with the seasonal variance fixed at zero, which is the constant-seasonal model in the notes' `dlmModSeas(..., dW = 0)` example, and compare the two by a likelihood ratio test. Zero is on the boundary of the parameter space, so the null distribution of the statistic is a 50:50 mixture of a point mass at zero and $\chi^2_1$, and the $p$-value is half the usual one.
@@ -733,37 +723,6 @@ The three variances behave very differently (@fig-profile):
 * **Seasonal variance: less well determined.** Its interval runs `r ci_text("Seasonal")`. `r if (pci("Seasonal", "lo_edge")) "The interval reaches zero even though the likelihood ratio test rejects zero; the test uses the exact fit with the variance at zero, while the grid only goes down to a small positive value." else paste0("Zero is excluded, in line with the likelihood ratio test, but the rate at which the seasonal pattern changes is known only to within a factor of about ", fmt(pci("Seasonal", "hi") / pci("Seasonal", "lo"), 0), ".")`
 * **Irregular variance: on the boundary.** Its interval runs `r ci_text("Irregular")`. The data cannot distinguish "no month-specific noise" from "a little", but they rule out a large irregular component. This is why the estimate is essentially zero, why `dlm` and I find different tiny values for it (@tbl-dlm-check), and why a Wald interval based on the curvature at the maximum would be meaningless here.
 
-## Where the likelihood comes from
-
-The likelihood is a sum over months, so it shows which months the model found hard to predict.
-
-```{r}
-#| label: fig-loglik-contrib
-#| fig-cap: "Contribution of each month to the log likelihood of the selected model. The COVID months and the first 13 diffuse months contribute nothing."
-#| fig-height: 2.6
-
-ll_t <- -0.5 * (log(2 * pi) + log(sel_kf$Qt) + sel_kf$et^2 / sel_kf$Qt)
-ll_t[which(!is.na(sel_kf$et))[seq_len(d_diffuse)]] <- NA
-contrib <- tibble(Month = train$Month, ll = ll_t, r = std_resid(sel_kf, d_diffuse))
-worst <- contrib |> filter(!is.na(ll)) |> arrange(ll) |> slice(1:3)
-
-ggplot(contrib, aes(as.Date(Month), ll)) +
-  covid_rect() + geom_col(fill = "steelblue4", na.rm = TRUE, width = 25) +
-  labs(x = NULL, y = "Log lik contribution")
-```
-
-```{r}
-#| label: refit-no-restart
-#| cache: true
-# Influence of the restart month: refit with April 2022 also treated as missing
-y_nr <- y_tour; y_nr[i_restart] <- NA
-fit_nr <- fit_structural(y_nr, sel$trend, sel$ar, start = sel$theta)
-```
-
-Most months contribute a positive amount (@fig-loglik-contrib). The log density is above zero because the one-step forecast standard deviation is only about `r pct(sqrt(median(sel_kf$Qt[!is.na(ll_t)])), 1)`. One month stands out: **`r format(worst$Month[1])`**, the first month after the gap, contributes `r fmt(worst$ll[1], 2)`, with a standardised forecast error of `r fmt(worst$r[1], 2)`. The filter had carried its February 2020 view of demand forward for 25 months, and demand on restart was far below it. The next worst months are `r format(worst$Month[2])` (`r fmt(worst$r[2], 2)`) and `r format(worst$Month[3])` (`r fmt(worst$r[3], 2)`).
-
-Apart from the restart, no single month dominates, so the estimates are not driven by a few outliers. The restart month does have some pull on the estimates. With April 2022 also treated as missing, the level variance becomes `r sci(fit_nr$p$level)` (from `r sci(sel$p$level)`) and the seasonal variance `r sci(fit_nr$p$seas)` (from `r sci(sel$p$seas)`), because the level no longer has to absorb the post-COVID reset in one step.
-
 ## Diagnostics
 
 ```{r}
@@ -801,6 +760,25 @@ r_post  <- sd(r_sel[train$period == "Post-COVID"][-1], na.rm = TRUE)
 As in the earlier projects, I only forecast from models whose standardised forecast errors look like white noise. `r if (min(ssm_tbl$"Ljung-Box p") > 0.05) "All four models pass the Ljung and Box test at the 5% level (@tbl-ssm)" else "Not all four models pass the Ljung and Box test (@tbl-ssm)"`, and for the selected model there is no remaining autocorrelation at the seasonal lags (@fig-ssm-diag), so the evolving seasonal component captures the calendar pattern.
 
 The Shapiro–Wilk test gives p = `r pfmt(sw_p)` with all months and p = `r pfmt(sw_p_nr)` without the restart month: `r if (sw_p < 0.05 & sw_p_nr >= 0.05) "the departure from normality is entirely due to April 2022." else if (sw_p < 0.05) "the tails are somewhat heavier than normal even without April 2022." else "the errors are consistent with normality."` The standard deviation of the standardised errors is `r fmt(r_pre, 2)` before COVID and `r fmt(r_post, 2)` after the restart. That suggests demand has been `r if (r_post > r_pre) "more" else "less"` volatile since the pandemic than a single set of variances assumes.
+
+```{r}
+#| label: restart-month
+#| include: false
+ll_t  <- -0.5 * (log(2 * pi) + log(sel_kf$Qt) + sel_kf$et^2 / sel_kf$Qt)
+ll_t[which(!is.na(sel_kf$et))[seq_len(d_diffuse)]] <- NA
+worst <- tibble(Month = train$Month, ll = ll_t, r = std_resid(sel_kf, d_diffuse)) |>
+  filter(!is.na(ll)) |> arrange(ll) |> slice(1)
+```
+
+```{r}
+#| label: refit-no-restart
+#| cache: true
+# Influence of the restart month: refit with April 2022 also treated as missing
+y_nr <- y_tour; y_nr[i_restart] <- NA
+fit_nr <- fit_structural(y_nr, sel$trend, sel$ar, start = sel$theta)
+```
+
+**The restart month.** `r format(worst$Month[1])` is by far the least likely month: it contributes `r fmt(worst$ll[1], 2)` to the log likelihood, against about `r fmt(median(ll_t, na.rm = TRUE), 1)` for a typical month, and its standardised error of `r fmt(worst$r[1], 2)` is the outlier in @fig-ssm-diag. The filter had carried its February 2020 view of demand forward for 25 months, and demand on restart was far below it. This one month has some pull on the estimates. With April 2022 also treated as missing, the level variance becomes `r sci(fit_nr$p$level)` (from `r sci(sel$p$level)`) and the seasonal variance `r sci(fit_nr$p$seas)` (from `r sci(sel$p$seas)`), because the level no longer has to absorb the post-COVID reset in one step. Apart from the restart, no single month dominates the likelihood, so the estimates are not driven by a few outliers.
 
 # Filtering: following demand in real time
 
@@ -1414,7 +1392,7 @@ Finally, the notes end with a Bayesian state space model in Stan. Fitting this m
 
 # Reproducibility {.unnumbered}
 
-All results are produced by the code in this document from `tourist_data.xlsx` (Stats SA P6410) in the `data/` folder. The Kalman filter, likelihood, smoother, auxiliary residuals and forecasting functions are my own code. `dlm` (`dlmMLE()`, `dlmFilter()`, `dlmSmooth()`, `dlmLL()`), `makeARIMA()`, `arima()` and `StructTS()` are used only as checks, and `fable` only for the reference models. The model fitting, profile likelihood, simulation and cross-validation chunks are cached, so delete the cache folder if the data change. The random seeds are set in the setup and simulation chunks.
+All results are produced by the code in this document from `tourist_data.xlsx` (Stats SA P6410) in the `data/` folder. The Kalman filter, likelihood, smoother, auxiliary residuals and forecasting functions are my own code. `dlm` (`dlmMLE()`, `dlmFilter()`, `dlmSmooth()`, `dlmLL()`), `makeARIMA()` and `arima()` are used only as checks, and `fable` only for the reference models. The model fitting, profile likelihood, simulation and cross-validation chunks are cached, so delete the cache folder if the data change. The random seeds are set in the setup and simulation chunks.
 
 ```{r}
 #| label: summary-check
