@@ -15,7 +15,7 @@ The code here builds on the course notes (Chapter 4): the scaled forward recursi
 
 ### Simulating from a three-state bivariate Gaussian HMM
 
-First set up the transition matrix and the state distributions. `sigma` has to exist as a $2 \times 2 \times 3$ array before the slices can be filled in.
+First set up the transition matrix and the state distributions. `sigma` has to exist as a $2 \times 2 \times 3$ array before the slices can be filled in
 
 ```{r}
 #| label: q1-setup
