@@ -59,7 +59,7 @@ rejects <- function(p, a = 0.05) if (p < a) "rejects" else "does not reject"
 
 **Data:** Real-world, publicly available data: the South African rand to US dollar spot exchange rate (FRED series DEXSFUS, Board of Governors of the Federal Reserve System), daily, January 2010 to September 2026. Full source details are in @sec-data-source.
 
-**Methods:** Exploratory analysis of the stylised facts; Ljung and Box and ARCH LM tests; the Box and Jenkins loop applied to the mean and the variance equation; ARCH(1), GARCH(1,1) with normal and Student t errors, and GJR-GARCH(1,1) with Student t errors; my own implementation of the GARCH(1,1) likelihood; a rolling out-of-sample evaluation of 1000 one-day-ahead forecasts, scored by Value-at-Risk backtests (Kupiec and Christoffersen tests), quantile loss and QLIKE, against historical simulation and constant variance benchmarks.
+**Methods:** Exploratory analysis of the stylised facts; Ljung and Box and ARCH LM tests; identification, estimation and residual checks for both the mean and the variance equation; ARCH(1), GARCH(1,1) with normal and Student t errors, and GJR-GARCH(1,1) with Student t errors; my own implementation of the GARCH(1,1) likelihood; a rolling out-of-sample evaluation of 1000 one-day-ahead forecasts, scored by Value-at-Risk backtests (Kupiec and Christoffersen tests), quantile loss and QLIKE, against historical simulation and constant variance benchmarks.
 
 **Key findings:** The returns show all the stylised facts: almost no autocorrelation in the returns themselves, strong autocorrelation in squared returns, and fat tails. ARCH(1) fails the residual diagnostics, while the GARCH(1,1) models capture the clustering with a very persistent variance. Student t errors fit better than normal errors, and depreciation shocks raise volatility more than appreciation shocks. Out of sample, the GJR-GARCH(1,1) t model gives the best forecasts by quantile loss and QLIKE, but all the GARCH models are too conservative in the lower tail because they assume a symmetric distribution while the returns are positively skewed; historical simulation has the best coverage. Details are in @sec-findings.
 
@@ -159,7 +159,7 @@ p_logr <- ggplot(fx, aes(date, r)) +
 p_diff + p_logr
 ```
 
-# Exploratory data analysis (Box and Jenkins step 1)
+# Exploratory data analysis
 
 ## The exchange rate and its returns
 
@@ -285,19 +285,11 @@ With 12 lags the statistic is `r fmt(arch_raw["statistic"], 1)` on 12 degrees of
 
 # Models
 
-## The modelling procedure for returns
+## Modelling approach for returns
 
-The project follows the seven-step ARIMA modelling procedure (the Box and Jenkins workflow) from the lectures, as in Project 1, applied to both equations of the model:
+The modelling follows the same approach as Project 1, applied to both equations of the model. The rate is modelled on the log scale, so that changes are proportional to the level (@fig-diff-vs-log), and log returns are the first difference of the log exchange rate. The returns fluctuate around a constant mean, so no further differencing is needed. For the *mean* equation the ACF of the returns is close to zero at all lags, so a constant mean, ARMA(0,0), is used. For the *variance* equation the slowly decaying ACF of squared returns suggests that a low order ARCH model will not be enough and that GARCH(1,1) is the natural candidate, since it is an ARCH($\infty$) model with geometrically decaying weights. The models are estimated by maximum likelihood with `rugarch`, and with my own code for GARCH(1,1) (@sec-own-code).
 
-1.  **Plot the data:** done in the exploratory analysis.
-2.  **Transform if needed:** the rate is modelled on the log scale, so that changes are proportional to the level (@fig-diff-vs-log).
-3.  **Difference until approximately stationary:** log returns are the first difference of the log exchange rate. The returns fluctuate around a constant mean, so no further differencing is needed.
-4.  **Identify candidate orders from the ACF:** for the *mean* equation the ACF of the returns is close to zero at all lags, so a constant mean, ARMA(0,0), is used. For the *variance* equation the slowly decaying ACF of squared returns suggests that a low order ARCH model will not be enough and that GARCH(1,1) is the natural candidate, since it is an ARCH($\infty$) model with geometrically decaying weights.
-5.  **Estimate by maximum likelihood:** with `rugarch`, and with my own code for GARCH(1,1) (@sec-own-code).
-6.  **Check the residuals against the white noise standard:** the standardised residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should show no autocorrelation (mean equation adequate) and their squares should show no autocorrelation (variance equation adequate). If a model fails, return to step 4.
-7.  **Forecast:** only with models that pass step 6.
-
-Finally, a model that survives the procedure must still beat the benchmarks out of sample (@sec-backtest).
+The standardised residuals $\hat z_t = \hat\varepsilon_t / \hat\sigma_t$ should then show no autocorrelation (mean equation adequate) and their squares should show no autocorrelation (variance equation adequate). A model that fails goes back to identification, and only models that pass are used to forecast. A model that passes must still beat the benchmarks out of sample (@sec-backtest).
 
 ## Candidate models
 
@@ -394,7 +386,7 @@ longrun_sd <- sqrt(uncvariance(fits[["GARCH(1,1) t"]]))
 
 **Asymmetry.** The GJR term is $\hat\gamma$ = `r fmt(gamma_j, 3)` (p `r pfmt(gamma_p)`). `r if (gamma_p < 0.05) { if (gamma_j < 0) "It is negative and significant, so shocks that weaken the rand (positive returns) raise volatility more than shocks that strengthen it. This is the reverse of the leverage effect in share prices, and is typical of emerging market currencies, where sudden depreciations are associated with stress and capital outflows." else "It is positive and significant, so days on which the rand strengthens raise volatility more than days on which it weakens." } else "It is not significantly different from zero, so there is no clear evidence that rand depreciation and appreciation affect volatility differently."` By BIC the preferred model is the **`r best_bic`** model.
 
-## Residual diagnostics (step 6)
+## Residual diagnostics
 
 ```{r}
 #| label: diagnostics
@@ -436,9 +428,9 @@ failed <- diag_tbl$Model[diag_tbl$Passes == "No"]
 
 The two Ljung and Box tests have different jobs, as the notes stress: autocorrelation left in $\hat z_t$ would send me back to the *mean* equation, while autocorrelation left in $\hat z_t^2$ sends me back to the *variance* equation.
 
-For ARCH(1) the test on $\hat z_t^2$ gives p `r pfmt(dg("ARCH(1) normal", "LB z^2 (p)"))` and the ARCH LM test on $\hat z_t$ gives p `r pfmt(dg("ARCH(1) normal", "ARCH LM on z (p)"))`. `r if (dg("ARCH(1) normal", "Passes") == "No") "A single lag of the squared shock cannot reproduce the slow decay seen in the ACF of squared returns, so ARCH(1) fails step 6. Following the procedure, I returned to step 4 and moved to GARCH(1,1), which adds the lagged variance and so gives the model a long memory with only one extra parameter. ARCH(1) is kept in the comparison only as a reference point; it is not used for forecasting." else "Surprisingly, ARCH(1) passes these tests, although it is clearly dominated on the information criteria."`
+For ARCH(1) the test on $\hat z_t^2$ gives p `r pfmt(dg("ARCH(1) normal", "LB z^2 (p)"))` and the ARCH LM test on $\hat z_t$ gives p `r pfmt(dg("ARCH(1) normal", "ARCH LM on z (p)"))`. `r if (dg("ARCH(1) normal", "Passes") == "No") "A single lag of the squared shock cannot reproduce the slow decay seen in the ACF of squared returns, so ARCH(1) fails the residual checks. I therefore went back to identification and moved to GARCH(1,1), which adds the lagged variance and so gives the model a long memory with only one extra parameter. ARCH(1) is kept in the comparison only as a reference point; it is not used for forecasting." else "Surprisingly, ARCH(1) passes these tests, although it is clearly dominated on the information criteria."`
 
-`r if (length(failed[failed != "ARCH(1) normal"]) == 0) "All three GARCH(1,1) models pass: no significant autocorrelation remains in the squared standardised residuals, so the variance equation is adequate and the models can be used to forecast (step 7)." else paste0("Among the GARCH models, ", paste(failed[failed != "ARCH(1) normal"], collapse = " and "), " still show some remaining ARCH structure at the 5% level. With more than 4000 observations these tests are very powerful, so I check whether the remaining correlation is large enough to matter before returning to step 3: the out-of-sample backtest below is the practical test of whether it does.")` The test on $\hat z_t$ itself gives p-values of `r paste(pfmt(diag_tbl[["LB z (p)"]]), collapse = ", ")` across the four models, `r if (all(diag_tbl[["LB z (p)"]] > 0.05)) "so the constant mean is adequate." else "so there is a little autocorrelation left in the returns themselves. Its size is economically negligible (the largest return autocorrelation is below 0.1), so I kept the constant mean rather than adding ARMA terms that would complicate the comparison of the variance models."`
+`r if (length(failed[failed != "ARCH(1) normal"]) == 0) "All three GARCH(1,1) models pass: no significant autocorrelation remains in the squared standardised residuals, so the variance equation is adequate and the models can be used to forecast." else paste0("Among the GARCH models, ", paste(failed[failed != "ARCH(1) normal"], collapse = " and "), " still show some remaining ARCH structure at the 5% level. With more than 4000 observations these tests are very powerful, so I check whether the remaining correlation is large enough to matter before revisiting the model: the out-of-sample backtest below is the practical test of whether it does.")` The test on $\hat z_t$ itself gives p-values of `r paste(pfmt(diag_tbl[["LB z (p)"]]), collapse = ", ")` across the four models, `r if (all(diag_tbl[["LB z (p)"]] > 0.05)) "so the constant mean is adequate." else "so there is a little autocorrelation left in the returns themselves. Its size is economically negligible (the largest return autocorrelation is below 0.1), so I kept the constant mean rather than adding ARMA terms that would complicate the comparison of the variance models."`
 
 ```{r}
 #| label: fig-sigma
@@ -658,7 +650,7 @@ Two benchmarks without a GARCH variance are included, in the spirit of the bench
 -   **Historical simulation (HS):** the VaR is the empirical quantile of the previous `r hs_window` returns.
 -   **Rolling normal:** a normal distribution with the mean and variance of the previous `r hs_window` returns.
 
-The ARCH(1) model failed the residual diagnostics, so following step 7 it is not part of the forecast comparison.
+The ARCH(1) model failed the residual diagnostics, so it is not part of the forecast comparison.
 
 ```{r}
 #| label: roll
@@ -888,7 +880,7 @@ Using the preferred `r final_model` model fitted to the full sample, the conditi
 ## Key findings {#sec-findings}
 
 1.  **The rand shows all the stylised facts of financial returns:** almost no autocorrelation in returns, strong and slowly decaying autocorrelation in squared returns, and fat tails (excess kurtosis `r fmt(kurt - 3, 1)`). The ARCH LM test confirms a time-varying variance (p `r pfmt(arch_raw["p.value"])`).
-2.  **The Box and Jenkins loop rejected ARCH(1)** because ARCH structure remained in its standardised residuals, and led to GARCH(1,1).
+2.  **The residual checks rejected ARCH(1)** because ARCH structure remained in its standardised residuals, which led to GARCH(1,1).
 3.  **Volatility is highly persistent:** $\hat\alpha + \hat\beta$ = `r fmt(pers_g, 4)`, a half-life of about `r fmt(half_g, 0)` trading days.
 4.  **Student t errors are clearly better than normal errors** ($\hat\nu$ = `r fmt(nu_g, 1)`), so even after removing volatility clustering, extreme days are more common than a normal distribution implies.
 5.  **Asymmetry:** $\hat\gamma$ = `r fmt(gamma_j, 3)` (p `r pfmt(gamma_p)`). `r if (gamma_p < 0.05) "There is significant asymmetry in how depreciation and appreciation shocks affect volatility." else "There is no significant asymmetry."`
@@ -922,7 +914,7 @@ The project went through several phases, each driven by a decision about what wo
 
 The most important of these was a problem I almost missed. My GARCH code matched `rugarch` exactly on the real data, so I assumed it was correct, but the simulation check showed otherwise: in almost half of the simulated series my code returned a constant-variance model, even though every series had clear GARCH effects. I really struggled to identify where the issue was and used an LLM to help investigate it. The cause turned out to be the optimiser. With such a large log likelihood, R's BFGS took a first step so big that it landed in a flat region and stopped. Rescaling the objective fixed it, and the estimates then sat right on the true values. Getting the fix to show up taught me a second lesson: because the simulation was cached, R would have kept showing the old results until I forced that chunk to run again. Both problems showed me that code can look right without being right, and that matching a package only shows that two programs agree on one dataset. The simulation, where I knew the true answer, was what exposed the problem.
 
-The backtest taught me to look at the pattern behind a result rather than just the headline. Historical simulation, the simplest method, was the only one with no rejected tests, and every GARCH rejection came from too few hits in the lower tail. The explanation was that the rand's returns are positively skewed, but all my models assume a symmetric distribution, so they overstate the risk of large strengthening moves. That ended up being one of the most interesting findings of the project. It also showed me that different evaluation measures answer different questions: the loss functions said GJR-GARCH with t errors gave the best forecasts overall, while the coverage tests said historical simulation was better calibrated, and both were true. Finally, tidying up outdated references and aligning the procedure with Project 1 made the whole report more consistent and easier to trust.
+The backtest taught me to look at the pattern behind a result rather than just the headline. Historical simulation, the simplest method, was the only one with no rejected tests, and every GARCH rejection came from too few hits in the lower tail. The explanation was that the rand's returns are positively skewed, but all my models assume a symmetric distribution, so they overstate the risk of large strengthening moves. That ended up being one of the most interesting findings of the project. It also showed me that different evaluation measures answer different questions: the loss functions said GJR-GARCH with t errors gave the best forecasts overall, while the coverage tests said historical simulation was better calibrated, and both were true. Finally, tidying up outdated references and aligning the modelling approach with Project 1 made the whole report more consistent and easier to trust.
 
 Going forward, the natural next step is a GARCH model with a skewed Student t distribution, which would keep GARCH's ability to react to shocks within days while fixing the lower tail. I would also like to look more closely at the weeks of the US–Iran war inside the test period, to see how each model coped while the shock was happening, and to add expected shortfall, since VaR says nothing about how large losses are on the days it is exceeded.
 

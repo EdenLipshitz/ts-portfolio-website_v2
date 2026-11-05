@@ -56,7 +56,7 @@ month_num <- function(m) year(as.Date(m)) * 12 + month(as.Date(m))
 
 **Data:** Real-world, publicly available data. Statistics South Africa, *Tourist Accommodation* release P6410, series B64100 (stay unit nights sold, total industry), January 2015 to June 2026. Full source details are in @sec-data-source.
 
-**Methods:** *Regression:* a static regression with trend, seasonal dummies and COVID intervention terms, then a regression with ARIMA errors in which the intervention decay rate is chosen by profile likelihood, the seasonal form (dummies or Fourier terms) by AICc and the error model by the Box and Jenkins steps. *Exponential smoothing:* ETS on the raw training data, then the full family of exponential smoothing methods on a series in which the COVID window is replaced by regression-based imputed values, with my own Holt–Winters code as a check, and, as a further check, the same models fitted to the post-COVID years only. All models are diagnosed (Ljung and Box) and compared with the seasonal naive benchmark and the Project 1 SARIMA on the July 2024 to June 2026 test set and by rolling-origin cross-validation.
+**Methods:** *Regression:* a static regression with trend, seasonal dummies and COVID intervention terms, then a regression with ARIMA errors in which the intervention decay rate is chosen by profile likelihood, the seasonal form (dummies or Fourier terms) by AICc and the error model from the ACF and PACF of the residuals, followed by residual checks. *Exponential smoothing:* ETS on the raw training data, then the full family of exponential smoothing methods on a series in which the COVID window is replaced by regression-based imputed values, with my own Holt–Winters code as a check, and, as a further check, the same models fitted to the post-COVID years only. All models are diagnosed (Ljung and Box) and compared with the seasonal naive benchmark and the Project 1 SARIMA on the July 2024 to June 2026 test set and by rolling-origin cross-validation.
 
 **Key findings:** A static regression fits the training data closely (adjusted $R^2$ = 0.965), but its errors are strongly autocorrelated, so its standard errors and intervals cannot be trusted. Letting the errors follow an ARIMA(2,1,1) process fixes this and describes the COVID shock with five parameters (a decaying shock with a half-life of about 2.5 months, two pulses and a level shift), giving a test RMSE of 98.8 against 101.6 for the Project 1 SARIMA. Exponential smoothing breaks on the raw data, where the level smoothing parameter goes to 1, but works once the COVID window is imputed: the damped Holt–Winters model was the most accurate model on the test set (RMSE 72.5), while the Project 1 SARIMA remained the best in rolling-origin cross-validation. Details are in @sec-findings.
 
@@ -292,12 +292,12 @@ best_seas <- seas_tbl$`Seasonal terms`[which.min(seas_tbl$AICc)]
 
 The lowest AICc belongs to the model with **`r tolower(best_seas)`**. `r if (best_seas == "Seasonal dummies") "The low-order Fourier models are clearly worse: the accommodation seasonal pattern has a sharp December peak, a smaller Easter and mid-year bump and a dip in winter, which needs many harmonics to describe. Fourier terms pay off mainly for long seasonal periods (weekly data with period 52, or daily data), where dummies would need many more parameters. Seasonal dummies are used from here on." else "A smooth seasonal shape is enough here, which saves parameters. Note, however, that the final model below uses seasonal dummies for comparability with Project 1."`
 
-### Fitting the model (Box and Jenkins loop)
+### Fitting the model
 
 ```{r}
 #| label: fit-reg
 
-# Steps 3 and 4: residuals from the regression part, before choosing the ARIMA errors
+# Residuals from the regression part, before choosing the ARIMA errors
 ols <- train_reg |>
   model(TSLM(log(nights) ~ season() + decay + mar20 + may20 + step))
 ols_resid <- augment(ols)
@@ -305,13 +305,13 @@ ols_resid <- augment(ols)
 
 ```{r}
 #| label: fig-ols-resid
-#| fig-cap: "Steps 3 and 4 of the modelling procedure for the error process: first differences of the residuals from the regression part, with their ACF and PACF."
+#| fig-cap: "Identifying the error process: first differences of the residuals from the regression part, with their ACF and PACF."
 
 ols_resid |>
   gg_tsdisplay(difference(.resid), plot_type = "partial", lag_max = 36)
 ```
 
-Following the seven-step modelling procedure used in Projects 1 and 2, the regression residuals are examined before choosing the error model. Without the trend the residuals from the regression part wander, so a first difference is taken. @fig-ols-resid shows the differenced residuals with their ACF and PACF, which point to a low order ARMA structure with no seasonal spikes left (the dummies have removed the seasonality). The orders are then chosen by AICc, and the model is estimated by maximum likelihood.
+As in Projects 1 and 2, the regression residuals are examined before choosing the error model. Without the trend the residuals from the regression part wander, so a first difference is taken. @fig-ols-resid shows the differenced residuals with their ACF and PACF, which point to a low order ARMA structure with no seasonal spikes left (the dummies have removed the seasonality). The orders are then chosen by AICc, and the model is estimated by maximum likelihood.
 
 ```{r}
 #| label: fit-reg-final
@@ -391,7 +391,7 @@ lbp <- function(m) reg_lb$lb_p[reg_lb$.model == m]
 fit_reg |> select(Reg) |> gg_tsresiduals(lag_max = 36)
 ```
 
-The Ljung and Box test on 24 lags (degrees of freedom reduced by the number of ARMA coefficients) gives p = `r pfmt(lbp("Reg"))`. `r if (lbp("Reg") > 0.05) "The innovations of the regression model are consistent with white noise and show no remaining seasonal structure, so the deterministic seasonal dummies are adequate. Compared with the static regression, the long runs in the residuals have disappeared: the ARIMA error has absorbed the autocorrelation. The model passes the residual check (step 6) and can be used to forecast." else "Some autocorrelation remains in the innovations of the regression model, so by the Box and Jenkins rule it should not be used for forecasting without revisiting the error orders."`
+The Ljung and Box test on 24 lags (degrees of freedom reduced by the number of ARMA coefficients) gives p = `r pfmt(lbp("Reg"))`. `r if (lbp("Reg") > 0.05) "The innovations of the regression model are consistent with white noise and show no remaining seasonal structure, so the deterministic seasonal dummies are adequate. Compared with the static regression, the long runs in the residuals have disappeared: the ARIMA error has absorbed the autocorrelation. The model passes the residual check and can be used to forecast." else "Some autocorrelation remains in the innovations of the regression model, so it should not be used for forecasting without revisiting the error orders."`
 
 # Part B: Exponential smoothing
 
@@ -637,7 +637,7 @@ ets_tbl |>
 fit_ets |> select(`Damped HW`) |> components() |> autoplot() + labs(x = NULL)
 ```
 
-The results sort the models into two groups (@tbl-ets-family). The non-seasonal methods (SES, Holt, damped Holt) have far higher AICc values and their innovations are strongly autocorrelated (Ljung and Box p `r pfmt(max(elb("SES"), elb("Holt"), elb("Damped Holt")))`), because they leave the whole seasonal pattern in the errors. They fail the residual check (step 6) immediately. The seasonal models all pass the white noise check, and the automatic selection chooses `r auto_form`.
+The results sort the models into two groups (@tbl-ets-family). The non-seasonal methods (SES, Holt, damped Holt) have far higher AICc values and their innovations are strongly autocorrelated (Ljung and Box p `r pfmt(max(elb("SES"), elb("Holt"), elb("Damped Holt")))`), because they leave the whole seasonal pattern in the errors. They fail the residual check immediately. The seasonal models all pass the white noise check, and the automatic selection chooses `r auto_form`.
 
 The seasonal models differ mainly in what they do with the trend:
 

@@ -54,7 +54,7 @@ pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%
 
 **Title:** Forecasting South African accommodation demand with ARIMA and SARIMA models
 
-**Section and topic:** Section 1. Benchmarks, stationarity and differencing, ARMA, ARIMA and SARIMA models, the Box and Jenkins workflow, forecast evaluation.
+**Section and topic:** Section 1. Benchmarks, stationarity and differencing, ARMA, ARIMA and SARIMA models, model identification and residual diagnostics, forecast evaluation.
 
 **Type of project:** Implementation and model comparison on real-world data.
 
@@ -62,7 +62,7 @@ pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%
 
 **Data:** Real-world, publicly available data from Statistics South Africa (Stats SA), *Tourist Accommodation* statistical release P6410, series B64100 (stay unit nights sold, total industry, thousands), monthly. Analysis window January 2015 to June 2026. Full source details are in @sec-data-source.
 
-**Methods:** The analysis follows the seven-step ARIMA modelling procedure from the lectures (plot, transform, difference, identify, estimate, check residuals, forecast). In the main analysis the COVID months (March 2020 to March 2022) are treated as missing, so all models are estimated from the pre- and post-COVID data only; fitting the same models with the COVID months kept is reported as a sensitivity check. The transformation and the orders of differencing are chosen from the pre-COVID data using time plots, ACF/PACF plots and unit root tests, with the Guerrero estimate of the Box–Cox parameter reported as a check. A candidate SARIMA model is identified by hand from the ACF and PACF and compared with the model chosen automatically by `ARIMA()`. Each candidate is checked with residual plots, Ljung–Box tests and, for the final model, its MA roots. The candidates are then compared with four benchmarks (mean, naive, seasonal naive, drift) and simpler ARMA and ARIMA models on a 24-month test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding-window rolling-origin cross-validation over horizons of 1 to 12 months.
+**Methods:** In the main analysis the COVID months (March 2020 to March 2022) are treated as missing, so all models are estimated from the pre- and post-COVID data only; fitting the same models with the COVID months kept is reported as a sensitivity check. The transformation and the orders of differencing are chosen from the pre-COVID data using time plots, ACF/PACF plots and unit root tests, with the Guerrero estimate of the Box–Cox parameter reported as a check. A candidate SARIMA model is identified by hand from the ACF and PACF and compared with the model chosen automatically by `ARIMA()`. Each candidate is checked with residual plots, Ljung–Box tests and, for the final model, its MA roots. The candidates are then compared with four benchmarks (mean, naive, seasonal naive, drift) and simpler ARMA and ARIMA models on a 24-month test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding-window rolling-origin cross-validation over horizons of 1 to 12 months.
 
 **Target variable:** This analysis focuses on stay unit nights sold. This was chosen over income level and occupancy rate because it appears to be the most consistent. Occupancy rate can change when room supply changes and income can be disrupted by inflation or other general increases. Unit nights sold tells a very clear demand picture with minimal factors affecting the quality of the variable over the years.
 
@@ -75,7 +75,7 @@ pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%
 
 # Introduction and research question
 
-Tourist accommodation is one of the clearest seasonal series published by Statistics South Africa. Demand peaks over the December holidays and dips in the winter months, and in April 2020 it collapsed almost to zero when the hard lockdown closed the industry. This makes it a good series for the Box and Jenkins material: the seasonality calls for seasonal differencing and a SARIMA model, while the COVID shock is a real example of a structural break that violates the assumptions those models are built on.
+Tourist accommodation is one of the clearest seasonal series published by Statistics South Africa. Demand peaks over the December holidays and dips in the winter months, and in April 2020 it collapsed almost to zero when the hard lockdown closed the industry. This makes it a good series for ARIMA modelling: the seasonality calls for seasonal differencing and a SARIMA model, while the COVID shock is a real example of a structural break that violates the assumptions those models are built on.
 
 **Forecast horizon.** The forecasts are aimed at short and medium-term planning. Horizons of 1 to 3 months support operational decisions such as staffing and pricing, while horizons up to 24 months support budgeting and planning for the next two holiday seasons. 24 months is used as the longest horizon because it covers two full seasonal cycles, so every calendar month is forecast at both a short and a long lead time. Long-term forecasts of several years are not attempted: a model with both a seasonal and a non-seasonal difference has prediction intervals that widen without limit, and the COVID break shows that the structure of the series can change faster than such a horizon would allow.
 
@@ -335,7 +335,7 @@ r1  <- acf_dd$acf[1]
 r12 <- acf_dd$acf[12]
 ```
 
-After both differences (@fig-d12-d1) the series looks stationary. The ACF has a clear negative spike at lag 1 (r~1~ = `r fmt(r1, 2)`) and the PACF tails off over the first few lags, which points to a non-seasonal MA(1) term. The lag 12 autocorrelation is small (r~12~ = `r fmt(r12, 2)`) and well inside the 95% bounds in @fig-d12-d1, so the ACF on its own does not show a clear seasonal MA signature. The isolated spike at lag 9 (and the borderline one at lag 13) has no seasonal interpretation; with 36 lags shown, one or two exceedances are expected by chance, so these are not modelled. A seasonal MA(1) term is still included, for two reasons. First, a seasonal difference usually induces negative autocorrelation at the seasonal lag, and a seasonal MA(1) is the standard term for it. Second, the short pre-COVID sample makes the lag 12 estimate imprecise. The term is kept only if its fitted coefficient is clearly non-zero, which is checked in @tbl-coefs. Following the Box and Jenkins workflow, the hand identified model is
+After both differences (@fig-d12-d1) the series looks stationary. The ACF has a clear negative spike at lag 1 (r~1~ = `r fmt(r1, 2)`) and the PACF tails off over the first few lags, which points to a non-seasonal MA(1) term. The lag 12 autocorrelation is small (r~12~ = `r fmt(r12, 2)`) and well inside the 95% bounds in @fig-d12-d1, so the ACF on its own does not show a clear seasonal MA signature. The isolated spike at lag 9 (and the borderline one at lag 13) has no seasonal interpretation; with 36 lags shown, one or two exceedances are expected by chance, so these are not modelled. A seasonal MA(1) term is still included, for two reasons. First, a seasonal difference usually induces negative autocorrelation at the seasonal lag, and a seasonal MA(1) is the standard term for it. Second, the short pre-COVID sample makes the lag 12 estimate imprecise. The term is kept only if its fitted coefficient is clearly non-zero, which is checked in @tbl-coefs. The hand identified model is therefore
 
 $$
 (1 - L)(1 - L^{12}) \log y_t = (1 + \theta_1 L)(1 + \Theta_1 L^{12})\,\varepsilon_t, \qquad \varepsilon_t \sim \text{WN}(0, \sigma^2),
@@ -345,19 +345,11 @@ the SARIMA(0,1,1)(0,1,1)~12~ or "airline" model. No constant is included because
 
 # Modelling strategy
 
-## The ARIMA modelling procedure
+## Modelling approach
 
-The modelling follows the seven-step ARIMA modelling procedure (the Box and Jenkins workflow) from the lectures. Each step maps to a part of this report:
+The exploratory analysis (time plot, seasonal plots and STL decomposition) showed proportional seasonal swings, so the series is modelled on the log scale. The Guerrero estimate is reported but not followed, for the reasons given above. One seasonal and one first difference of log nights sold make the series approximately stationary, based on the unit root tests, the ACF and the time plot. The lag 1 spike in the ACF of the differenced series, together with the seasonal difference, points to the SARIMA(0,1,1)(0,1,1)~12~ model, and the model chosen automatically by `ARIMA()` is included as an alternative candidate. All models are estimated by maximum likelihood with `ARIMA()` in `fable`, in the main analysis and in the sensitivity check.
 
-1. **Plot the data:** the time plot, seasonal plots and STL decomposition in the exploratory analysis.
-2. **Transform if needed to stabilise the variance:** a log transformation, chosen from the proportional seasonal swings. The Guerrero estimate is reported but not followed, for the reasons given in the exploratory analysis.
-3. **Difference until approximately stationary:** one seasonal and one first difference of log nights sold, chosen from the unit root tests, the ACF and the time plot.
-4. **Identify candidate orders from the ACF and PACF:** the lag 1 spike, together with the seasonal difference, points to the SARIMA(0,1,1)(0,1,1)~12~ model. The model chosen automatically by `ARIMA()` is included as an alternative candidate.
-5. **Estimate by maximum likelihood:** `ARIMA()` in `fable`, in the main analysis and in the sensitivity check.
-6. **Check the residuals against the white noise standard:** Ljung and Box tests, residual plots, ACF and histogram. If a model fails, return to step 4.
-7. **Forecast:** only with models that pass step 6.
-
-Finally, a model that survives the procedure must still beat the benchmarks on the test set before it earns its place. In this report, models that fail step 6 are still forecast on the test set, but only as reference points showing *why* the loop matters. They are not candidates for the final model.
+Each model's residuals are then checked against the white noise standard with Ljung and Box tests, residual plots, the ACF and a histogram. A model that fails goes back to model identification, and only models that pass are used to forecast. A model that passes must still beat the benchmarks on the test set before it earns its place. In this report, models that fail the residual checks are still forecast on the test set, but only as reference points showing *why* the checks matter. They are not candidates for the final model.
 
 ## The COVID problem
 
@@ -413,9 +405,9 @@ The models are trained on January 2015 to June 2024 (`r nrow(train_A)` months, o
 | ARMA | ARMA(p, q) with constant on $\log y_t$, orders by AICc, no differencing | Ignores trend and seasonality |
 | ARIMA | ARIMA(p, 1, q) on $\log y_t$, orders by AICc | Handles the level, ignores seasonality |
 | SARIMA (auto) | ARIMA(p, 1, q)(P, 1, Q)~12~ on $\log y_t$, orders by AICc | Automatic seasonal model |
-| SARIMA (0,1,1)(0,1,1) | Hand identified airline model on $\log y_t$ | Box and Jenkins model |
+| SARIMA (0,1,1)(0,1,1) | Hand identified airline model on $\log y_t$ | Identified from the ACF and PACF |
 
-: Candidate models. The ARMA, ARIMA and SARIMA models form a ladder in which each step adds one feature of the data. {#tbl-models}
+: Candidate models. The ARMA, ARIMA and SARIMA models form a ladder in which each model adds one feature of the data. {#tbl-models}
 
 **Why these models.** The four benchmarks are the standard set from the notes. Seasonal naive is the one that matters most: because the seasonal shape is so stable (@fig-season), simply repeating last year's value is a hard target, and any ARIMA model has to beat it to justify its extra parameters. The ARMA and non-seasonal ARIMA models are deliberately misspecified reference points rather than serious candidates. The ARMA has no differencing and no seasonal terms, and the ARIMA handles the level but not the seasonality. Including them shows how much each feature of the data (the wandering level, then the seasonality) contributes to forecast accuracy. The real candidates are the two seasonal models: the hand identified airline model from the ACF and PACF, and the automatic `ARIMA()` choice as a check on the hand identification.
 
@@ -435,15 +427,15 @@ fit <- train |>
     ARMA        = ARIMA(log(nights) ~ 1 + pdq(d = 0) + PDQ(0, 0, 0)),
     ARIMA       = ARIMA(log(nights) ~ pdq(d = 1) + PDQ(0, 0, 0)),
     SARIMA_auto = ARIMA(log(nights) ~ pdq(d = 1) + PDQ(D = 1)),
-    SARIMA_BJ   = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
+    SARIMA_airline   = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
   )
 
-arima_models <- c("ARMA", "ARIMA", "SARIMA_auto", "SARIMA_BJ")
+arima_models <- c("ARMA", "ARIMA", "SARIMA_auto", "SARIMA_airline")
 
 model_labels <- c(
   Mean = "Mean", Naive = "Naive", SNaive = "Seasonal naive", Drift = "Drift",
   ARMA = "ARMA", ARIMA = "ARIMA", SARIMA_auto = "SARIMA (auto)",
-  SARIMA_BJ = "SARIMA (0,1,1)(0,1,1)"
+  SARIMA_airline = "SARIMA (0,1,1)(0,1,1)"
 )
 ```
 
@@ -482,7 +474,7 @@ get_aicc  <- function(d, m) order_tbl$AICc[order_tbl$design == d & order_tbl$.mo
 #| tbl-cap: "Estimated coefficients of the hand identified SARIMA(0,1,1)(0,1,1) model under both designs."
 
 coef_tbl <- tidy(fit) |>
-  filter(.model == "SARIMA_BJ") |>
+  filter(.model == "SARIMA_airline") |>
   select(design, term, estimate, std.error)
 
 kable(coef_tbl, digits = 3, col.names = c("Design", "Term", "Estimate", "Std. error"))
@@ -493,7 +485,7 @@ ma_A  <- coef_tbl |> filter(design == design_levels[1], term == "ma1")  |> pull(
 ma_B  <- coef_tbl |> filter(design == design_levels[2], term == "ma1")  |> pull(estimate)
 ```
 
-The two designs give very different models from the same data. Under Design A the residual variance of the airline model is `r fmt(get_sig2(design_levels[1], "SARIMA_BJ"), 4)` on the log scale, against `r fmt(get_sig2(design_levels[2], "SARIMA_BJ"), 4)` under Design B, about `r fmt(get_sig2(design_levels[1], "SARIMA_BJ") / get_sig2(design_levels[2], "SARIMA_BJ"), 0)` times larger. The coefficients move too (@tbl-coefs). Under Design A the seasonal MA coefficient is `r fmt(sma_A, 3)`. A value at or near -1 means the seasonal MA factor $(1 + \Theta_1 L^{12})$ almost cancels the seasonal difference $(1 - L^{12})$: the model is close to non-invertible and is effectively saying that the seasonal pattern is fixed and should not have been differenced. It also sits on the boundary of the parameter space, where the usual standard errors are unreliable. Under Design B the estimate is `r fmt(sma_B, 3)` and the non-seasonal MA coefficient is `r fmt(ma_B, 3)` (against `r fmt(ma_A, 3)` under Design A). The Design B values are inside the invertible region (@fig-roots). The non-seasonal MA coefficient agrees in sign with the negative lag 1 autocorrelation found in the identification step and is well away from -1, so there is no sign that the first difference over-differences the series. The seasonal MA coefficient is about `r fmt(abs(sma_B / coef_tbl$std.error[coef_tbl$design == design_levels[2] & coef_tbl$term == "sma1"]), 1)` standard errors from zero, which confirms that the seasonal MA term is needed even though the lag 12 autocorrelation was weak in the identification step.
+The two designs give very different models from the same data. Under Design A the residual variance of the airline model is `r fmt(get_sig2(design_levels[1], "SARIMA_airline"), 4)` on the log scale, against `r fmt(get_sig2(design_levels[2], "SARIMA_airline"), 4)` under Design B, about `r fmt(get_sig2(design_levels[1], "SARIMA_airline") / get_sig2(design_levels[2], "SARIMA_airline"), 0)` times larger. The coefficients move too (@tbl-coefs). Under Design A the seasonal MA coefficient is `r fmt(sma_A, 3)`. A value at or near -1 means the seasonal MA factor $(1 + \Theta_1 L^{12})$ almost cancels the seasonal difference $(1 - L^{12})$: the model is close to non-invertible and is effectively saying that the seasonal pattern is fixed and should not have been differenced. It also sits on the boundary of the parameter space, where the usual standard errors are unreliable. Under Design B the estimate is `r fmt(sma_B, 3)` and the non-seasonal MA coefficient is `r fmt(ma_B, 3)` (against `r fmt(ma_A, 3)` under Design A). The Design B values are inside the invertible region (@fig-roots). The non-seasonal MA coefficient agrees in sign with the negative lag 1 autocorrelation found in the identification step and is well away from -1, so there is no sign that the first difference over-differences the series. The seasonal MA coefficient is about `r fmt(abs(sma_B / coef_tbl$std.error[coef_tbl$design == design_levels[2] & coef_tbl$term == "sma1"]), 1)` standard errors from zero, which confirms that the seasonal MA term is needed even though the lag 12 autocorrelation was weak in the identification step.
 
 ```{r}
 #| label: fig-roots
@@ -502,11 +494,11 @@ The two designs give very different models from the same data. Under Design A th
 
 fit |>
   filter(design == design_levels[2]) |>
-  select(SARIMA_BJ) |>
+  select(SARIMA_airline) |>
   gg_arma()
 ```
 
-Under Design B the automatic search chose `r get_spec(design_levels[2], "SARIMA_auto")` with AICc `r fmt(get_aicc(design_levels[2], "SARIMA_auto"))`, compared with `r fmt(get_aicc(design_levels[2], "SARIMA_BJ"))` for the hand identified model. Whether the extra flexibility is worth it is answered by the test set below, not by the AICc.
+Under Design B the automatic search chose `r get_spec(design_levels[2], "SARIMA_auto")` with AICc `r fmt(get_aicc(design_levels[2], "SARIMA_auto"))`, compared with `r fmt(get_aicc(design_levels[2], "SARIMA_airline"))` for the hand identified model. Whether the extra flexibility is worth it is answered by the test set below, not by the AICc.
 
 ## Residual diagnostics
 
@@ -552,7 +544,7 @@ lb_tbl |>
 #| fig-height: 5
 
 aug |>
-  filter(.model == "SARIMA_BJ") |>
+  filter(.model == "SARIMA_airline") |>
   ggplot(aes(as.Date(Month), .innov)) +
   geom_hline(yintercept = 0, colour = "grey50") +
   geom_line(colour = "steelblue4") +
@@ -566,7 +558,7 @@ aug |>
 #| fig-height: 3.5
 
 resid_B <- aug |>
-  filter(.model == "SARIMA_BJ", design == design_levels[2])
+  filter(.model == "SARIMA_airline", design == design_levels[2])
 
 p_acf <- resid_B |>
   ACF(.innov, lag_max = 36, na.action = na.pass) |>
@@ -590,19 +582,19 @@ if (requireNamespace("patchwork", quietly = TRUE)) {
 lb_get <- function(d, m, col) lb_tbl[[col]][lb_tbl$design == d & lb_tbl$.model == m]
 ```
 
-Under Design A the residual plot is dominated by a handful of enormous residuals in 2020 (the largest is `r fmt(lb_get(design_levels[1], "SARIMA_BJ", "max_abs"), 1)` standard deviations from zero), so the normality assumption behind the prediction intervals fails badly, even though the Ljung and Box test (p = `r fmt(lb_get(design_levels[1], "SARIMA_BJ", "lb_p"), 3)`) does not detect autocorrelation. This is a useful reminder that a white noise test only checks the correlation structure: residuals can be uncorrelated and still be far from the identically distributed errors the model assumes. Under Design B the airline residuals look like white noise (p = `r fmt(lb_get(design_levels[2], "SARIMA_BJ", "lb_p"), 3)`), and the histogram is roughly symmetric. Two spikes in the residual ACF (@fig-resid-acf), at lags 9 and 18, just cross the 95% bounds. With 36 lags about two exceedances are expected by chance and the Ljung and Box test does not reject, so the model is accepted; but lag 9 also stood out in the identification step, so it is noted as a limitation. The ARMA model without differencing leaves strong autocorrelation in its residuals under Design B (p = `r fmt(lb_get(design_levels[2], "ARMA", "lb_p"), 3)`), which is expected: it has no way to represent the seasonal pattern.
+Under Design A the residual plot is dominated by a handful of enormous residuals in 2020 (the largest is `r fmt(lb_get(design_levels[1], "SARIMA_airline", "max_abs"), 1)` standard deviations from zero), so the normality assumption behind the prediction intervals fails badly, even though the Ljung and Box test (p = `r fmt(lb_get(design_levels[1], "SARIMA_airline", "lb_p"), 3)`) does not detect autocorrelation. This is a useful reminder that a white noise test only checks the correlation structure: residuals can be uncorrelated and still be far from the identically distributed errors the model assumes. Under Design B the airline residuals look like white noise (p = `r fmt(lb_get(design_levels[2], "SARIMA_airline", "lb_p"), 3)`), and the histogram is roughly symmetric. Two spikes in the residual ACF (@fig-resid-acf), at lags 9 and 18, just cross the 95% bounds. With 36 lags about two exceedances are expected by chance and the Ljung and Box test does not reject, so the model is accepted; but lag 9 also stood out in the identification step, so it is noted as a limitation. The ARMA model without differencing leaves strong autocorrelation in its residuals under Design B (p = `r fmt(lb_get(design_levels[2], "ARMA", "lb_p"), 3)`), which is expected: it has no way to represent the seasonal pattern.
 
 ```{r}
-#| label: bj-loop
+#| label: residual-check
 #| include: false
 pass_B <- lb_tbl |> filter(design == design_levels[2], passes_lb == "Yes") |> pull(.model)
 fail_B <- lb_tbl |> filter(design == design_levels[2], passes_lb == "No") |> pull(.model)
 list_models <- function(x) if (length(x) == 0) "none" else paste(model_labels[x], collapse = ", ")
 ```
 
-**Applying step 6 of the procedure.** Under Design B the models that pass the white noise test are: `r list_models(pass_B)`. The models that fail are: `r list_models(fail_B)`. For a model that fails, the procedure says to return to step 4 rather than forecast. For the ARMA and non-seasonal ARIMA models, returning to step 4 means recognising from their residual ACF that the seasonal autocorrelation has not been modelled, which leads straight to the seasonal models. `r if ("SARIMA_auto" %in% fail_B) "The automatically selected SARIMA also leaves significant autocorrelation, so it fails the loop despite its lower AICc. This is a good illustration that choosing orders by an information criterion alone does not replace the diagnostic step." else paste0("The automatically selected SARIMA passes as well, but only just (p = ", fmt(lb_get(design_levels[2], "SARIMA_auto", "lb_p"), 3), ", right at the 5% cut-off), so it remains a candidate alongside the hand identified model, with weaker support.")` Under Design A every model technically passes the Ljung and Box test, but the airline model fails step 6 in a different way: its residuals are far from identically distributed (the COVID residuals are extreme outliers) and its seasonal MA coefficient sits on the invertibility boundary. Returning to step 4 under Design A would not fix this, because the problem is the data, not the orders. The fix is to change how the break is handled, which is what Design B does.
+**Which models pass the residual checks.** Under Design B the models that pass the white noise test are: `r list_models(pass_B)`. The models that fail are: `r list_models(fail_B)`. A model that fails should be re-identified rather than used to forecast. For the ARMA and non-seasonal ARIMA models, re-identifying means recognising from their residual ACF that the seasonal autocorrelation has not been modelled, which leads straight to the seasonal models. `r if ("SARIMA_auto" %in% fail_B) "The automatically selected SARIMA also leaves significant autocorrelation, so it fails the residual checks despite its lower AICc. This is a good illustration that choosing orders by an information criterion alone does not replace checking the residuals." else paste0("The automatically selected SARIMA passes as well, but only just (p = ", fmt(lb_get(design_levels[2], "SARIMA_auto", "lb_p"), 3), ", right at the 5% cut-off), so it remains a candidate alongside the hand identified model, with weaker support.")` Under Design A every model technically passes the Ljung and Box test, but the airline model fails the residual checks in a different way: its residuals are far from identically distributed (the COVID residuals are extreme outliers) and its seasonal MA coefficient sits on the invertibility boundary. Re-identifying the orders under Design A would not fix this, because the problem is the data, not the orders. The fix is to change how the break is handled, which is what Design B does.
 
-**Candidates for the final model.** Only the models that pass the loop under Design B are candidates for forecasting. The test set comparison below then checks the last condition from the notes: whether these candidates beat the benchmarks.
+**Candidates for the final model.** Only the models that pass the residual checks under Design B are candidates for forecasting. The test set comparison below then checks the last condition: whether these candidates beat the benchmarks.
 
 # Forecast evaluation on the test set
 
@@ -664,19 +656,19 @@ better_or_worse <- function(x, y) if (x < y) "lower" else "higher"
 
 ```{r}
 #| label: fig-forecasts
-#| fig-cap: "Test set forecasts with 95% prediction intervals from the seasonal naive benchmark (SNaive), the automatic SARIMA (SARIMA_auto) and the airline model (SARIMA_BJ), under both designs. Black lines are the observed values. Under Design A the intervals are so wide that they dominate the vertical axis."
+#| fig-cap: "Test set forecasts with 95% prediction intervals from the seasonal naive benchmark (SNaive), the automatic SARIMA (SARIMA_auto) and the airline model (SARIMA_airline), under both designs. Black lines are the observed values. Under Design A the intervals are so wide that they dominate the vertical axis."
 #| fig-height: 6.5
 
 fc |>
-  filter(.model %in% c("SNaive", "SARIMA_auto", "SARIMA_BJ")) |>
+  filter(.model %in% c("SNaive", "SARIMA_auto", "SARIMA_airline")) |>
   autoplot(nights_keyed |> filter_index("2021 Jan" ~ .), level = 95) +
   facet_wrap(vars(design), ncol = 1, scales = "free_y") +
   labs(x = NULL, y = "Nights sold (thousands)", colour = "Model", fill = "Model")
 ```
 
-**Design A.** With the COVID months kept, the most accurate model on the test set is the `r model_labels[best_A]` model. The airline SARIMA has an RMSE of `r fmt(res_get(A, "SARIMA_BJ", "RMSE"))` thousand nights against `r fmt(res_get(A, "SNaive", "RMSE"))` for the seasonal naive method, and the automatically selected `r get_spec(A, "SARIMA_auto")` has an RMSE of `r fmt(res_get(A, "SARIMA_auto", "RMSE"))`. In other words, the more sophisticated models do not earn their extra parameters. Part of the reason is visible in @fig-forecasts: the residual variance inflated by 2020 makes the 95% intervals extremely wide (mean width `r fmt(res_get(A, "SARIMA_BJ", "width95"), 0)` thousand nights for the airline model), and because the bias adjustment adds a term proportional to $\hat\sigma^2$ when back-transforming from the log scale, the inflated variance also pushes the point forecasts upwards. The intervals reach `r pct(res_get(A, "SARIMA_BJ", "cover95"))` coverage, but only because they are uninformatively wide; the large Winkler scores penalise this. The non-seasonal ARIMA under Design A does well on point accuracy (RMSE `r fmt(res_get(A, "ARIMA", "RMSE"))`, close to the final model in Design B), but this does not make it a good model: its 95% intervals average `r fmt(res_get(A, "ARIMA", "width95"), 0)` thousand nights, wider than the level of the series itself, and its residuals contain the same extreme COVID outliers. A good RMSE on one 24-month test set is not enough on its own, which is why the diagnostics and the cross-validation are also needed.
+**Design A.** With the COVID months kept, the most accurate model on the test set is the `r model_labels[best_A]` model. The airline SARIMA has an RMSE of `r fmt(res_get(A, "SARIMA_airline", "RMSE"))` thousand nights against `r fmt(res_get(A, "SNaive", "RMSE"))` for the seasonal naive method, and the automatically selected `r get_spec(A, "SARIMA_auto")` has an RMSE of `r fmt(res_get(A, "SARIMA_auto", "RMSE"))`. In other words, the more sophisticated models do not earn their extra parameters. Part of the reason is visible in @fig-forecasts: the residual variance inflated by 2020 makes the 95% intervals extremely wide (mean width `r fmt(res_get(A, "SARIMA_airline", "width95"), 0)` thousand nights for the airline model), and because the bias adjustment adds a term proportional to $\hat\sigma^2$ when back-transforming from the log scale, the inflated variance also pushes the point forecasts upwards. The intervals reach `r pct(res_get(A, "SARIMA_airline", "cover95"))` coverage, but only because they are uninformatively wide; the large Winkler scores penalise this. The non-seasonal ARIMA under Design A does well on point accuracy (RMSE `r fmt(res_get(A, "ARIMA", "RMSE"))`, close to the final model in Design B), but this does not make it a good model: its 95% intervals average `r fmt(res_get(A, "ARIMA", "width95"), 0)` thousand nights, wider than the level of the series itself, and its residuals contain the same extreme COVID outliers. A good RMSE on one 24-month test set is not enough on its own, which is why the diagnostics and the cross-validation are also needed.
 
-**Design B.** With the COVID window treated as missing, the ranking changes. The most accurate model is the `r model_labels[best_B]` model. The airline SARIMA reaches an RMSE of `r fmt(res_get(B, "SARIMA_BJ", "RMSE"))` and a MAPE of `r fmt(res_get(B, "SARIMA_BJ", "MAPE"), 2)`%, compared with `r fmt(res_get(B, best_bench, "RMSE"))` for the best benchmark (`r model_labels[best_bench]`)`r if (best_bench != "SNaive") paste0(" and ", fmt(res_get(B, "SNaive", "RMSE")), " for seasonal naive") else ""`. Its 95% intervals have a mean width of `r fmt(res_get(B, "SARIMA_BJ", "width95"), 0)` thousand nights, much narrower than under Design A, and still cover `r pct(res_get(B, "SARIMA_BJ", "cover95"))` of the test months (`r pct(res_get(B, "SARIMA_BJ", "cover80"))` for the 80% intervals). The automatically selected model has `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_BJ"))` AICc than the airline model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_BJ", "RMSE"))` test RMSE (`r fmt(res_get(B, "SARIMA_auto", "RMSE"))`), which shows that an in-sample criterion and out-of-sample accuracy do not have to agree. @fig-forecasts also shows that the observed values sit above the airline forecasts for most of the second test year: the recovery kept going after the training period ended, and a model that forecasts from the last observed level cannot anticipate that. This links to the limitation on the choice of COVID window below.
+**Design B.** With the COVID window treated as missing, the ranking changes. The most accurate model is the `r model_labels[best_B]` model. The airline SARIMA reaches an RMSE of `r fmt(res_get(B, "SARIMA_airline", "RMSE"))` and a MAPE of `r fmt(res_get(B, "SARIMA_airline", "MAPE"), 2)`%, compared with `r fmt(res_get(B, best_bench, "RMSE"))` for the best benchmark (`r model_labels[best_bench]`)`r if (best_bench != "SNaive") paste0(" and ", fmt(res_get(B, "SNaive", "RMSE")), " for seasonal naive") else ""`. Its 95% intervals have a mean width of `r fmt(res_get(B, "SARIMA_airline", "width95"), 0)` thousand nights, much narrower than under Design A, and still cover `r pct(res_get(B, "SARIMA_airline", "cover95"))` of the test months (`r pct(res_get(B, "SARIMA_airline", "cover80"))` for the 80% intervals). The automatically selected model has `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_airline"))` AICc than the airline model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_airline", "RMSE"))` test RMSE (`r fmt(res_get(B, "SARIMA_auto", "RMSE"))`), which shows that an in-sample criterion and out-of-sample accuracy do not have to agree. @fig-forecasts also shows that the observed values sit above the airline forecasts for most of the second test year: the recovery kept going after the training period ended, and a model that forecasts from the last observed level cannot anticipate that. This links to the limitation on the choice of COVID window below.
 
 **The model ladder.** Under Design B, moving from ARMA (RMSE `r fmt(res_get(B, "ARMA", "RMSE"))`) to ARIMA (`r fmt(res_get(B, "ARIMA", "RMSE"))`) does not help on its own: differencing removes the level but a non-seasonal model still cannot reproduce the December peak, so its forecasts flatten out after a few months. The large gain comes only when the seasonal structure is modelled explicitly with the SARIMA. The ARMA does better on the test set than its specification suggests (RMSE `r fmt(res_get(B, "ARMA", "RMSE"))`, ahead of seasonal naive), probably because its three AR terms let it track both the level and part of the within-year pattern over the test period. It still fails the Ljung and Box test, so its test set result is treated as luck of this particular split rather than evidence for the model. The MASE values below 1 or above 1 should be read with care: the scaling uses the in-sample seasonal naive error over the whole training period, which includes the COVID collapse, so all MASE values are small in absolute terms; they are useful for ranking, not as an absolute measure.
 
@@ -705,7 +697,7 @@ cv_fit <- cv_stretch |>
   model(
     Mean      = MEAN(nights),
     SNaive    = SNAIVE(nights),
-    SARIMA_BJ = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
+    SARIMA_airline = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1))
   )
 
 cv_fc <- cv_fit |>
@@ -757,7 +749,7 @@ cv_get <- function(d, m) {
 }
 ```
 
-Cross-validation confirms the test set conclusions and makes the contrast between the designs sharper. Under Design A the airline model averages an RMSE of `r fmt(cv_get(A, "SARIMA_BJ"))` across horizons, far worse than seasonal naive (`r fmt(cv_get(A, "SNaive"))`), and its error grows quickly with the horizon (@fig-cv). The reason is the bias adjustment again: with $\hat\sigma^2$ inflated by the COVID months, the variance of a log scale forecast grows with $h$, and so does the upward adjustment to the back-transformed mean. Under Design B the same model has the lowest error at every horizon, with an average RMSE of `r fmt(cv_get(B, "SARIMA_BJ"))` against `r fmt(cv_get(B, "SNaive"))` for seasonal naive and `r fmt(cv_get(B, "Mean"))` for the mean method. Neighbouring origins share most of their data, so these 25 origins are not independent replicates, but the ranking is consistent across every horizon. The origins after June 2024 also overlap the test period, so the cross-validation is not fully independent of the test set comparison; it is best read as a check on the stability of the ranking. Only the benchmarks that matter most and the final candidate are included, to keep the refitting time manageable.
+Cross-validation confirms the test set conclusions and makes the contrast between the designs sharper. Under Design A the airline model averages an RMSE of `r fmt(cv_get(A, "SARIMA_airline"))` across horizons, far worse than seasonal naive (`r fmt(cv_get(A, "SNaive"))`), and its error grows quickly with the horizon (@fig-cv). The reason is the bias adjustment again: with $\hat\sigma^2$ inflated by the COVID months, the variance of a log scale forecast grows with $h$, and so does the upward adjustment to the back-transformed mean. Under Design B the same model has the lowest error at every horizon, with an average RMSE of `r fmt(cv_get(B, "SARIMA_airline"))` against `r fmt(cv_get(B, "SNaive"))` for seasonal naive and `r fmt(cv_get(B, "Mean"))` for the mean method. Neighbouring origins share most of their data, so these 25 origins are not independent replicates, but the ranking is consistent across every horizon. The origins after June 2024 also overlap the test period, so the cross-validation is not fully independent of the test set comparison; it is best read as a check on the stability of the ranking. Only the benchmarks that matter most and the final candidate are included, to keep the refitting time manageable.
 
 # Final model and forecasts
 
@@ -770,7 +762,7 @@ final_data <- nights_sold |>
   mutate(nights = if_else(period == "COVID window", NA_real_, nights))
 
 final_fit <- final_data |>
-  model(SARIMA_BJ = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)))
+  model(SARIMA_airline = ARIMA(log(nights) ~ 0 + pdq(0, 1, 1) + PDQ(0, 1, 1)))
 
 report(final_fit)
 
@@ -822,9 +814,9 @@ The model projects the familiar seasonal shape forward on a level close to that 
 ## Key findings {#sec-findings}
 
 1. **Seasonality is the dominant and most stable feature of the series.** The seasonal shape barely changed even through the COVID years, which is why the seasonal naive method is hard to beat. The non-seasonal ARMA and ARIMA models cannot represent the seasonal pattern and fail the residual diagnostics; the ARMA happened to score reasonably on the test set, but not for reasons that would carry over to other periods.
-2. **How the break is handled matters more than which ARIMA model is chosen.** With the COVID months kept (Design A), the seasonal ARIMA models were worse than the seasonal naive benchmark on the test set and much worse in cross-validation. The cause is a residual variance inflated by about `r fmt(get_sig2(A, "SARIMA_BJ") / get_sig2(B, "SARIMA_BJ"), 0)` times, a seasonal MA coefficient pushed to the invertibility boundary (`r fmt(sma_A, 3)`), and point forecasts pushed upwards by the bias adjustment.
-3. **With the COVID window treated as missing (Design B), the Box and Jenkins airline model was the only model to pass the full loop and beat the benchmarks**: it passed the diagnostic step and performed best, with a test RMSE of `r fmt(res_get(B, "SARIMA_BJ", "RMSE"))` thousand nights (MAPE `r fmt(res_get(B, "SARIMA_BJ", "MAPE"), 2)`%), white noise residuals and slightly conservative prediction intervals (the 80% intervals covered 92% of test months and the 95% intervals all of them). It also had the lowest cross-validated error at every horizon from 1 to 12 months.
-4. **A lower AICc did not guarantee better forecasts.** The automatically selected seasonal model had a `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_BJ"))` AICc than the hand identified model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_BJ", "RMSE"))` test RMSE, so the simpler model identified from the ACF and PACF was preferred.
+2. **How the break is handled matters more than which ARIMA model is chosen.** With the COVID months kept (Design A), the seasonal ARIMA models were worse than the seasonal naive benchmark on the test set and much worse in cross-validation. The cause is a residual variance inflated by about `r fmt(get_sig2(A, "SARIMA_airline") / get_sig2(B, "SARIMA_airline"), 0)` times, a seasonal MA coefficient pushed to the invertibility boundary (`r fmt(sma_A, 3)`), and point forecasts pushed upwards by the bias adjustment.
+3. **With the COVID window treated as missing (Design B), the hand identified airline model was the only model to pass the residual checks and beat the benchmarks**: it passed the diagnostics and performed best, with a test RMSE of `r fmt(res_get(B, "SARIMA_airline", "RMSE"))` thousand nights (MAPE `r fmt(res_get(B, "SARIMA_airline", "MAPE"), 2)`%), white noise residuals and slightly conservative prediction intervals (the 80% intervals covered 92% of test months and the 95% intervals all of them). It also had the lowest cross-validated error at every horizon from 1 to 12 months.
+4. **A lower AICc did not guarantee better forecasts.** The automatically selected seasonal model had a `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_airline"))` AICc than the hand identified model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_airline", "RMSE"))` test RMSE, so the simpler model identified from the ACF and PACF was preferred.
 
 ## Issues and limitations
 
@@ -849,11 +841,11 @@ Upon looking at the EDA this data showed a clear seasonal pattern with a unique 
 
 I found that this data was quite similar to a seasonally adjusted electrical equipment dataset that was covered in one of the coding lectures. This is due to the fact that both datasets had a level of non-stationarity and the variability mostly occurred due to a shock at a specific time. For this dataset it was COVID and for the other dataset it was the 2008/2009 crash. In that example the crash caused a sharp drop and a slow recovery that a single ARIMA model struggled to describe, which is exactly the problem COVID created here, so seeing it in the lecture first helped me recognise the issue in my own data.
 
-The biggest thing I learned from this project is how much a single structural break can damage a model that otherwise looks reasonable. When I kept the COVID months in, the airline model still passed the Ljung–Box test, and at first I took that as a sign the model was fine. Only when I looked at the residual plot and the forecasts did I see that a handful of residuals from 2020 had inflated the variance by more than 100 times, pushed the seasonal MA coefficient to -1 and made the forecasts and intervals useless. This taught me that a white noise test only checks whether the residuals are correlated, not whether they are well behaved, so the diagnostic step has to include actually looking at the residuals and not just reading off a p-value.
+The biggest thing I learned from this project is how much a single structural break can damage a model that otherwise looks reasonable. When I kept the COVID months in, the airline model still passed the Ljung–Box test, and at first I took that as a sign the model was fine. Only when I looked at the residual plot and the forecasts did I see that a handful of residuals from 2020 had inflated the variance by more than 100 times, pushed the seasonal MA coefficient to -1 and made the forecasts and intervals useless. This taught me that a white noise test only checks whether the residuals are correlated, not whether they are well behaved, so checking a model has to include actually looking at the residuals and not just reading off a p-value.
 
-The part I found most difficult was making decisions when the evidence disagreed. The unit root tests said no first difference was needed while the ACF and the time plot suggested one was, the Guerrero estimate pointed to a different transformation from the log I had chosen, and the automatic model had a better AICc than my hand-identified model but forecast worse on the test set. Earlier in the course I would have just followed whichever test or criterion the software gave me. Working through these cases made me understand that the modelling procedure is a set of judgement calls, and that the important thing is to explain why I made each choice and then check it afterwards, for example by confirming that the fitted MA coefficient was not close to -1 and that the seasonal MA term was clearly significant.
+The part I found most difficult was making decisions when the evidence disagreed. The unit root tests said no first difference was needed while the ACF and the time plot suggested one was, the Guerrero estimate pointed to a different transformation from the log I had chosen, and the automatic model had a better AICc than my hand-identified model but forecast worse on the test set. Earlier in the course I would have just followed whichever test or criterion the software gave me. Working through these cases made me understand that modelling is a set of judgement calls, and that the important thing is to explain why I made each choice and then check it afterwards, for example by confirming that the fitted MA coefficient was not close to -1 and that the seasonal MA term was clearly significant.
 
-I also reworked the project part way through so that it follows the seven-step ARIMA procedure from the lectures, with the COVID months treated as missing as the main analysis and keeping them only as a sensitivity check. This made the report much easier to follow, because every decision now sits under a clear step, and it made me see the procedure as a loop rather than a straight line: a model that fails the residual check sends you back to the identification step instead of straight to forecasting.
+I also reworked the project part way through so that the report follows the order in which the modelling decisions are actually made, with the COVID months treated as missing as the main analysis and keeping them only as a sensitivity check. This made the report much easier to follow, because every decision now has a clear place, and it made me see modelling as a loop rather than a straight line: a model that fails the residual check sends you back to identification instead of straight to forecasting.
 
 I used AI throughout this project to help me find the data, debug my code and review my write-up, and these uses are recorded in my AI use log. The review in particular picked up places where my text did not match my own output, such as describing an autocorrelation as negative when it was positive. Going back through each of these against my tables and plots was a useful lesson in checking that every claim in a report is actually supported by the results.
 
