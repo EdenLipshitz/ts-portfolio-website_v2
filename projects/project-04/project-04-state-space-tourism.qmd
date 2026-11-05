@@ -68,7 +68,7 @@ covid_rect <- function(log_y = FALSE) annotate("rect", xmin = as.Date(covid_star
 * Demand behaves like a random-walk level (monthly SD about 2%) plus a slowly evolving seasonal pattern. A fixed seasonal pattern is rejected (p = 0.002), and there is almost no month-specific noise.
 * When data resumed in April 2022, demand was 31% below what the filter expected. The filter re-learned the level within a few months without being told anything about COVID-19.
 * About 22.4 million stay unit nights (48% of expected demand) were lost between March 2020 and March 2022 (95% band 19.3 to 25.5 million).
-* The best state space model (damped trend + AR(1)) has a test RMSE of 89.6 thousand nights. That beats seasonal naive (132.6) and the Project 1 SARIMA (101.6), but not the Project 3 damped Holt–Winters model (72.5).
+* The best state space model (damped trend + AR(1)) has a test RMSE of 89.9 thousand nights. That beats seasonal naive (132.6) and the Project 1 SARIMA (101.6), but not the Project 3 damped Holt–Winters model (72.5).
 
 **What I would do differently:** Use the exact diffuse initialisation, add the Project 3 intervention terms and an Easter regressor to the state space model, and let the variances differ before and after COVID-19.
 
@@ -511,6 +511,7 @@ tibble(
 The two agree (@tbl-dlm-check). The level and seasonal variances match to two significant figures, and the maximised log likelihoods differ by `r sci(abs(my_full$loglik + dlm_fit$value + 0.5 * n_obs * log(2 * pi)))`. The irregular variance is close to zero in both, but its exact value differs, because the likelihood is flat near zero (@sec-profile).
 
 The three `dlmMLE()` starting values reach objective values of `r paste(fmt(dlm_values, 2), collapse = ", ")`, with convergence codes `r paste(sapply(dlm_fits, "[[", "convergence"), collapse = ", ")`. `r if (any(sapply(dlm_fits, "[[", "convergence") != 0)) "A non-zero code means the optimiser stopped abnormally, even where it ended at the same value. This is why the notes say to check different starting values: one run alone could not be trusted." else "All three converge to the same maximum, as the notes recommend checking."` At `dlm`'s estimates, from month 14 onwards:
+
 * My filtered states differ from `dlmFilter()` by at most `r sci(diff_filt)`.
 * My smoothed states differ from `dlmSmooth()` by at most `r sci(diff_smooth)`.
 * The smoothed level variances differ by at most `r sci(diff_svar)`.
@@ -991,6 +992,7 @@ Because the COVID months were not used to estimate anything, the smoothed signal
 The band uses the smoothed covariances between the 25 months. Adding up the monthly intervals instead would treat the months as perfectly correlated and give a half-width of `r fmt(naive_hw / 1000, 1)` million nights, against `r fmt(1.96 * lost_smooth$sd_total / 1000, 1)` million here. The months are strongly but not perfectly correlated: they share the same bridged level, but each has its own seasonal uncertainty.
 
 Filtering and smoothing give two different counterfactuals:
+
 * The filter's forecast from February 2020 asks "what did we expect before the pandemic?". It puts the loss at `r fmt(lost_filter$lost / 1000, 1)` million nights (95% band `r fmt(lost_filter$lo / 1000, 1)` to `r fmt(lost_filter$hi / 1000, 1)` million) and attributes all of the drop to COVID-19.
 * The smoother asks "given where demand ended up, what path is most likely?". Because demand after the gap was lower than before it, its counterfactual drifts down through the window, and the estimated loss is `r if (lost_smooth$lost < lost_filter$lost) "smaller" else "larger"`. It attributes part of the drop to a lasting change in demand that, under the model, would have happened anyway.
 
@@ -1066,6 +1068,7 @@ With `r n_aux` months tested, about `r fmt(e_aux, 0)` values beyond ±2 are expe
 # Simulation study: can the lost-demand estimate be trusted?
 
 The lost-demand figure relies on three things:
+
 * the smoother bridging a 25-month gap;
 * variances estimated from `r n_lik` forecast errors;
 * intervals that treat those variances as known.
@@ -1335,6 +1338,7 @@ The 95% intervals of the state space models cover `r if (min(sapply(names(ssm_fi
 ## The structural model and the Project 1 SARIMA {#sec-compare-arima}
 
 The SARIMA check (@tbl-sarima-check) gives a bonus. The airline model's likelihood uses the same `r ll_at_arima$n` months as the structural models' (both drop 13 diffuse months from the 89 observed), so the two are on the same footing:
+
 * The airline model has three parameters and a log likelihood of `r fmt(fit_airline$loglik, 2)` (AIC `r fmt(-2 * fit_airline$loglik + 6, 1)`).
 * The `r best_aic` model, with three variances, has `r fmt(sv(best_aic, "Log lik"), 2)` (AIC `r fmt(sv(best_aic, "AIC"), 1)`).
 
@@ -1362,6 +1366,7 @@ tibble(
 ```
 
 The state space approach is the only one in the portfolio that treats the COVID months as missing *and* says something about them (@tbl-portfolio):
+
 * The filter shows how a real-time analyst's view of demand would have evolved through the gap and the restart.
 * The smoother turns the gap into an estimate of lost demand, with an uncertainty band.
 * The auxiliary residuals test for breaks.
@@ -1415,7 +1420,7 @@ All results are produced by the code in this document from `tourist_data.xlsx` (
 # This chunk flags them if a re-render with new data changes the results.
 stated <- c(sarima_ll = "147.1098", p_seas = "0.002", restart = "31%", lost = "22.4",
             share = "48%", lo = "19.3", hi = "25.5", best_ssm = "Damped trend + AR(1)",
-            rmse_ssm = "89.6")
+            rmse_ssm = "89.9")
 computed <- c(sarima_ll = fmt(ll_at_arima$ll, 4), p_seas = pfmt(p_seas),
               restart = pct(1 - exp(act_restart - pred_restart)),
               lost = fmt(lost_smooth$lost / 1000, 1), share = pct(lost_smooth$share),
