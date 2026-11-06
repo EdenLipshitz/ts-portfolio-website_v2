@@ -20,9 +20,9 @@ website:
           - href: projects/project-02/project-02-garch-zar.qmd
             text: "Project 2: GARCH volatility"
           - href: projects/project-03/project-03-regression-ets-tourism.qmd
-            text: "Project 3: Modelling the COVID shock"
+            text: "Project 3: Regression and exponential smoothing"
           - href: projects/project-04/project-04-state-space-tourism.qmd
-            text: "Project 4: Kalman filter"
+            text: "Project 4: State space models"
       - text: Journal
         menu:
           - href: journal/index.qmd
@@ -49,7 +49,7 @@ website:
           - href: journal/entries/week-10.qmd
             text: "Week 10"
           - href: journal/entries/week-11-12.qmd
-            text: "Week 11 and 12"
+            text: "Week 11–12"
       - text: Tutorials
         menu:
           - href: tutorials/index.qmd
@@ -69,7 +69,7 @@ website:
           - href: tutorials/section-2/05-exponential-smoothing-exercise.qmd
             text: "Exponential Smoothing Exercise"
           - href: tutorials/section-2/06-state-space-kalman-filter.qmd
-            text: "State Space Model and Kalman Filter Exercise"
+            text: "State Space Models and Kalman Filter Exercise"
           - href: tutorials/section-2/07-hidden-markov-model-exercise.qmd
             text: "Hidden Markov Model Exercise"
     right:

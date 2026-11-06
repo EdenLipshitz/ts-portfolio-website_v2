@@ -13,4 +13,4 @@ listing:
   filter-ui: false
 ---
 
-A weekly record of my progress through the course. Each entry follows the same structure: the session or topic covered, what I did, what I learned, difficulties or open questions, and what to do next. Entries link to the relevant projects and tutorials. My use of AI tools is recorded separately in the [AI use log](../ai-use-log.qmd).
+A weekly record of my progress through the course. Each entry starts with the session or topic covered, then goes through what I worked on, the ideas I struggled with, how I worked through them, and what I understood by the end of the week. Each one ends with links to the related tutorials and projects. My use of AI tools is recorded separately in the [AI use log](../ai-use-log.qmd).

@@ -151,11 +151,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../projects/project-03/project-03-regression-ets-tourism.html">
- <span class="dropdown-text">Project 3: Modelling the COVID shock</span></a>
+ <span class="dropdown-text">Project 3: Regression and exponential smoothing</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../projects/project-04/project-04-state-space-tourism.html">
- <span class="dropdown-text">Project 4: Kalman filter</span></a>
+ <span class="dropdown-text">Project 4: State space models</span></a>
   </li>  
     </ul>
   </li>
@@ -211,7 +211,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../journal/entries/week-11-12.html">
- <span class="dropdown-text">Week 11 and 12</span></a>
+ <span class="dropdown-text">Week 11–12</span></a>
   </li>  
     </ul>
   </li>
@@ -250,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
         <li>
     <a class="dropdown-item" href="../tutorials/section-2/06-state-space-kalman-filter.html">
- <span class="dropdown-text">State Space Model and Kalman Filter Exercise</span></a>
+ <span class="dropdown-text">State Space Models and Kalman Filter Exercise</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="../tutorials/section-2/07-hidden-markov-model-exercise.html">
@@ -306,7 +306,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1 and 3 use the same series and the same test set, so their results can be compared directly. Select a project to open its executive summary and detailed analysis.</p>
+<p>Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1, 3 and 4 use the same series and the same test set, so their results can be compared directly, and each handles the COVID-19 months in a different way. Select a project to open its executive summary and detailed analysis.</p>
 <div class="grid">
 <div class="g-col-12 g-col-md-6">
 <div class="portfolio-card">
@@ -331,20 +331,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="g-col-12 g-col-md-6">
 <div class="portfolio-card">
 <p><span class="card-tag">Section 2</span></p>
-<section id="project-3-modelling-the-covid-19-shock" class="level3">
-<h3 class="anchored" data-anchor-id="project-3-modelling-the-covid-19-shock"><a href="../projects/project-03/project-03-regression-ets-tourism.html" class="stretched-link">Project 3: Modelling the COVID-19 shock</a></h3>
-<p>Regression with ARIMA errors and COVID intervention terms, and exponential smoothing, compared with Project 1 on the same test set.</p>
-<p><em>Model comparison, real-world data</em></p>
+<section id="project-3-regression-and-exponential-smoothing" class="level3">
+<h3 class="anchored" data-anchor-id="project-3-regression-and-exponential-smoothing"><a href="../projects/project-03/project-03-regression-ets-tourism.html" class="stretched-link">Project 3: Regression and exponential smoothing</a></h3>
+<p>Regression with ARIMA errors and COVID intervention terms, and exponential smoothing with my own Holt–Winters code, compared with Project 1 on the same test set.</p>
+<p><em>Implementation and model comparison, real-world data</em></p>
 </section>
 </div>
 </div>
 <div class="g-col-12 g-col-md-6">
 <div class="portfolio-card">
 <p><span class="card-tag">Section 2</span></p>
-<section id="project-4-building-a-kalman-filter" class="level3">
-<h3 class="anchored" data-anchor-id="project-4-building-a-kalman-filter"><a href="../projects/project-04/project-04-state-space-tourism.html" class="stretched-link">Project 4: Building a Kalman filter</a></h3>
-<p>My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series.</p>
-<p><em>Implementation and simulation study</em></p>
+<section id="project-4-state-space-models-and-my-own-kalman-filter" class="level3">
+<h3 class="anchored" data-anchor-id="project-4-state-space-models-and-my-own-kalman-filter"><a href="../projects/project-04/project-04-state-space-tourism.html" class="stretched-link">Project 4: State space models and my own Kalman filter</a></h3>
+<p>My own Kalman filter, smoother and likelihood, checked against <code>dlm</code> and the Project 1 SARIMA likelihood, and used to estimate how much accommodation demand was lost to COVID-19.</p>
+<p><em>Implementation, simulation study and model comparison, real-world data</em></p>
 </section>
 </div>
 </div>
@@ -811,7 +811,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">toc:</span><span class="co"> false</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1 and 3 use the same series and the same test set, so their results can be compared directly. Select a project to open its executive summary and detailed analysis.</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>Four substantial projects, two from each section of the course. Between them they cover model comparison, computational and statistical programming, and real-world data. Projects 1, 3 and 4 use the same series and the same test set, so their results can be compared directly, and each handles the COVID-19 months in a different way. Select a project to open its executive summary and detailed analysis.</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>::: {.grid}</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>::: {.g-col-12 .g-col-md-6}</span>
@@ -842,12 +842,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>::: {.portfolio-card}</span>
 <span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Section 2</span><span class="co">]</span>{.card-tag}</span>
 <span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">### [Project 3: Modelling the COVID-19 shock](project-03/project-03-regression-ets-tourism.qmd){.stretched-link}</span></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a><span class="fu">### [Project 3: Regression and exponential smoothing](project-03/project-03-regression-ets-tourism.qmd){.stretched-link}</span></span>
 <span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>Regression with ARIMA errors and COVID intervention terms, and exponential smoothing, compared with Project 1 on the same test set. </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>Regression with ARIMA errors and COVID intervention terms, and exponential smoothing with my own Holt–Winters code, compared with Project 1 on the same test set.</span>
 <span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>*Model comparison, real-world data*</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>*Implementation and model comparison, real-world data*</span>
 <span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
@@ -855,11 +855,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>::: {.portfolio-card}</span>
 <span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a><span class="co">[</span><span class="ot">Section 2</span><span class="co">]</span>{.card-tag}</span>
 <span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### [Project 4: Building a Kalman filter](project-04/project-04-state-space-tourism.qmd){.stretched-link}</span></span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a><span class="fu">### [Project 4: State space models and my own Kalman filter](project-04/project-04-state-space-tourism.qmd){.stretched-link}</span></span>
 <span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>My own Kalman filter, smoother and likelihood, validated against known results and applied to the accommodation series.</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>My own Kalman filter, smoother and likelihood, checked against <span class="in">`dlm`</span> and the Project 1 SARIMA likelihood, and used to estimate how much accommodation demand was lost to COVID-19.</span>
 <span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>*Implementation and simulation study*</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>*Implementation, simulation study and model comparison, real-world data*</span>
 <span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>:::</span>
 <span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a></span>

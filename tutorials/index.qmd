@@ -18,6 +18,8 @@ Introduction to time series: the nature of time series data, the forecasting pro
 ::: {.g-col-12 .g-col-md-6}
 ::: {.portfolio-card}
 ### [Time Series Analysis Part 1: Exercise 1](section-1/02-tsa-part1-exercise-1.qmd){.stretched-link}
+
+The forecasting process, matching series to their ACFs, moving averages, log transforms and regression on annual totals, and forecasting with ARIMA and AR models.
 :::
 :::
 ::: {.g-col-12 .g-col-md-6}
@@ -31,7 +33,7 @@ Stylised facts of returns, testing for ARCH effects, fitting and diagnosing ARCH
 ::: {.portfolio-card}
 ### [Spectral Analysis Lab](section-1/04-spectral-analysis-lab.qmd){.stretched-link}
 
-Frequency and period, the periodogram, reading and smoothing a periodogram, spectra of familiar models.
+Frequency and period, the periodogram, fitting a harmonic, and separating signal from noise in monthly temperatures.
 :::
 :::
 :::
@@ -48,7 +50,7 @@ Simple exponential smoothing, Holt and Holt-Winters methods, ETS models and thei
 :::
 ::: {.g-col-12 .g-col-md-6}
 ::: {.portfolio-card}
-### [State Space Model and Kalman Filter Exercise](section-2/06-state-space-kalman-filter.qmd){.stretched-link}
+### [State Space Models and Kalman Filter Exercise](section-2/06-state-space-kalman-filter.qmd){.stretched-link}
 
 Writing models in state-space form, coding the Kalman filter from first principles, estimating variances by maximum likelihood, forecasting with missing values, and regression as a Kalman filter.
 :::
