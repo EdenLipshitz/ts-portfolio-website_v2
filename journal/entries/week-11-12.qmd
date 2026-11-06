@@ -1,0 +1,46 @@
+---
+title: "Week 11–12"
+description: "*Hidden Markov Models*"
+---
+
+**Session or topic covered: Hidden Markov Models**
+
+Weeks 11 and 12 were both spent on hidden Markov models (HMMs), so I am treating them as one entry. I worked through the chapter and both sets of lecture slides, starting with independent mixture models and Markov chains and building up to the full HMM, its likelihood, the forward and backward probabilities, filtering, smoothing and prediction, and finally local and global decoding with the Viterbi algorithm. The parts I found hardest were why the likelihood can't simply be logged, keeping filtering, smoothing and prediction apart, and the difference between the forward algorithm and Viterbi.
+
+The basic idea is that the observations depend on a state we can never see. The call-centre example made this concrete for me. I can't see whether the service provider is busy or not, but I can see whether I wait a long or a short time on the phone, and my waiting time behaves differently depending on that hidden state. Because a busy provider tends to stay busy for a while, the hidden state has persistence, and that persistence is what creates the dependence in the waiting times. An HMM has two parts. The transition matrix $\Gamma$ gives the probability of moving to each state given the state I'm currently in, so each row sums to one. The emission probabilities $p(x_t \mid z_t)$ describe what the data looks like given the state. An initial distribution $\delta$ gives the probability of starting in each state. Seen this way, an HMM is a dependent mixture model: at each time point the observation comes from one of several distributions, but which one is chosen follows a Markov chain instead of being independent each time.
+
+The likelihood was the hardest part. Up to now, writing a likelihood meant multiplying densities and taking logs. Here the probability of the data has to account for every possible hidden path, and with $m$ states and $T$ observations there are $m^T$ of them. The matrix form
+
+$$
+L_T = \delta P(x_1)\,\Gamma P(x_2)\,\Gamma \cdots \Gamma P(x_T)\,\mathbf{1}'
+$$
+
+looked abstract until I read it from left to right. Start with a belief about which state I'm in, weight it by how well each state explains the first observation (that's what the diagonal matrix of emission probabilities $P(x_t)$ does), move the belief one step forward with $\Gamma$, and repeat for every observation. Summing at the end gives the likelihood. Each step involves a sum over states, so the likelihood isn't a product of individual probabilities and I can't just take logs. Multiplying many small probabilities also underflows very quickly. The scaling algorithm gets around both problems by normalising the belief vector at every step and adding up the logs of the normalising constants. What helped most was noticing that the normalised vector is just the filtered state probability, which linked straight back to the Kalman filter from week 10. Both run a cycle of predicting the state and then updating it with the new observation, and both give the likelihood as a by-product. The difference is that the HMM state is discrete, so the belief is a vector of probabilities rather than a mean and a variance.
+
+I kept mixing up filtering, smoothing and prediction because all three are written in terms of $\alpha$ and $\beta$. What sorted it out was asking what data each one conditions on. Filtering, $P(Z_t = i \mid x_{1:t}) = \alpha_t(i)/L_t$, asks which state I'm in now given everything up to now, so it only needs the forward probabilities. Smoothing, $P(Z_s = i \mid x_{1:T}) = \alpha_s(i)\beta_s(i)/L_T$, asks which state I was in at an earlier time with hindsight, so it also needs the backward probabilities, which give the probability of the rest of the data given the state at that time. Prediction, $P(Z_{t+h} \mid x_{1:t}) = \alpha_t \Gamma^h / L_t$, takes the current belief and pushes it $h$ steps forward with the transition matrix. All three give a vector of probabilities, one for each state, rather than a single number. Forecasting an observation then means weighting each state's distribution by the probability of being in that state, so the forecast distribution of an HMM is itself a mixture. I don't need to know the backward recursion off by heart, but I do need to be able to explain what $\beta$ means and how it combines with $\alpha$.
+
+The difference between the forward algorithm and Viterbi only clicked once I worked through the first two steps of the DNA example by hand. The model has two states, H (high GC content) and L (low GC content), each with a starting probability of 0.5. The probability of observing G is 0.3 under H and 0.2 under L. From H the chain stays in H with probability 0.5, and from L it moves to H with probability 0.4. After the first G, the forward probabilities are
+
+$$
+\alpha_1(H) = 0.5 \times 0.3 = 0.15, \qquad \alpha_1(L) = 0.5 \times 0.2 = 0.1.
+$$
+
+To be in H at the second G, the chain could have come from H or from L, and the forward algorithm adds both routes:
+
+$$
+\alpha_2(H) = 0.15 \times 0.5 \times 0.3 + 0.1 \times 0.4 \times 0.3 = 0.0225 + 0.012 = 0.0345.
+$$
+
+Viterbi looks at exactly the same two routes but keeps only the better one,
+
+$$
+\xi_2(H) = \max(0.0225,\ 0.012) = 0.0225,
+$$
+
+and remembers that the best route came from H. That one change, replacing a sum with a maximum, is the whole difference. The forward algorithm answers how probable the data is over all paths, while Viterbi finds the single most probable path, which is recovered at the end by backtracking from the last time point. This also answered a question I had while reading the notes, about why it is fine to maximise the joint probability of the path and the data instead of the probability of the path given the data. The probability of the data is the same for every path, so dividing by it doesn't change which path comes out on top. It also showed me why local decoding, which picks the most likely state at each time point separately, can give a different sequence from Viterbi: the best state at each moment on its own doesn't have to join up into the best overall path. Viterbi in practice works with sums of log probabilities instead of products, for the same underflow reason as the likelihood.
+
+Applying all of this to the earthquake counts showed me how much care the interpretation takes. Poisson HMMs with one, two and three states were fitted in `depmixS4`, and three states gave the lowest AIC. The Viterbi path splits the century into spells of low, medium and high activity, with means of roughly 13, 20 and 30 major earthquakes a year. The package reports the Poisson means on the log scale, so they have to be exponentiated first. The state labels are arbitrary, so state 1 isn't necessarily the lowest. The three-state model also needed starting values for the means to converge sensibly, which tells me the likelihood can have more than one peak. The lecturer mentioned preferring a Bayesian approach to the standard package, and I can see why, given how sensitive the fit is to starting values and how hard it is to justify the number of states.
+
+Overall, these two weeks showed me that an HMM is a state space model with a discrete state, and that its observations are a mixture whose weights change over time according to a Markov chain. That's what lets it capture regimes and persistence that a single distribution can't. I can now say which of the four questions an HMM answers (how probable the data is, which parameters fit best, which state the system was in, and what comes next) is handled by which tool. Next I want to finish the HMM exercise, code the forward algorithm and Viterbi myself and check them against the hand calculations, and think about how I would choose the number of states beyond just comparing AIC, because that seems to be the weakest point in most HMM analyses.
+
+**Links:** [Hidden Markov Model Exercise](../../tutorials/section-2/07-hidden-markov-model-exercise.qmd) · [State Space Models and Kalman Filter](../../tutorials/section-2/06-state-space-kalman-filter.qmd)

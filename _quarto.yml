@@ -48,10 +48,8 @@ website:
             text: "Week 9"
           - href: journal/entries/week-10.qmd
             text: "Week 10"
-          - href: journal/entries/week-11.qmd
-            text: "Week 11"
-          - href: journal/entries/week-12.qmd
-            text: "Week 12"
+          - href: journal/entries/week-11-12.qmd
+            text: "Week 11 and 12"
       - text: Tutorials
         menu:
           - href: tutorials/index.qmd

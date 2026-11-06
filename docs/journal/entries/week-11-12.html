@@ -6,9 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="[Session or topic covered this week]">
+<meta name="description" content="Hidden Markov Models">
 
-<title>Week 12 – Time Series Portfolio</title>
+<title>Week 11–12 – Time Series Portfolio</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -105,6 +105,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -211,12 +240,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Week 10</span></a>
   </li>  
         <li>
-    <a class="dropdown-item" href="../../journal/entries/week-11.html">
- <span class="dropdown-text">Week 11</span></a>
-  </li>  
-        <li>
-    <a class="dropdown-item" href="../../journal/entries/week-12.html">
- <span class="dropdown-text">Week 12</span></a>
+    <a class="dropdown-item" href="../../journal/entries/week-11-12.html">
+ <span class="dropdown-text">Week 11 and 12</span></a>
   </li>  
     </ul>
   </li>
@@ -288,29 +313,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#what-i-did" id="toc-what-i-did" class="nav-link active" data-scroll-target="#what-i-did">What I did</a></li>
-  <li><a href="#what-i-learned" id="toc-what-i-learned" class="nav-link" data-scroll-target="#what-i-learned">What I learned</a></li>
-  <li><a href="#difficulties-or-open-questions" id="toc-difficulties-or-open-questions" class="nav-link" data-scroll-target="#difficulties-or-open-questions">Difficulties or open questions</a></li>
-  <li><a href="#what-to-do-next" id="toc-what-to-do-next" class="nav-link" data-scroll-target="#what-to-do-next">What to do next</a></li>
-  </ul>
-</nav>
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
+        
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<div class="quarto-title-block"><div><h1 class="title">Week 12</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
+<div class="quarto-title-block"><div><h1 class="title">Week 11–12</h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
 </div>
 
 <div>
   <div class="description">
-    <em>[Session or topic covered this week]</em>
+    <em>Hidden Markov Models</em>
   </div>
 </div>
 
@@ -327,25 +343,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><strong>Date:</strong> <em>[date of entry]</em></p>
-<p><strong>Session or topic covered:</strong></p>
-<section id="what-i-did" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-did">What I did</h2>
-</section>
-<section id="what-i-learned" class="level2">
-<h2 class="anchored" data-anchor-id="what-i-learned">What I learned</h2>
-</section>
-<section id="difficulties-or-open-questions" class="level2">
-<h2 class="anchored" data-anchor-id="difficulties-or-open-questions">Difficulties or open questions</h2>
-</section>
-<section id="what-to-do-next" class="level2">
-<h2 class="anchored" data-anchor-id="what-to-do-next">What to do next</h2>
-<p><strong>Links:</strong> <em>[related tutorials and projects]</em></p>
+<p><strong>Session or topic covered: Hidden Markov Models</strong></p>
+<p>Weeks 11 and 12 were both spent on hidden Markov models (HMMs), so I am treating them as one entry. I worked through the chapter and both sets of lecture slides, starting with independent mixture models and Markov chains and building up to the full HMM, its likelihood, the forward and backward probabilities, filtering, smoothing and prediction, and finally local and global decoding with the Viterbi algorithm. The parts I found hardest were why the likelihood can’t simply be logged, keeping filtering, smoothing and prediction apart, and the difference between the forward algorithm and Viterbi.</p>
+<p>The basic idea is that the observations depend on a state we can never see. The call-centre example made this concrete for me. I can’t see whether the service provider is busy or not, but I can see whether I wait a long or a short time on the phone, and my waiting time behaves differently depending on that hidden state. Because a busy provider tends to stay busy for a while, the hidden state has persistence, and that persistence is what creates the dependence in the waiting times. An HMM has two parts. The transition matrix <span class="math inline">\(\Gamma\)</span> gives the probability of moving to each state given the state I’m currently in, so each row sums to one. The emission probabilities <span class="math inline">\(p(x_t \mid z_t)\)</span> describe what the data looks like given the state. An initial distribution <span class="math inline">\(\delta\)</span> gives the probability of starting in each state. Seen this way, an HMM is a dependent mixture model: at each time point the observation comes from one of several distributions, but which one is chosen follows a Markov chain instead of being independent each time.</p>
+<p>The likelihood was the hardest part. Up to now, writing a likelihood meant multiplying densities and taking logs. Here the probability of the data has to account for every possible hidden path, and with <span class="math inline">\(m\)</span> states and <span class="math inline">\(T\)</span> observations there are <span class="math inline">\(m^T\)</span> of them. The matrix form</p>
+<p><span class="math display">\[
+L_T = \delta P(x_1)\,\Gamma P(x_2)\,\Gamma \cdots \Gamma P(x_T)\,\mathbf{1}'
+\]</span></p>
+<p>looked abstract until I read it from left to right. Start with a belief about which state I’m in, weight it by how well each state explains the first observation (that’s what the diagonal matrix of emission probabilities <span class="math inline">\(P(x_t)\)</span> does), move the belief one step forward with <span class="math inline">\(\Gamma\)</span>, and repeat for every observation. Summing at the end gives the likelihood. Each step involves a sum over states, so the likelihood isn’t a product of individual probabilities and I can’t just take logs. Multiplying many small probabilities also underflows very quickly. The scaling algorithm gets around both problems by normalising the belief vector at every step and adding up the logs of the normalising constants. What helped most was noticing that the normalised vector is just the filtered state probability, which linked straight back to the Kalman filter from week 10. Both run a cycle of predicting the state and then updating it with the new observation, and both give the likelihood as a by-product. The difference is that the HMM state is discrete, so the belief is a vector of probabilities rather than a mean and a variance.</p>
+<p>I kept mixing up filtering, smoothing and prediction because all three are written in terms of <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>. What sorted it out was asking what data each one conditions on. Filtering, <span class="math inline">\(P(Z_t = i \mid x_{1:t}) = \alpha_t(i)/L_t\)</span>, asks which state I’m in now given everything up to now, so it only needs the forward probabilities. Smoothing, <span class="math inline">\(P(Z_s = i \mid x_{1:T}) = \alpha_s(i)\beta_s(i)/L_T\)</span>, asks which state I was in at an earlier time with hindsight, so it also needs the backward probabilities, which give the probability of the rest of the data given the state at that time. Prediction, <span class="math inline">\(P(Z_{t+h} \mid x_{1:t}) = \alpha_t \Gamma^h / L_t\)</span>, takes the current belief and pushes it <span class="math inline">\(h\)</span> steps forward with the transition matrix. All three give a vector of probabilities, one for each state, rather than a single number. Forecasting an observation then means weighting each state’s distribution by the probability of being in that state, so the forecast distribution of an HMM is itself a mixture. I don’t need to know the backward recursion off by heart, but I do need to be able to explain what <span class="math inline">\(\beta\)</span> means and how it combines with <span class="math inline">\(\alpha\)</span>.</p>
+<p>The difference between the forward algorithm and Viterbi only clicked once I worked through the first two steps of the DNA example by hand. The model has two states, H (high GC content) and L (low GC content), each with a starting probability of 0.5. The probability of observing G is 0.3 under H and 0.2 under L. From H the chain stays in H with probability 0.5, and from L it moves to H with probability 0.4. After the first G, the forward probabilities are</p>
+<p><span class="math display">\[
+\alpha_1(H) = 0.5 \times 0.3 = 0.15, \qquad \alpha_1(L) = 0.5 \times 0.2 = 0.1.
+\]</span></p>
+<p>To be in H at the second G, the chain could have come from H or from L, and the forward algorithm adds both routes:</p>
+<p><span class="math display">\[
+\alpha_2(H) = 0.15 \times 0.5 \times 0.3 + 0.1 \times 0.4 \times 0.3 = 0.0225 + 0.012 = 0.0345.
+\]</span></p>
+<p>Viterbi looks at exactly the same two routes but keeps only the better one,</p>
+<p><span class="math display">\[
+\xi_2(H) = \max(0.0225,\ 0.012) = 0.0225,
+\]</span></p>
+<p>and remembers that the best route came from H. That one change, replacing a sum with a maximum, is the whole difference. The forward algorithm answers how probable the data is over all paths, while Viterbi finds the single most probable path, which is recovered at the end by backtracking from the last time point. This also answered a question I had while reading the notes, about why it is fine to maximise the joint probability of the path and the data instead of the probability of the path given the data. The probability of the data is the same for every path, so dividing by it doesn’t change which path comes out on top. It also showed me why local decoding, which picks the most likely state at each time point separately, can give a different sequence from Viterbi: the best state at each moment on its own doesn’t have to join up into the best overall path. Viterbi in practice works with sums of log probabilities instead of products, for the same underflow reason as the likelihood.</p>
+<p>Applying all of this to the earthquake counts showed me how much care the interpretation takes. Poisson HMMs with one, two and three states were fitted in <code>depmixS4</code>, and three states gave the lowest AIC. The Viterbi path splits the century into spells of low, medium and high activity, with means of roughly 13, 20 and 30 major earthquakes a year. The package reports the Poisson means on the log scale, so they have to be exponentiated first. The state labels are arbitrary, so state 1 isn’t necessarily the lowest. The three-state model also needed starting values for the means to converge sensibly, which tells me the likelihood can have more than one peak. The lecturer mentioned preferring a Bayesian approach to the standard package, and I can see why, given how sensitive the fit is to starting values and how hard it is to justify the number of states.</p>
+<p>Overall, these two weeks showed me that an HMM is a state space model with a discrete state, and that its observations are a mixture whose weights change over time according to a Markov chain. That’s what lets it capture regimes and persistence that a single distribution can’t. I can now say which of the four questions an HMM answers (how probable the data is, which parameters fit best, which state the system was in, and what comes next) is handled by which tool. Next I want to finish the HMM exercise, code the forward algorithm and Viterbi myself and check them against the hand calculations, and think about how I would choose the number of states beyond just comparing AIC, because that seems to be the weakest point in most HMM analyses.</p>
+<p><strong>Links:</strong> <a href="../../tutorials/section-2/07-hidden-markov-model-exercise.html">Hidden Markov Model Exercise</a> · <a href="../../tutorials/section-2/06-state-space-kalman-filter.html">State Space Models and Kalman Filter</a></p>
 
 
 <!-- -->
 
-</section>
 
 <a onclick="window.scrollTo(0, 0); return false;" role="button" id="quarto-back-to-top"><i class="bi bi-arrow-up"></i> Back to top</a></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
@@ -800,23 +826,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   });
   </script><div class="modal fade" id="quarto-embedded-source-code-modal" tabindex="-1" aria-labelledby="quarto-embedded-source-code-modal-label" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content"><div class="modal-header"><h5 class="modal-title" id="quarto-embedded-source-code-modal-label">Source Code</h5><button class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="">
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1" data-shortcodes="false"><pre class="sourceCode markdown code-with-copy"><code class="sourceCode markdown"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 12"</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*[Session or topic covered this week]*"</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="an">title:</span><span class="co"> "Week 11–12"</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="an">description:</span><span class="co"> "*Hidden Markov Models*"</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="co">---</span></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Date:** *[date of entry]*</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>**Session or topic covered: Hidden Markov Models**</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>**Session or topic covered:**</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>Weeks 11 and 12 were both spent on hidden Markov models (HMMs), so I am treating them as one entry. I worked through the chapter and both sets of lecture slides, starting with independent mixture models and Markov chains and building up to the full HMM, its likelihood, the forward and backward probabilities, filtering, smoothing and prediction, and finally local and global decoding with the Viterbi algorithm. The parts I found hardest were why the likelihood can't simply be logged, keeping filtering, smoothing and prediction apart, and the difference between the forward algorithm and Viterbi.</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I did</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>The basic idea is that the observations depend on a state we can never see. The call-centre example made this concrete for me. I can't see whether the service provider is busy or not, but I can see whether I wait a long or a short time on the phone, and my waiting time behaves differently depending on that hidden state. Because a busy provider tends to stay busy for a while, the hidden state has persistence, and that persistence is what creates the dependence in the waiting times. An HMM has two parts. The transition matrix $\Gamma$ gives the probability of moving to each state given the state I'm currently in, so each row sums to one. The emission probabilities $p(x_t \mid z_t)$ describe what the data looks like given the state. An initial distribution $\delta$ gives the probability of starting in each state. Seen this way, an HMM is a dependent mixture model: at each time point the observation comes from one of several distributions, but which one is chosen follows a Markov chain instead of being independent each time.</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">## What I learned</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>The likelihood was the hardest part. Up to now, writing a likelihood meant multiplying densities and taking logs. Here the probability of the data has to account for every possible hidden path, and with $m$ states and $T$ observations there are $m^T$ of them. The matrix form</span>
 <span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">## Difficulties or open questions</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="fu">## What to do next</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>L_T = \delta P(x_1)\,\Gamma P(x_2)\,\Gamma \cdots \Gamma P(x_T)\,\mathbf{1}'</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>$$</span>
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>**Links:** *[related tutorials and projects]*</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>looked abstract until I read it from left to right. Start with a belief about which state I'm in, weight it by how well each state explains the first observation (that's what the diagonal matrix of emission probabilities $P(x_t)$ does), move the belief one step forward with $\Gamma$, and repeat for every observation. Summing at the end gives the likelihood. Each step involves a sum over states, so the likelihood isn't a product of individual probabilities and I can't just take logs. Multiplying many small probabilities also underflows very quickly. The scaling algorithm gets around both problems by normalising the belief vector at every step and adding up the logs of the normalising constants. What helped most was noticing that the normalised vector is just the filtered state probability, which linked straight back to the Kalman filter from week 10. Both run a cycle of predicting the state and then updating it with the new observation, and both give the likelihood as a by-product. The difference is that the HMM state is discrete, so the belief is a vector of probabilities rather than a mean and a variance.</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>I kept mixing up filtering, smoothing and prediction because all three are written in terms of $\alpha$ and $\beta$. What sorted it out was asking what data each one conditions on. Filtering, $P(Z_t = i \mid x_{1:t}) = \alpha_t(i)/L_t$, asks which state I'm in now given everything up to now, so it only needs the forward probabilities. Smoothing, $P(Z_s = i \mid x_{1:T}) = \alpha_s(i)\beta_s(i)/L_T$, asks which state I was in at an earlier time with hindsight, so it also needs the backward probabilities, which give the probability of the rest of the data given the state at that time. Prediction, $P(Z_{t+h} \mid x_{1:t}) = \alpha_t \Gamma^h / L_t$, takes the current belief and pushes it $h$ steps forward with the transition matrix. All three give a vector of probabilities, one for each state, rather than a single number. Forecasting an observation then means weighting each state's distribution by the probability of being in that state, so the forecast distribution of an HMM is itself a mixture. I don't need to know the backward recursion off by heart, but I do need to be able to explain what $\beta$ means and how it combines with $\alpha$.</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>The difference between the forward algorithm and Viterbi only clicked once I worked through the first two steps of the DNA example by hand. The model has two states, H (high GC content) and L (low GC content), each with a starting probability of 0.5. The probability of observing G is 0.3 under H and 0.2 under L. From H the chain stays in H with probability 0.5, and from L it moves to H with probability 0.4. After the first G, the forward probabilities are</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>\alpha_1(H) = 0.5 \times 0.3 = 0.15, \qquad \alpha_1(L) = 0.5 \times 0.2 = 0.1.</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>To be in H at the second G, the chain could have come from H or from L, and the forward algorithm adds both routes:</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>\alpha_2(H) = 0.15 \times 0.5 \times 0.3 + 0.1 \times 0.4 \times 0.3 = 0.0225 + 0.012 = 0.0345.</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>Viterbi looks at exactly the same two routes but keeps only the better one,</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>\xi_2(H) = \max(0.0225,\ 0.012) = 0.0225,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>$$</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>and remembers that the best route came from H. That one change, replacing a sum with a maximum, is the whole difference. The forward algorithm answers how probable the data is over all paths, while Viterbi finds the single most probable path, which is recovered at the end by backtracking from the last time point. This also answered a question I had while reading the notes, about why it is fine to maximise the joint probability of the path and the data instead of the probability of the path given the data. The probability of the data is the same for every path, so dividing by it doesn't change which path comes out on top. It also showed me why local decoding, which picks the most likely state at each time point separately, can give a different sequence from Viterbi: the best state at each moment on its own doesn't have to join up into the best overall path. Viterbi in practice works with sums of log probabilities instead of products, for the same underflow reason as the likelihood.</span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>Applying all of this to the earthquake counts showed me how much care the interpretation takes. Poisson HMMs with one, two and three states were fitted in <span class="in">`depmixS4`</span>, and three states gave the lowest AIC. The Viterbi path splits the century into spells of low, medium and high activity, with means of roughly 13, 20 and 30 major earthquakes a year. The package reports the Poisson means on the log scale, so they have to be exponentiated first. The state labels are arbitrary, so state 1 isn't necessarily the lowest. The three-state model also needed starting values for the means to converge sensibly, which tells me the likelihood can have more than one peak. The lecturer mentioned preferring a Bayesian approach to the standard package, and I can see why, given how sensitive the fit is to starting values and how hard it is to justify the number of states.</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a>Overall, these two weeks showed me that an HMM is a state space model with a discrete state, and that its observations are a mixture whose weights change over time according to a Markov chain. That's what lets it capture regimes and persistence that a single distribution can't. I can now say which of the four questions an HMM answers (how probable the data is, which parameters fit best, which state the system was in, and what comes next) is handled by which tool. Next I want to finish the HMM exercise, code the forward algorithm and Viterbi myself and check them against the hand calculations, and think about how I would choose the number of states beyond just comparing AIC, because that seems to be the weakest point in most HMM analyses.</span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a>**Links:** <span class="co">[</span><span class="ot">Hidden Markov Model Exercise</span><span class="co">](../../tutorials/section-2/07-hidden-markov-model-exercise.qmd)</span> · <span class="co">[</span><span class="ot">State Space Models and Kalman Filter</span><span class="co">](../../tutorials/section-2/06-state-space-kalman-filter.qmd)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->
 <footer class="footer">
