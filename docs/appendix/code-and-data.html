@@ -331,7 +331,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="odd">
 <td style="text-align: left;"><code>data/tourist_data.xlsx</code></td>
 <td style="text-align: left;">Statistics South Africa, <em>Tourist Accommodation</em> (P6410), <a href="https://www.statssa.gov.za/?page_id=1854&amp;PPN=P6410" class="uri">https://www.statssa.gov.za/?page_id=1854&amp;PPN=P6410</a></td>
-<td style="text-align: left;">Projects 1 and 3</td>
+<td style="text-align: left;">Projects 1, 3 and 4</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;"><code>data/usdzar_fred.csv</code></td>
@@ -339,13 +339,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">Project 2</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;"><code>data/usdzar_monthly_fred.csv</code></td>
-<td style="text-align: left;">FRED series EXSFUS (monthly average rand per US dollar), <a href="https://fred.stlouisfed.org/series/EXSFUS" class="uri">https://fred.stlouisfed.org/series/EXSFUS</a></td>
-<td style="text-align: left;">Project 3</td>
+<td style="text-align: left;"><code>data/TSA_Part1_DataSets.xlsx</code></td>
+<td style="text-align: left;">Course data sets for Time Series Analysis Part 1 (electric knives, souvenir sales, strikes)</td>
+<td style="text-align: left;">Tutorial: Part 1 Exercise 1</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><code>data/sales_data.csv</code></td>
+<td style="text-align: left;">Course data set: daily sales for several stores</td>
+<td style="text-align: left;">Tutorial: TS Intro</td>
 </tr>
 </tbody>
 </table>
-<p>The two FRED files are downloaded automatically the first time the relevant project is rendered and saved in the <code>data/</code> folder. All data are public, aggregated statistics with no personal information, so POPIA does not apply.</p>
+<p>The remaining tutorials use data sets that come with R or its packages: <code>nottem</code> (spectral analysis lab), <code>Tbrate</code> and <code>SP500</code> from <code>Ecdat</code> (ARCH and GARCH lab), <code>marathon</code>, <code>oil</code> and <code>books</code> from <code>fpp2</code> (exponential smoothing exercise) and <code>usconsumption</code> from <code>fpp</code> (state space exercise). The state space and hidden Markov model exercises also simulate their own data.</p>
+<p>The FRED file for Project 2 is downloaded automatically the first time that project is rendered and saved in the <code>data/</code> folder, so later renders use the same copy. All data are public, aggregated statistics with no personal information, so POPIA does not apply.</p>
 </section>
 <section id="reproducing-the-portfolio" class="level2">
 <h2 class="anchored" data-anchor-id="reproducing-the-portfolio">Reproducing the portfolio</h2>
@@ -361,13 +367,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"fpp3"</span>, <span class="st">"readxl"</span>, <span class="st">"knitr"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"patchwork"</span>, <span class="st">"rugarch"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># projects</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fpp3"</span>, <span class="st">"readxl"</span>, <span class="st">"knitr"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"patchwork"</span>, <span class="st">"rugarch"</span>, <span class="st">"dlm"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tutorials</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyverse"</span>, <span class="st">"tsibble"</span>, <span class="st">"feasts"</span>, <span class="st">"timetk"</span>, <span class="st">"here"</span>, <span class="st">"forecast"</span>, <span class="st">"fpp"</span>, <span class="st">"fpp2"</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Ecdat"</span>, <span class="st">"tseries"</span>, <span class="st">"fGarch"</span>, <span class="st">"SimDesign"</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 </div>
 </section>
 <section id="code" class="level2">
 <h2 class="anchored" data-anchor-id="code">Code</h2>
-<p>The full code for each project is in the project pages (use the <strong>Code</strong> button at the top of each page to show or download it):</p>
+<p>The full code for each project and tutorial is in its page (use the <strong>Code</strong> button at the top of each page to show or download it):</p>
 <ul>
 <li><a href="../projects/project-01/project-01-sarima-tourism.html">Project 1</a></li>
 <li><a href="../projects/project-02/project-02-garch-zar.html">Project 2</a></li>
@@ -840,35 +852,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> File <span class="pp">|</span> Source <span class="pp">|</span> Used in <span class="pp">|</span></span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span>:--<span class="pp">|</span>:--<span class="pp">|</span>:--<span class="pp">|</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/tourist_data.xlsx`</span> <span class="pp">|</span> Statistics South Africa, *Tourist Accommodation* (P6410), <span class="ot">&lt;https://www.statssa.gov.za/?page_id=1854&amp;PPN=P6410&gt;</span> <span class="pp">|</span> Projects 1 and 3 <span class="pp">|</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/tourist_data.xlsx`</span> <span class="pp">|</span> Statistics South Africa, *Tourist Accommodation* (P6410), <span class="ot">&lt;https://www.statssa.gov.za/?page_id=1854&amp;PPN=P6410&gt;</span> <span class="pp">|</span> Projects 1, 3 and 4 <span class="pp">|</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/usdzar_fred.csv`</span> <span class="pp">|</span> FRED series DEXSFUS (daily rand per US dollar), <span class="ot">&lt;https://fred.stlouisfed.org/series/DEXSFUS&gt;</span> <span class="pp">|</span> Project 2 <span class="pp">|</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/usdzar_monthly_fred.csv`</span> <span class="pp">|</span> FRED series EXSFUS (monthly average rand per US dollar), <span class="ot">&lt;https://fred.stlouisfed.org/series/EXSFUS&gt;</span> <span class="pp">|</span> Project 3 <span class="pp">|</span></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>The two FRED files are downloaded automatically the first time the relevant project is rendered and saved in the <span class="in">`data/`</span> folder. All data are public, aggregated statistics with no personal information, so POPIA does not apply.</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducing the portfolio</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Install R, Quarto (version 1.4 or later) and the packages listed below.</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Open the portfolio folder (or <span class="in">`portfolio.Rproj`</span> in RStudio).</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Run <span class="in">`quarto render`</span> in the terminal, or use **Build &gt; Render Website** in RStudio.</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>Computational results are stored in the <span class="in">`_freeze`</span> folder, so pages are only re-run when their source changes.</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a><span class="fu">## R packages</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(<span class="st">"fpp3"</span>, <span class="st">"readxl"</span>, <span class="st">"knitr"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"patchwork"</span>, <span class="st">"rugarch"</span>))</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">## Code</span></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>The full code for each project is in the project pages (use the **Code** button at the top of each page to show or download it):</span>
-<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 1</span><span class="co">](../projects/project-01/project-01-sarima-tourism.qmd)</span></span>
-<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 2</span><span class="co">](../projects/project-02/project-02-garch-zar.qmd)</span></span>
-<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 3</span><span class="co">](../projects/project-03/project-03-regression-ets-tourism.qmd)</span></span>
-<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 4</span><span class="co">](../projects/project-04/project-04-state-space-tourism.qmd)</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/TSA_Part1_DataSets.xlsx`</span> <span class="pp">|</span> Course data sets for Time Series Analysis Part 1 (electric knives, souvenir sales, strikes) <span class="pp">|</span> Tutorial: Part 1 Exercise 1 <span class="pp">|</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="pp">|</span> <span class="in">`data/sales_data.csv`</span> <span class="pp">|</span> Course data set: daily sales for several stores <span class="pp">|</span> Tutorial: TS Intro <span class="pp">|</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>The remaining tutorials use data sets that come with R or its packages: <span class="in">`nottem`</span> (spectral analysis lab), <span class="in">`Tbrate`</span> and <span class="in">`SP500`</span> from <span class="in">`Ecdat`</span> (ARCH and GARCH lab), <span class="in">`marathon`</span>, <span class="in">`oil`</span> and <span class="in">`books`</span> from <span class="in">`fpp2`</span> (exponential smoothing exercise) and <span class="in">`usconsumption`</span> from <span class="in">`fpp`</span> (state space exercise). The state space and hidden Markov model exercises also simulate their own data.</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>The FRED file for Project 2 is downloaded automatically the first time that project is rendered and saved in the <span class="in">`data/`</span> folder, so later renders use the same copy. All data are public, aggregated statistics with no personal information, so POPIA does not apply.</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="fu">## Reproducing the portfolio</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="ss">1. </span>Install R, Quarto (version 1.4 or later) and the packages listed below.</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="ss">2. </span>Open the portfolio folder (or <span class="in">`portfolio.Rproj`</span> in RStudio).</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="ss">3. </span>Run <span class="in">`quarto render`</span> in the terminal, or use **Build &gt; Render Website** in RStudio.</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>Computational results are stored in the <span class="in">`_freeze`</span> folder, so pages are only re-run when their source changes.</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a><span class="fu">## R packages</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="in">```{r}</span></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co">#| eval: false</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="fu">c</span>(</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>  <span class="co"># projects</span></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>  <span class="st">"fpp3"</span>, <span class="st">"readxl"</span>, <span class="st">"knitr"</span>, <span class="st">"rmarkdown"</span>, <span class="st">"patchwork"</span>, <span class="st">"rugarch"</span>, <span class="st">"dlm"</span>,</span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tutorials</span></span>
+<span id="cb2-36"><a href="#cb2-36" aria-hidden="true" tabindex="-1"></a>  <span class="st">"tidyverse"</span>, <span class="st">"tsibble"</span>, <span class="st">"feasts"</span>, <span class="st">"timetk"</span>, <span class="st">"here"</span>, <span class="st">"forecast"</span>, <span class="st">"fpp"</span>, <span class="st">"fpp2"</span>,</span>
+<span id="cb2-37"><a href="#cb2-37" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Ecdat"</span>, <span class="st">"tseries"</span>, <span class="st">"fGarch"</span>, <span class="st">"SimDesign"</span></span>
+<span id="cb2-38"><a href="#cb2-38" aria-hidden="true" tabindex="-1"></a>))</span>
+<span id="cb2-39"><a href="#cb2-39" aria-hidden="true" tabindex="-1"></a><span class="in">```</span></span>
+<span id="cb2-40"><a href="#cb2-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-41"><a href="#cb2-41" aria-hidden="true" tabindex="-1"></a><span class="fu">## Code</span></span>
+<span id="cb2-42"><a href="#cb2-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-43"><a href="#cb2-43" aria-hidden="true" tabindex="-1"></a>The full code for each project and tutorial is in its page (use the **Code** button at the top of each page to show or download it):</span>
+<span id="cb2-44"><a href="#cb2-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-45"><a href="#cb2-45" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 1</span><span class="co">](../projects/project-01/project-01-sarima-tourism.qmd)</span></span>
+<span id="cb2-46"><a href="#cb2-46" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 2</span><span class="co">](../projects/project-02/project-02-garch-zar.qmd)</span></span>
+<span id="cb2-47"><a href="#cb2-47" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 3</span><span class="co">](../projects/project-03/project-03-regression-ets-tourism.qmd)</span></span>
+<span id="cb2-48"><a href="#cb2-48" aria-hidden="true" tabindex="-1"></a><span class="ss">* </span><span class="co">[</span><span class="ot">Project 4</span><span class="co">](../projects/project-04/project-04-state-space-tourism.qmd)</span></span>
 </code></pre></div><button title="Copy to Clipboard" class="code-copy-button" data-in-quarto-modal=""><i class="bi"></i></button></div>
 </div></div></div></div></div>
 </div> <!-- /content -->

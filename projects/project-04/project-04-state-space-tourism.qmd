@@ -60,7 +60,7 @@ covid_rect <- function(log_y = FALSE) annotate("rect", xmin = as.Date(covid_star
 
 **Data:** Statistics South Africa, *Tourist Accommodation* release P6410, series B64100 (stay unit nights sold, thousands), monthly, January 2015 to June 2026 (@sec-data-source).
 
-**Methods:** My own Kalman filter, likelihood, Kalman smoother and forecasts, written in the notation and structure of the course notes and checked against `dlm` (the package used in the notes) and against the exact log likelihood of the Project 1 SARIMA. Beyond the notes, I derive the smoothed covariances between months (for an honest band on total lost demand) and auxiliary residuals that test for breaks, and I use a boundary-corrected likelihood ratio test for the seasonal variance. Four structural models are estimated by maximum likelihood and compared by AIC, likelihood ratio tests, profile likelihoods and residual diagnostics. A simulation study checks the lost-demand estimate, and the forecasts are evaluated on the Projects 1 and 3 test set and by rolling-origin cross-validation.
+**Methods:** My own Kalman filter, likelihood, Kalman smoother and forecasts, written in the notation and structure of the course notes and checked against `dlm` (the package used in the notes) and against the exact log likelihood of the Project 1 SARIMA. Beyond the notes, I derive the smoothed covariances between months (for a proper uncertainty band on total lost demand) and auxiliary residuals that test for breaks, and I use a boundary-corrected likelihood ratio test for the seasonal variance. Four structural models are estimated by maximum likelihood and compared by AIC, likelihood ratio tests, profile likelihoods and residual diagnostics. A simulation study checks the lost-demand estimate, and the forecasts are evaluated on the Projects 1 and 3 test set and by rolling-origin cross-validation.
 
 **Key findings:**
 
@@ -1379,6 +1379,18 @@ This project also showed that Project 1's SARIMA is itself evaluated by a Kalman
 I would implement the exact diffuse Kalman filter instead of a large $C_0$. I would also add the Project 3 intervention terms and an Easter regressor as regression effects inside the state space model. That way the COVID months could be used rather than skipped, and the moving holiday would no longer be read as a shock, which would also show how much of the seasonal variance is really Easter. I would let the variances differ before and after COVID.
 
 Finally, the notes end with a Bayesian state space model in Stan. Fitting this model that way, with priors that keep the irregular variance off the boundary, would carry the parameter uncertainty into the lost-demand estimate.
+
+## Reflection and model development
+
+This project started life as part of Project 3. My first version of Project 3 mixed exponential smoothing, an intervention regression and a structural model fitted with a Kalman filter, and it was trying to do too much. Moving the state space material into its own project gave it room, and it meant I could do what I said I wanted to do at the end of my week 10 journal entry: write the filter myself instead of only calling `dlm`. 
+
+The hardest part was getting from the matrix equations in the notes to code that worked on a monthly series with 25 missing months. The equations look short on paper, but the seasonal component needs eleven states, and the diffuse start took several attempts before the likelihood behaved. For a while my results looked reasonable but I had no way of trusting them, which is why I put so much weight on the two checks. Agreeing with `dlm` told me my filter and smoother were doing the same thing as the package. Reproducing the Project 1 SARIMA log likelihood exactly was the point where I actually believed my code, because it tied this project back to a number I had already got a completely different way.
+
+The result I found most satisfying was the steady-state gain. In Project 3 I had estimated the Holt–Winters smoothing weights, and seeing the filter settle on almost the same weights for the level and the seasonal pattern made the link between exponential smoothing and the Kalman filter concrete for me, instead of something I had only read in the notes. The restart in April 2022 was the other moment where the filter made sense in practice. Without being told anything about COVID, it saw that demand was `r pct(1 - exp(act_restart - pred_restart))` below what it expected and re-learned the level within a few months.
+
+I also learned to be careful about what the model can and cannot tell me. The estimate of demand lost depends on what the model assumes would have happened during the gap, and comparing the smoother with the February 2020 forecast showed me how much that assumption matters. The profile likelihoods, and the irregular variance sitting at zero, showed me that a maximum likelihood estimate on its own says nothing about how well the data actually pin a parameter down.
+
+I used AI to help write the filter, likelihood, smoother and forecasting functions in the notation of the notes, to debug them, and to derive the covariances for the band on total lost demand, which went beyond the notes. These uses are recorded in my AI use log. Going forward, I would most like to add the Project 3 intervention terms to this model so that the COVID months can be used instead of skipped, which would bring the two Section 2 projects together in one model.
 
 # References {.unnumbered}
 

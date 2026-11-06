@@ -47,7 +47,7 @@ fmt  <- function(x, d = 1) formatC(x, format = "f", digits = d, big.mark = ",")
 pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%")
 ```
 
-# Project summary {.unnumbered}
+# Executive summary {.unnumbered}
 
 ::: {.callout-note appearance="simple"}
 ## Executive summary
@@ -64,7 +64,7 @@ pct  <- function(x, d = 0) paste0(formatC(100 * x, format = "f", digits = d), "%
 
 **Methods:** In the main analysis the COVID months (March 2020 to March 2022) are treated as missing, so all models are estimated from the pre- and post-COVID data only; fitting the same models with the COVID months kept is reported as a sensitivity check. The transformation and the orders of differencing are chosen from the pre-COVID data using time plots, ACF/PACF plots and unit root tests, with the Guerrero estimate of the Box–Cox parameter reported as a check. A candidate SARIMA model is identified by hand from the ACF and PACF and compared with the model chosen automatically by `ARIMA()`. Each candidate is checked with residual plots, Ljung–Box tests and, for the final model, its MA roots. The candidates are then compared with four benchmarks (mean, naive, seasonal naive, drift) and simpler ARMA and ARIMA models on a 24-month test set (RMSE, MAE, MAPE, MASE, interval coverage) and by expanding-window rolling-origin cross-validation over horizons of 1 to 12 months.
 
-**Target variable:** This analysis focuses on stay unit nights sold. This was chosen over income level and occupancy rate because it appears to be the most consistent. Occupancy rate can change when room supply changes and income can be disrupted by inflation or other general increases. Unit nights sold tells a very clear demand picture with minimal factors affecting the quality of the variable over the years.
+**Target variable:** I focus on stay unit nights sold rather than income or the occupancy rate because it is the most consistent measure over time. The occupancy rate changes when the number of rooms changes, and income is affected by inflation and price increases. Unit nights sold gives a clear picture of demand with few other factors affecting it over the years.
 
 **Key findings:** See @sec-findings. In short: with the COVID months left in the data, the seasonal ARIMA models are far worse than the seasonal naive benchmark, because the collapse in April 2020 dominates the estimated variance and distorts the parameters. Treating the COVID window as missing gives a stable SARIMA(0,1,1)(0,1,1)~12~ "airline" model with well behaved residuals, and that model gives the most accurate forecasts on both the test set and in cross-validation.
 
@@ -815,7 +815,7 @@ The model projects the familiar seasonal shape forward on a level close to that 
 
 1. **Seasonality is the dominant and most stable feature of the series.** The seasonal shape barely changed even through the COVID years, which is why the seasonal naive method is hard to beat. The non-seasonal ARMA and ARIMA models cannot represent the seasonal pattern and fail the residual diagnostics; the ARMA happened to score reasonably on the test set, but not for reasons that would carry over to other periods.
 2. **How the break is handled matters more than which ARIMA model is chosen.** With the COVID months kept (Design A), the seasonal ARIMA models were worse than the seasonal naive benchmark on the test set and much worse in cross-validation. The cause is a residual variance inflated by about `r fmt(get_sig2(A, "SARIMA_airline") / get_sig2(B, "SARIMA_airline"), 0)` times, a seasonal MA coefficient pushed to the invertibility boundary (`r fmt(sma_A, 3)`), and point forecasts pushed upwards by the bias adjustment.
-3. **With the COVID window treated as missing (Design B), the hand identified airline model was the only model to pass the residual checks and beat the benchmarks**: it passed the diagnostics and performed best, with a test RMSE of `r fmt(res_get(B, "SARIMA_airline", "RMSE"))` thousand nights (MAPE `r fmt(res_get(B, "SARIMA_airline", "MAPE"), 2)`%), white noise residuals and slightly conservative prediction intervals (the 80% intervals covered 92% of test months and the 95% intervals all of them). It also had the lowest cross-validated error at every horizon from 1 to 12 months.
+3. **With the COVID window treated as missing (Design B), the hand-identified airline model was the only model to pass the residual checks and beat the benchmarks.** It had a test RMSE of `r fmt(res_get(B, "SARIMA_airline", "RMSE"))` thousand nights (MAPE `r fmt(res_get(B, "SARIMA_airline", "MAPE"), 2)`%), white noise residuals and slightly conservative prediction intervals (the 80% intervals covered 92% of test months and the 95% intervals all of them). It also had the lowest cross-validated error at every horizon from 1 to 12 months.
 4. **A lower AICc did not guarantee better forecasts.** The automatically selected seasonal model had a `r better_or_worse(get_aicc(B, "SARIMA_auto"), get_aicc(B, "SARIMA_airline"))` AICc than the hand identified model but `r better_or_worse(res_get(B, "SARIMA_auto", "RMSE"), res_get(B, "SARIMA_airline", "RMSE"))` test RMSE, so the simpler model identified from the ACF and PACF was preferred.
 
 ## Issues and limitations
@@ -833,7 +833,7 @@ The model projects the familiar seasonal shape forward on a level close to that 
 
 I would model the COVID shock directly with intervention variables in a regression with ARIMA errors, so that the 25 months are used rather than discarded. Project 3 takes up this idea on the same series and the same test set, which allows a direct comparison with the SARIMA results from this project. I would also compare a sliding window with the expanding window in the cross-validation, since a sliding window is the natural choice when structural breaks are plausible.
 
-## Project reflections and development
+## Reflection and model development
 
 When I first started thinking about the best way to approach this problem I was very intrigued by the idea of using financial data. I immediately found some data online and had AI do a mini analysis of the data with SARIMA, ARIMA and the other models present in this project. I quickly found that the analysis would not yield the kind of results I wanted because of the volatility and variation within financial stock data. I therefore pivoted and went back and forth on a couple of different econometric datasets. I had the idea to use the Airbnb dataset that I had worked with earlier in the year during a data analytics course but unfortunately the data was not able to be processed in a time series way. Therefore, using the assistance of AI I was able to track down and pull data from the Stats SA website about tourist accommodation, a dataset that would fit and perform much more consistently with AR, MA, ARIMA and SARIMA models. 
 

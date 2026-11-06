@@ -103,7 +103,7 @@ More recently, the rand swung from its weakest level in the sample in April 2025
 
 ## Reading the data and computing returns
 
-The code downloads the series the first time the document is rendered and saves it as `usdzar_fred.csv`. If the download fails (for example without an internet connection), download the CSV manually from the FRED page above and save it in the same folder as this file under that name.
+The code downloads the series the first time the document is rendered and saves it as `usdzar_fred.csv`. If the download fails (for example without an internet connection), download the CSV manually from the FRED page above and save it in the `data/` folder under that name.
 
 ```{r}
 #| label: load-data
