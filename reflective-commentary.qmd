@@ -1,13 +1,72 @@
 ---
 title: "Reflective Commentary"
+toc: true
 ---
 
-*Target length: 1000 to 2000 words.*
+This commentary looks back across the whole portfolio: what I learned, where I struggled, how my ideas for each project developed, and how AI built on those ideas. The [journal](journal/index.qmd) records the week-by-week detail and the [AI use log](ai-use-log.qmd) records each substantive use of AI. This page draws the two together.
 
 ## Learning achievements
 
+At the start of the semester I had a basic idea of what a time series was. The main thing I have learned since is that time series modelling is a sequence of decisions, and each one has to be justified by something in the data. Early on I learned the building blocks one at a time. I learned why a random walk's prediction intervals widen without limit while a stationary AR(1)'s settle down, and why residuals and forecast errors answer different questions. I learned that a log transform is there to stabilise the variance, not to make the data normal. Working through the MA(1) derivations by hand showed me why its autocorrelation cuts off after lag 1, which made the ACF and PACF something I could reason with rather than a pattern to memorise.
+
+The biggest shift came in Section 2, when I saw that most of the course is one framework seen from different angles. Every ETS model is a state space model. `ARIMA()` uses a Kalman filter to handle missing months. The Kalman gain is a weighted average of the prediction and the observation, which is the same idea as the smoothing parameter in exponential smoothing. An HMM is a state space model with a discrete state, and the Viterbi algorithm is the forward algorithm with a sum replaced by a maximum. Project 4 made these links concrete. My own filter reproduced the Project 1 SARIMA log likelihood exactly (147.11), and its steady-state gain matched the Holt–Winters smoothing weights from Project 3.
+
+I also learned to check my own work properly. Agreement with a package is not proof that code is correct, and a better information criterion is not proof that a model forecasts better. Every method I coded myself is now checked against something independent: a package, a known likelihood, or a simulation where I know the true answer.
+
 ## Methodological challenges
+
+The hardest part of the portfolio was making decisions when the evidence disagreed. In Project 1 the unit root tests said no first difference was needed while the time plot and ACF suggested one was. The automatic model had a lower AICc than my hand-identified airline model but forecast worse. In Project 3, AICc preferred the undamped Holt–Winters model, which was one of the worst on the test set, and the test set and cross-validation picked different winners. Earlier in the course I would have followed whichever number the software gave me. Now I try to work out why the measures disagree, and I base the decision on that.
+
+The COVID-19 collapse was the problem that ran through the whole portfolio. When I kept the COVID months in Project 1, the airline model still passed the Ljung–Box test, and at first I took that as a sign it was fine. Only the residual plot and the forecasts showed that a few residuals from 2020 had inflated the variance more than 100 times and pushed the seasonal MA coefficient to −1. That taught me not to rely on one diagnostic.
+
+Coding was the other big challenge. My GARCH code in Project 2 matched `rugarch` on the real data, but returned a constant-variance model in almost half of my simulated series, and I could not find the cause on my own. In Project 4, moving from the matrix equations in the notes to working code on a monthly series with 25 missing months took several attempts, especially the diffuse start and the seasonal state.
+
+## The projects: my ideas and how AI built on them
+
+### Project 1: ARIMA and SARIMA
+
+**What I wanted to find.** I first wanted to use financial data, so I had AI run a quick ARIMA and SARIMA analysis on some stock data. The results showed that its volatility made it a poor fit for these models. I moved to Stats SA accommodation data, wanting to see how much accuracy is gained by moving from benchmarks to SARIMA on a strongly seasonal series. The EDA changed my plan. I had intended to build up from AR and MA models, but the clear non-stationarity and the COVID drop made the break the real question. I noticed the series behaved like the electrical equipment example from the coding lectures, where the 2008/09 crash caused a sharp drop and a slow recovery that a single ARIMA model struggled with.
+
+**How I got there.** I chose the log transform, the differencing and the hand-identified airline model myself, and compared treating the COVID months as missing with keeping them.
+
+**How AI built on it.** AI helped me find the P6410 release and debug my code. It also helped me restructure the report so that it follows the order in which modelling decisions are actually made, with COVID-as-missing as the main analysis and COVID-kept as a sensitivity check. Its review of my write-up found places where my text did not match my own output, which I then corrected against my tables.
+
+### Project 2: GARCH volatility
+
+**What I wanted to find.** I came back to my financial idea with the right models. I wanted to know whether the rand shows volatility clustering, and which model gives the most reliable one-day risk forecasts. The rand's swing from its weakest level in April 2025 to one of its strongest by early 2026, followed by the shock of the US–Iran war, made it a series I genuinely wanted to understand.
+
+**How I got there.** Each modelling step came from the data: a flat ACF of returns, a strong ACF of squared returns, ARCH(1) failing its checks, heavy tails and asymmetry. I wrote my own GARCH(1,1) likelihood and a simulation check, and set up a rolling Value-at-Risk backtest.
+
+**How AI built on it.** AI helped me find the FRED series and shape the project as a story. Its most important contribution was helping me trace the simulation failure to R's BFGS optimiser taking too large a first step, and suggesting rescaling the objective. I applied the fix and confirmed that the estimates then sat on the true values. A later critical review led me to tighten the argument for log returns. The finding I am most pleased with is my own: every GARCH rejection came from the positive skewness of rand returns, which no symmetric model can capture.
+
+### Project 3: Regression and exponential smoothing
+
+**What I wanted to find.** Project 1 left me unsatisfied, because deleting 25 months throws away real information. I wanted to see whether *modelling* the shock, rather than deleting it, could beat the SARIMA on the same test set.
+
+**How I got there.** I started with the simplest regression on purpose. Its adjusted $R^2$ of 0.965 looked excellent, but the Durbin–Watson statistic of 0.53 showed why regression with ARIMA errors was needed. Exponential smoothing broke on the raw data (the level parameter went to 1), so I imputed the COVID window with a regression. I also tested my own idea that fitting only the post-COVID years might make imputation unnecessary, and found that the seasonal pattern and slope barely update, so they would still come from 2015.
+
+**How AI built on it.** My first version mixed ETS, an intervention regression and a Kalman-filter structural model. Working through it with AI, I decided to move the state space material to Project 4 and remove the exchange rate. AI helped me code the Holt–Winters recursions, the profile AICc for the decay rate and the imputation regression. I checked my Holt–Winters code against `ETS()`, chose dummies over Fourier terms by AICc, and worked out why damped Holt–Winters won the test set (RMSE 72.5) while the Project 1 SARIMA won cross-validation.
+
+### Project 4: State space models and the Kalman filter
+
+**What I wanted to find.** I wanted to open the black box behind the earlier projects by building the Kalman filter myself, and to use it on the accommodation series rather than the Nile data. This gave me a fourth way of handling COVID: skipping the months without inventing values. I wanted to know how the filter tracks demand through the gap, how well the data pin down the model, and how much demand was lost.
+
+**How I got there.** I followed the structure and notation of the course notes and validated the code in two independent ways: against `dlm`, and by reproducing the Project 1 SARIMA likelihood exactly.
+
+**How AI built on it.** AI helped me write the filter, likelihood, smoother and forecasting functions in the notation of the notes. It also helped me derive the covariances needed for an honest uncertainty band on total lost demand, which went beyond the notes. I chose the four structural models and interpreted the results: demand was 31% below the filter's expectation when data resumed in April 2022, and about 22.4 million nights were lost (95% band 19.3 to 25.5 million). A simulation with the same gap recovered this to within about 6%.
+
+### How AI shaped the work overall
+
+Across all four projects the questions, data and modelling decisions were mine, and AI made it possible to go further with them. It was most useful when I gave it something specific, such as my own output, a failing simulation or a draft to check against my results. When I asked for general help, the suggestions were generic. Its explanations helped me get unstuck on concepts, but I only really understood them once I had worked through the maths or the code myself, which is what the journal records.
 
 ## Ethical and reproducibility considerations
 
+All the data are public, aggregated statistics from Stats SA and FRED, with no personal information, so POPIA does not apply. I wrote a data statement for each project. The main ethical question for me was honesty about AI use. I kept the AI use log for that reason, and I take responsibility for every result and sentence. The review that found mismatches between my text and my output showed me why that responsibility matters: a fluent sentence can still be wrong.
+
+For reproducibility, every project runs from files in the `data/` folder, the FRED download is saved so later renders give identical results, seeds are fixed, and each page ends with `sessionInfo()`. Numbers in the text are computed inline, so they update with the results. Caching taught me a lesson. After fixing the GARCH optimiser, I had to force the cached simulation to re-run, otherwise the page would have shown the old, wrong results. The whole site is version controlled on GitHub and was rendered many times before submission.
+
 ## Future areas for development
+
+Each project ends with a natural next step. In Project 2, a skewed Student t GARCH would address the asymmetry the backtest exposed, and expected shortfall would show how large losses are beyond the VaR. In Project 3, multiple imputation would stop the exponential smoothing intervals from treating invented values as exact. In Project 4, adding the Project 3 intervention terms and an Easter regressor to the state space model would let the COVID months be used rather than skipped. A Bayesian version in Stan would carry parameter uncertainty into the lost-demand estimate. I would also like to compare a hidden Markov model with GARCH for the rand, since its very high persistence may reflect regime changes rather than true long memory.
+
+More broadly, I want to keep building the habit this portfolio gave me: justify each decision from the data, check my code against something independent, and treat any disagreement between measures as something to explain rather than ignore.
