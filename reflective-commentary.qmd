@@ -53,7 +53,7 @@ Coding was the other big challenge. My GARCH code in Project 2 matched `rugarch`
 
 **How I got there.** I followed the structure and notation of the course notes and validated the code in two independent ways: against `dlm`, and by reproducing the Project 1 SARIMA likelihood exactly.
 
-**How AI built on it.** AI helped me write the filter, likelihood, smoother and forecasting functions in the notation of the notes. It also helped me derive the covariances needed for an honest uncertainty band on total lost demand, which went beyond the notes. I chose the four structural models and interpreted the results: demand was 31% below the filter's expectation when data resumed in April 2022, and about 22.4 million nights were lost (95% band 19.3 to 25.5 million). A simulation with the same gap recovered this to within about 6%.
+**How AI built on it.** AI helped me write the filter, likelihood, smoother and forecasting functions in the notation of the notes. It also helped me derive the covariances needed for a proper uncertainty band on total lost demand, which went beyond the notes. I chose the four structural models and interpreted the results: demand was 31% below the filter's expectation when data resumed in April 2022, and about 22.4 million nights were lost (95% band 19.3 to 25.5 million). A simulation with the same gap recovered this to within about 6%.
 
 ### How AI shaped the work overall
 

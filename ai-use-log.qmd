@@ -123,7 +123,7 @@ Every method I coded myself was checked against a package, a known result or a s
 | Date | What I asked AI to help with | What I checked or changed myself |
 |:--|:----------|:----------|
 | Oct to Nov 2026 | Writing my own Kalman filter, likelihood, smoother and forecasting functions, following the structure and notation of the course notes (TSCh3-SSM), and applying all of it to the accommodation series rather than the Nile data. | I validated my code in two independent ways: it agrees with `dlm`'s filter and smoother, and it reproduces the exact Project 1 SARIMA log likelihood (147.11). I chose the four structural models and interpreted the profile likelihoods, the restart in April 2022 and the link between the steady-state gain and Holt–Winters. |
-| Nov 2026 | Deriving the covariances needed for an honest uncertainty band on total demand lost to COVID, and a summary check that flags the executive summary numbers if a re-render changes the results. | I checked the lost-demand estimate with a simulation from the fitted model with the same gap, which recovered the counterfactual to within about 6%. |
+| Nov 2026 | Deriving the covariances needed for a proper uncertainty band on total demand lost to COVID, and a summary check that flags the executive summary numbers if a re-render changes the results. | I checked the lost-demand estimate with a simulation from the fitted model with the same gap, which recovered the counterfactual to within about 6%. |
 
 ## Tutorials {.section-heading}
 
