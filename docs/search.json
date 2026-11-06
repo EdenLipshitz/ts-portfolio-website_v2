@@ -564,7 +564,70 @@
     "href": "ai-use-log.html",
     "title": "AI Use Log",
     "section": "",
-    "text": "A running log of substantive uses of AI that influenced my work, as required by the portfolio guidelines. I remain responsible for checking and understanding everything AI helped me produce.\n\n\n\n\n\n\n\n\n\n\nEntry\nTool used\nWhat I asked it to help with\nLink to prompt or conversation\nWhat I checked or changed myself\n\n\n\n\n1\nClaude\nPlanning the four projects from the course material and guidelines\n[link]\n\n\n\n2\nClaude\nStructure of project 1\n[link]\n\n\n\n3\nClaude\nStructure of project 2\n[link]\n\n\n\n4\nClaude\nStructure of project 3\n[link]\n\n\n\n5\nClaude\nCourse work intuitive explanations\n[link]\n\n\n\n\nAdd the date of each use in the first column if required.\n\n\n\n\n\n Back to top"
+    "text": "This page records the substantive ways I used AI while building this portfolio, as the portfolio guidelines ask. I used one tool throughout: Claude (Anthropic), working inside a single Claude Project for the time series portfolio, where I kept the course guidelines and my project plan. I have not logged every small interaction, only the uses that shaped my work.\nThe academic integrity section of the guidelines is clear that documenting AI use is not a substitute for owning the work. Everything here was checked by me, and I am responsible for every result, decision and sentence in the portfolio. The final column of each table records what I checked or changed myself."
+  },
+  {
+    "objectID": "ai-use-log.html#at-a-glance",
+    "href": "ai-use-log.html#at-a-glance",
+    "title": "AI Use Log",
+    "section": "At a glance",
+    "text": "At a glance\n\n\n\nUnderstanding\n\nIntuition for concepts\nPlain-language and visual explanations of topics I found hard, which I then worked through myself against the course notes.\n\n\n\n\n\nCoding\n\nDebugging and checking code\nFinding the cause of errors and silent bugs in R, most importantly the optimiser problem in my own GARCH code.\n\n\n\n\n\nWriting\n\nStructure and review\nPlanning and restructuring the projects, drafting and editing write-ups and journal entries, and reviewing text against my own output.\n\n\n\n\n\nData\n\nFinding data\nTracking down a dataset that suited the models, after my first two ideas did not work.\n\n\n\n\n\nWebsite\n\nBuilding the site\nSetting up the Quarto website, navigation and styling, and publishing it with GitHub Pages.\n\n\n\n\n\nPrinciples\n\nHow I checked\nEvery method I coded myself was checked against a package, a known result or a simulation where the true answer was known."
+  },
+  {
+    "objectID": "ai-use-log.html#across-the-portfolio",
+    "href": "ai-use-log.html#across-the-portfolio",
+    "title": "AI Use Log",
+    "section": "Across the portfolio",
+    "text": "Across the portfolio\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nSep 2026\nPlanning the four projects from the portfolio guidelines and rubric: spreading them across the two sections, and making sure that between them they covered model comparison, computational work and real-world data.\nI chose the data, the questions and the models for each project. I checked the plan against the guidelines checklist myself, and changed it several times as the course went on: Project 4 became a Kalman filter project rather than an HMM project, Project 3 was narrowed to regression and exponential smoothing, and HMMs moved to a tutorial.\n\n\nSep 2026\nFinding a suitable dataset for Project 1, after my first two ideas (stock prices and an Airbnb dataset) did not suit ARIMA-type models. AI helped me find the Stats SA Tourist Accommodation release (P6410).\nI downloaded the data from Stats SA myself, read the release’s notes, and wrote the data statement. I made the final choice of series (total nights sold, from January 2015).\n\n\nOct to Nov 2026\nMoving my Word documents and separate .qmd files first into a Quarto book and then into a Quarto website: the _quarto.yml configuration, navbar, landing page cards and styles.css. When publishing through Quarto Pub did not work, help switching to GitHub Pages.\nI decided on the structure (projects, journal, tutorials grouped by section) and renumbered the tutorials myself. I merged the state space and Kalman filter tutorials into one page. I rendered the site repeatedly and checked that every link and page worked."
+  },
+  {
+    "objectID": "ai-use-log.html#understanding-the-course-material",
+    "href": "ai-use-log.html#understanding-the-course-material",
+    "title": "AI Use Log",
+    "section": "Understanding the course material",
+    "text": "Understanding the course material\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nJul to Oct 2026\nIntuitive explanations of concepts I found confusing in lectures, for example aggregation and granularity, prediction versus forecasting, invertibility of MA models, the PACF, how the exponential smoothing equations build on each other, the matrices in state space form and the Kalman gain.\nI compared each explanation with the lecture notes and only kept what agreed with them. Where I could, I worked through the maths myself, for example deriving the mean, variance and autocorrelation of the MA(1) model in Week 5.\n\n\nAug 2026\nA visual explanation of rolling-origin evaluation, which I could not picture from the notes alone.\nI later implemented rolling-origin cross-validation myself in Projects 1, 3 and 4, which is where I really understood it.\n\n\nAug to Nov 2026\nTurning my notes on what I had found difficult each week into journal entries. I asked that each entry only use material covered up to that week, not quote my notes, and explain in full any example it used.\nEvery entry is based on what I actually struggled with that week. I checked the content against my notes and edited the wording into my own voice before adding it to the journal."
+  },
+  {
+    "objectID": "ai-use-log.html#project-1-arima-and-sarima",
+    "href": "ai-use-log.html#project-1-arima-and-sarima",
+    "title": "AI Use Log",
+    "section": "Project 1: ARIMA and SARIMA",
+    "text": "Project 1: ARIMA and SARIMA\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nSep 2026\nA quick exploratory analysis of some financial data with ARIMA and SARIMA, to see whether it would make a good project.\nI judged from the results that the data’s volatility made it a poor fit for these models and moved to the tourism data instead. I came back to the financial idea with the right models in Project 2.\n\n\nSep 2026\nDebugging my R code: a read_excel() path error (which turned out to be a trailing space in the file name, found with list.files()), where to filter to 2015 onwards, and why pivot_wider() lost the category variable in my hotels against total industry plot.\nI fixed the code myself and chose to colour the plot by COVID period with case_when(), since that was the comparison I wanted to make in the write-up.\n\n\nOct 2026\nRestructuring the report so that it follows the order in which modelling decisions are actually made, with the COVID months treated as missing in the main analysis and kept only as a sensitivity check. Also removing Kalman filter material that belonged in Section 2.\nThe modelling decisions are mine: the log transform, the differencing, the hand-identified airline model and the comparison with the automatic model. I checked each decision against the output, for example that the fitted MA coefficient was not close to −1.\n\n\nOct 2026\nReviewing my write-up against my results.\nThe review found places where my text did not match my own output, such as calling an autocorrelation negative when it was positive. I went back through every flagged claim against my tables and plots and corrected them myself."
+  },
+  {
+    "objectID": "ai-use-log.html#project-2-garch-volatility",
+    "href": "ai-use-log.html#project-2-garch-volatility",
+    "title": "AI Use Log",
+    "section": "Project 2: GARCH volatility",
+    "text": "Project 2: GARCH volatility\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nSep to Oct 2026\nShaping the project as a story, motivated by the rand’s behaviour around the 2025–26 conflict with Iran, and keeping a record of how the model developed across versions.\nThe modelling path came from what I saw in the data (flat ACF of returns, strong ACF of squared returns, ARCH(1) failing, heavy tails, asymmetry). I checked every rand level and date quoted in the text against the FRED data.\n\n\nOct 2026\nInvestigating why my own GARCH(1,1) code returned a constant-variance model in almost half of my simulated series, even though it matched rugarch on the real data. AI helped me trace the cause to R’s BFGS optimiser taking too large a first step, and suggested rescaling the objective (fnscale).\nI added the fix, forced the cached simulation chunk to re-run, and confirmed that the estimates then sat on the true parameter values. I wrote the likelihood code, the delta-method standard errors and the simulation design myself.\n\n\nOct 2026\nA critical review of the whole project once the analysis was working.\nI acted on the review by tightening the argument for log returns, aligning the approach with Project 1 and removing outdated references. I interpreted the backtest myself, including the finding that the GARCH rejections come from the positive skewness of rand returns."
+  },
+  {
+    "objectID": "ai-use-log.html#project-3-regression-and-exponential-smoothing",
+    "href": "ai-use-log.html#project-3-regression-and-exponential-smoothing",
+    "title": "AI Use Log",
+    "section": "Project 3: Regression and exponential smoothing",
+    "text": "Project 3: Regression and exponential smoothing\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nOct 2026\nRescoping the project. My first version mixed an ETS model, an intervention regression and a structural model fitted with the Kalman filter.\nI decided to move the state space material to Project 4 and remove the exchange rate, so that this project uses the accommodation data only and goes deeper into regression and exponential smoothing. I also added rolling-origin cross-validation to fix a weakness I had listed in my own earlier draft.\n\n\nOct to Nov 2026\nHelp coding the Holt–Winters recursions from first principles, the profile AICc for the intervention decay rate, and the regression used to impute the COVID window.\nI checked my Holt–Winters code against ETS() in fable and they agreed almost exactly. I chose seasonal dummies over Fourier terms using AICc, and interpreted why the test set and cross-validation disagreed."
+  },
+  {
+    "objectID": "ai-use-log.html#project-4-kalman-filter",
+    "href": "ai-use-log.html#project-4-kalman-filter",
+    "title": "AI Use Log",
+    "section": "Project 4: Kalman filter",
+    "text": "Project 4: Kalman filter\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nOct to Nov 2026\nWriting my own Kalman filter, likelihood, smoother and forecasting functions, following the structure and notation of the course notes (TSCh3-SSM), and applying all of it to the accommodation series rather than the Nile data.\nI validated my code in two independent ways: it agrees with dlm’s filter and smoother, and it reproduces the exact Project 1 SARIMA log likelihood (147.11). I chose the four structural models and interpreted the profile likelihoods, the restart in April 2022 and the link between the steady-state gain and Holt–Winters.\n\n\nNov 2026\nDeriving the covariances needed for an honest uncertainty band on total demand lost to COVID, and a summary check that flags the executive summary numbers if a re-render changes the results.\nI checked the lost-demand estimate with a simulation from the fitted model with the same gap, which recovered the counterfactual to within about 6%."
+  },
+  {
+    "objectID": "ai-use-log.html#tutorials",
+    "href": "ai-use-log.html#tutorials",
+    "title": "AI Use Log",
+    "section": "Tutorials",
+    "text": "Tutorials\n\n\n\n\n\n\n\n\nDate\nWhat I asked AI to help with\nWhat I checked or changed myself\n\n\n\n\nAug to Nov 2026\nHelp working through the tutorial and lab questions, asking that solutions stay as close as possible to the lecturer’s code in the course notes and be written briefly in my own tone.\nI ran every solution myself, compared it with the code and examples in the notes, and made sure I could explain each step."
+  },
+  {
+    "objectID": "ai-use-log.html#what-i-learned-about-using-ai",
+    "href": "ai-use-log.html#what-i-learned-about-using-ai",
+    "title": "AI Use Log",
+    "section": "What I learned about using AI",
+    "text": "What I learned about using AI\nThe most useful thing AI did for me was not writing code but helping me find out why something was wrong. The clearest case was Project 2, where my GARCH code agreed with rugarch on the real data, so I believed it was correct. It was only the simulation, where I knew the true answer, that showed the problem, and AI helped me trace it to the optimiser. That taught me that agreement with a package, or a confident explanation from an AI, is not proof. Every method I coded myself is now checked against something independent: a package, a known likelihood or a simulation.\nI also learned that AI is only as good as what I ask it. When I asked for general help, the suggestions were generic. When I gave it my own output and asked whether my write-up matched it, it found real errors, but I still had to go back to the tables myself to confirm each one. Finally, I found AI most valuable for intuition when I was stuck on a concept, but the understanding only really came when I worked through the maths or the code myself, which is what the journal records."
   },
   {
     "objectID": "index.html",
