@@ -5,7 +5,14 @@ toc: true
 
 This page records the substantive ways I used AI while building this portfolio, as the portfolio guidelines ask. I used one tool throughout: **Claude** (Anthropic), working inside a single Claude Project for the time series portfolio, where I kept the course guidelines and my project plan. I have not logged every small interaction, only the uses that shaped my work. The full conversations are kept in my Claude Project and can be shown on request.
 
+I used Claude as an assistant, not as the author of the ideas. For every project I decided what I wanted to investigate and knew which topics from the course each project needed to cover, and I chose the data, the questions and the models. I worked from the code in the lecture slides and the lecture tutorials: I wrote it out myself, then reconciled my version with Claude and streamlined it for efficiency. I also used Claude to debug my code and to help draft and refine the written explanations in the projects, which I checked against my own output. For the tutorials, I worked through every question myself first, then compared my solutions with Claude's and adopted its version where it was stylistically cleaner.
+
 The academic integrity section of the guidelines is clear that documenting AI use is not a substitute for owning the work. Everything here was checked by me, and I am responsible for every result, decision and sentence in the portfolio. The final column of each table records what I checked or changed myself.
+
+::: {.callout-note}
+## How to read the dates
+Dates are given by month and match the period in which I was working on each part of the portfolio.
+:::
 
 ## At a glance
 
@@ -26,7 +33,7 @@ Plain-language and visual explanations of topics I found hard, which I then work
 
 ### Debugging and checking code
 
-Finding the cause of errors and silent bugs in R, most importantly the optimiser problem in my own GARCH code.
+Reconciling my own versions of the lecture code, streamlining it, and finding the cause of errors and silent bugs, most importantly the optimiser problem in my GARCH code.
 :::
 :::
 
@@ -73,56 +80,62 @@ Every method I coded myself was checked against a package, a known result or a s
 
 ## Across the portfolio {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Planning the four projects from the portfolio guidelines and rubric: spreading them across the two sections, and making sure that between them they covered model comparison, computational work and real-world data. | I chose the data, the questions and the models for each project. I checked the plan against the guidelines checklist myself, and changed it several times as the course went on: Project 4 became a Kalman filter project rather than an HMM project, Project 3 was narrowed to regression and exponential smoothing, and HMMs moved to a tutorial. |
-| Finding suitable datasets for Projects 1 and 2. For Project 1, my first two ideas (stock prices and an Airbnb dataset) did not suit ARIMA-type models, and AI helped me find the Stats SA Tourist Accommodation release (P6410). For Project 2, AI helped me find the daily USD/ZAR exchange rate series (DEXSFUS) on FRED. | I downloaded both datasets from their sources myself, read the documentation, and wrote the data statements. I made the final choice of series for each project (total nights sold from January 2015, and daily rand per US dollar returns). |
-| Portfolio management and setting out the website: moving my Word documents and separate `.qmd` files into a Quarto website, and the styling, layout and navigation (the `_quarto.yml` configuration, navbar, landing page cards and `styles.css`). When publishing through Quarto Pub did not work, help switching to GitHub Pages. | I was happy with the style and layout of the result, so the changes I made were to the actual content of the pages and fixing content-related issues. I rendered the site repeatedly and checked that every link and page worked. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Sep 2026 | Planning the four projects from the portfolio guidelines and rubric: spreading them across the two sections, and making sure that between them they covered model comparison, computational work and real-world data. | I chose the data, the questions and the models for each project. I checked the plan against the guidelines checklist myself, and changed it several times as the course went on: Project 4 became a Kalman filter project rather than an HMM project, Project 3 was narrowed to regression and exponential smoothing, and HMMs moved to a tutorial. |
+| Sep to Oct 2026 | Finding suitable datasets for Projects 1 and 2. For Project 1, my first two ideas (stock prices and an Airbnb dataset) did not suit ARIMA-type models, and AI helped me find the Stats SA Tourist Accommodation release (P6410). For Project 2, AI helped me find the daily USD/ZAR exchange rate series (DEXSFUS) on FRED. | I downloaded both datasets from their sources myself, read the documentation, and wrote the data statements. I made the final choice of series for each project (total nights sold from January 2015, and daily rand per US dollar returns). |
+| Oct to Nov 2026 | Portfolio management and setting out the website: moving my Word documents and separate `.qmd` files into a Quarto website, and the styling, layout and navigation (the `_quarto.yml` configuration, navbar, landing page cards and `styles.css`). When publishing through Quarto Pub did not work, help switching to GitHub Pages. | I was happy with the style and layout of the result, so the changes I made were to the actual content of the pages and fixing content-related issues. I rendered the site repeatedly and checked that every link and page worked. |
 
 ## Understanding the course material {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Intuitive explanations of concepts I found confusing in lectures, for example aggregation and granularity, prediction versus forecasting, invertibility of MA models, the PACF, how the exponential smoothing equations build on each other, the matrices in state space form and the Kalman gain. | I compared each explanation with the lecture notes and only kept what agreed with them. Where I could, I worked through the maths myself, for example deriving the mean, variance and autocorrelation of the MA(1) model in Week 5. |
-| A visual explanation of rolling-origin evaluation, which I could not picture from the notes alone. | I later implemented rolling-origin cross-validation myself in Projects 1, 3 and 4, which is where I really understood it. |
-| Comparing and contrasting my own notes with the course notes where I was getting confused, and ironing out issues in my understanding. | I made my own notes throughout the semester and reconciled them with the course notes myself. AI was used to clarify the points where the two did not line up or where I was confused. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Jul to Oct 2026 | Intuitive explanations of concepts I found confusing in lectures, for example aggregation and granularity, prediction versus forecasting, invertibility of MA models, the PACF, how the exponential smoothing equations build on each other, the matrices in state space form and the Kalman gain. | I compared each explanation with the lecture notes and only kept what agreed with them. Where I could, I worked through the maths myself, for example deriving the mean, variance and autocorrelation of the MA(1) model in Week 5. |
+| Aug 2026 | A visual explanation of rolling-origin evaluation, which I could not picture from the notes alone. | I later implemented rolling-origin cross-validation myself in Projects 1, 3 and 4, which is where I really understood it. |
+| Jul to Nov 2026 | Comparing and contrasting my own notes with the course notes where I was getting confused, and ironing out issues in my understanding. | I made my own notes throughout the semester and reconciled them with the course notes myself. AI was used to clarify the points where the two did not line up or where I was confused. |
 
 ## Project 1: ARIMA and SARIMA {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| A quick exploratory analysis of some financial data with ARIMA and SARIMA, to see whether it would make a good project. | I judged from the results that the data's volatility made it a poor fit for these models and moved to the tourism data instead. I came back to the financial idea with the right models in Project 2. |
-| Debugging my R code: a `read_excel()` path error (which turned out to be a trailing space in the file name, found with `list.files()`), where to filter to 2015 onwards, and why `pivot_wider()` lost the category variable in my hotels against total industry plot. | I fixed the code myself and chose to colour the plot by COVID period with `case_when()`, since that was the comparison I wanted to make in the write-up. |
-| Restructuring the report so that it follows the order in which modelling decisions are actually made, with the COVID months treated as missing in the main analysis and kept only as a sensitivity check. Also removing Kalman filter material that belonged in Section 2. | The modelling decisions are mine: the log transform, the differencing, the hand-identified airline model and the comparison with the automatic model. I checked each decision against the output, for example that the fitted MA coefficient was not close to −1. |
-| Reviewing my write-up against my results. | The review found places where my text did not match my own output, such as calling an autocorrelation negative when it was positive. I went back through every flagged claim against my tables and plots and corrected them myself. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Sep 2026 | A quick exploratory analysis of some financial data with ARIMA and SARIMA, to see whether it would make a good project. | I judged from the results that the data's volatility made it a poor fit for these models and moved to the tourism data instead. I came back to the financial idea with the right models in Project 2. |
+| Sep 2026 | Debugging my R code: a `read_excel()` path error (which turned out to be a trailing space in the file name, found with `list.files()`), where to filter to 2015 onwards, and why `pivot_wider()` lost the category variable in my hotels against total industry plot. | I fixed the code myself and chose to colour the plot by COVID period with `case_when()`, since that was the comparison I wanted to make in the write-up. |
+| Oct 2026 | Restructuring the report so that it follows the order in which modelling decisions are actually made, with the COVID months treated as missing in the main analysis and kept only as a sensitivity check. Also removing Kalman filter material that belonged in Section 2. | The modelling decisions are mine: the log transform, the differencing, the hand-identified airline model and the comparison with the automatic model. I checked each decision against the output, for example that the fitted MA coefficient was not close to −1. |
+| Oct 2026 | Reviewing my write-up against my results. | The review found places where my text did not match my own output, such as calling an autocorrelation negative when it was positive. I went back through every flagged claim against my tables and plots and corrected them myself. |
 
 ## Project 2: GARCH volatility {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Shaping the project as a story, motivated by the rand's behaviour around the 2025–26 conflict with Iran, and keeping a record of how the model developed across versions. | The modelling path came from what I saw in the data (flat ACF of returns, strong ACF of squared returns, ARCH(1) failing, heavy tails, asymmetry). I checked every rand level and date quoted in the text against the FRED data. |
-| Investigating why my own GARCH(1,1) code returned a constant-variance model in almost half of my simulated series, even though it matched `rugarch` on the real data. AI helped me trace the cause to R's BFGS optimiser taking too large a first step, and suggested rescaling the objective (`fnscale`). | I added the fix, forced the cached simulation chunk to re-run, and confirmed that the estimates then sat on the true parameter values. I wrote the likelihood code, the delta-method standard errors and the simulation design myself. |
-| A critical review of the whole project once the analysis was working. | I acted on the review by tightening the argument for log returns, aligning the approach with Project 1 and removing outdated references. I interpreted the backtest myself, including the finding that the GARCH rejections come from the positive skewness of rand returns. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Sep to Oct 2026 | Shaping the project as a story, motivated by the rand's behaviour around the 2025–26 conflict with Iran, and keeping a record of how the model developed across versions. | The modelling path came from what I saw in the data (flat ACF of returns, strong ACF of squared returns, ARCH(1) failing, heavy tails, asymmetry). I checked every rand level and date quoted in the text against the FRED data. |
+| Oct 2026 | Investigating why my own GARCH(1,1) code returned a constant-variance model in almost half of my simulated series, even though it matched `rugarch` on the real data. AI helped me trace the cause to R's BFGS optimiser taking too large a first step, and suggested rescaling the objective (`fnscale`). | I added the fix, forced the cached simulation chunk to re-run, and confirmed that the estimates then sat on the true parameter values. I wrote the likelihood code, the delta-method standard errors and the simulation design myself. |
+| Oct 2026 | A critical review of the whole project once the analysis was working. | I acted on the review by tightening the argument for log returns, aligning the approach with Project 1 and removing outdated references. I interpreted the backtest myself, including the finding that the GARCH rejections come from the positive skewness of rand returns. |
 
 ## Project 3: Regression and exponential smoothing {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Rescoping the project. My first version mixed an ETS model, an intervention regression and a structural model fitted with the Kalman filter. | I decided to move the state space material to Project 4 and remove the exchange rate, so that this project uses the accommodation data only and goes deeper into regression and exponential smoothing. I also added rolling-origin cross-validation to fix a weakness I had listed in my own earlier draft. |
-| Help coding the Holt–Winters recursions from first principles, the profile AICc for the intervention decay rate, and the regression used to impute the COVID window. | I checked my Holt–Winters code against `ETS()` in `fable` and they agreed almost exactly. I chose seasonal dummies over Fourier terms using AICc, and interpreted why the test set and cross-validation disagreed. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Oct 2026 | Rescoping the project. My first version mixed an ETS model, an intervention regression and a structural model fitted with the Kalman filter. | I decided to move the state space material to Project 4 and remove the exchange rate, so that this project uses the accommodation data only and goes deeper into regression and exponential smoothing. I also added rolling-origin cross-validation to fix a weakness I had listed in my own earlier draft. |
+| Oct to Nov 2026 | Help coding the Holt–Winters recursions from first principles, the profile AICc for the intervention decay rate, and the regression used to impute the COVID window. | I checked my Holt–Winters code against `ETS()` in `fable` and they agreed almost exactly. I chose seasonal dummies over Fourier terms using AICc, and interpreted why the test set and cross-validation disagreed. |
 
 ## Project 4: Kalman filter {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Writing my own Kalman filter, likelihood, smoother and forecasting functions, following the structure and notation of the course notes (TSCh3-SSM), and applying all of it to the accommodation series rather than the Nile data. | I validated my code in two independent ways: it agrees with `dlm`'s filter and smoother, and it reproduces the exact Project 1 SARIMA log likelihood (147.11). I chose the four structural models and interpreted the profile likelihoods, the restart in April 2022 and the link between the steady-state gain and Holt–Winters. |
-| Deriving the covariances needed for an honest uncertainty band on total demand lost to COVID, and a summary check that flags the executive summary numbers if a re-render changes the results. | I checked the lost-demand estimate with a simulation from the fitted model with the same gap, which recovered the counterfactual to within about 6%. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Oct to Nov 2026 | Writing my own Kalman filter, likelihood, smoother and forecasting functions, following the structure and notation of the course notes (TSCh3-SSM), and applying all of it to the accommodation series rather than the Nile data. | I validated my code in two independent ways: it agrees with `dlm`'s filter and smoother, and it reproduces the exact Project 1 SARIMA log likelihood (147.11). I chose the four structural models and interpreted the profile likelihoods, the restart in April 2022 and the link between the steady-state gain and Holt–Winters. |
+| Nov 2026 | Deriving the covariances needed for an honest uncertainty band on total demand lost to COVID, and a summary check that flags the executive summary numbers if a re-render changes the results. | I checked the lost-demand estimate with a simulation from the fitted model with the same gap, which recovered the counterfactual to within about 6%. |
 
 ## Tutorials {.section-heading}
 
-| What I asked AI to help with | What I checked or changed myself |
-|:----------|:----------|
-| Help working through the tutorial and lab questions, asking that solutions stay as close as possible to the lecturer's code in the course notes and be written briefly in my own tone. | I ran every solution myself, compared it with the code and examples in the notes, and made sure I could explain each step. |
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Aug to Nov 2026 | Comparing my tutorial and lab solutions with Claude's, after I had worked through every question myself. I asked that its versions stay as close as possible to the lecturer's code in the course notes. | I did each tutorial on my own first. I then compared my answers with Claude's and went with its version where it was stylistically cleaner, keeping the method of the course notes. I ran every final solution myself and made sure I could explain each step. |
+
+## This log {.section-heading}
+
+| Date | What I asked AI to help with | What I checked or changed myself |
+|:--|:----------|:----------|
+| Nov 2026 | Going back through my portfolio project and our conversations to help me put this log together, and comparing it with the template in the guidelines. | I decided what to include and how to describe my own role. I corrected entries that did not match what I had actually done, and rewrote the description of how I used AI for the journal and the tutorials. |
 
 ## What I learned about using AI {.section-heading}
 
